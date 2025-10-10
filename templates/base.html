@@ -1,0 +1,111 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:'en' }}" {% if is_rtl %}dir="rtl" {% else %}dir="ltr" {% endif %}>
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="{% static 'img/favicon.ico' %}" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="{% static 'img/favicon-32x32.png' %}">
+  <link rel="icon" type="image/png" sizes="16x16" href="{% static 'img/favicon-16x16.png' %}">
+  <link rel="apple-touch-icon" sizes="180x180" href="{% static 'img/apple-touch-icon-180.png' %}">
+  <link rel="manifest" href="{% static 'site.webmanifest' %}">
+  <meta name="theme-color" content="#0ea5e9">
+
+
+  <title>{% block title %}{{ seo_title|default:site_name }}{% endblock %}</title>
+  <meta name="description"
+    content="{% block meta_description %}{{ seo_description|default:default_description }}{% endblock %}" />
+  <meta name="robots" content="{% block meta_robots %}index,follow{% endblock %}" />
+
+  {# Canonical #}
+  {% if canonical_url %}
+  <link rel="canonical" href="{{ canonical_url }}" />
+  {% endif %}
+
+  {# hreflang alternates #}
+  {% if hreflang_urls %}
+  {% for lang_code, href in hreflang_urls %}
+  <link rel="alternate" hreflang="{{ lang_code }}" href="{{ href }}" />
+  {% endfor %}
+  {# x-default #}
+  <link rel="alternate" hreflang="x-default" href="{{ canonical_url|default:request.build_absolute_uri }}" />
+  {% endif %}
+
+  {# Open Graph #}
+  <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+  <meta property="og:site_name" content="{{ site_name }}">
+  <meta property="og:locale" content="{{ og_locale|default:'en_US' }}">
+  <meta property="og:title" content="{% block og_title %}{{ seo_title|default:site_name }}{% endblock %}">
+  <meta property="og:description"
+    content="{% block og_description %}{{ seo_description|default:default_description }}{% endblock %}">
+  <meta property="og:url" content="{{ canonical_url|default:request.build_absolute_uri }}">
+  {% block og_image %}{% endblock %}
+
+  {# Twitter #}
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{% block tw_title %}{{ seo_title|default:site_name }}{% endblock %}">
+  <meta name="twitter:description"
+    content="{% block tw_description %}{{ seo_description|default:default_description }}{% endblock %}">
+  {% block tw_image %}{% endblock %}
+
+
+  {# Sayfa-bazlı JSON-LD (FAQ, Product, Breadcrumb, Article vs.) #}
+  {% block schema_jsonld %}{% endblock %}
+
+  {% block head_extra %}{% endblock %}
+  {% load static %}
+
+  <script>
+    // Early theme: FOUC engelle
+    (function () {
+      try {
+        const ls = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const wantDark = ls ? (ls === 'dark') : prefersDark;
+        if (wantDark) document.documentElement.classList.add('dark');
+      } catch (e) { /* ignore */ }
+    })();
+    (function () {
+      var html = document.documentElement;
+      var saved = null;
+      try { saved = localStorage.getItem('theme'); } catch (e) { }
+      var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      var next = saved || (prefersDark ? 'dark' : 'light');
+
+      if (next === 'dark') {
+        html.classList.add('dark');              // Tailwind dark:*** buraya bakar
+        html.setAttribute('data-theme', 'dark'); // Senin custom CSS değişkenlerin
+      } else {
+        html.classList.remove('dark');
+        html.setAttribute('data-theme', 'light');
+      }
+    })();
+
+  </script>
+
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+
+</head>
+
+<body class="{% block body_class %}{% endblock %}">
+  <header>
+    {% block header %}
+    {# navbar burada; dil değiştirici vs. #}
+    {% endblock %}
+  </header>
+
+  <main id="content">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer>
+    {% block footer %}{% endblock %}
+  </footer>
+
+  {% block scripts %}
+  <script src="{% static 'js/app.js' %}"></script>
+  {% endblock %}
+</body>
+
+</html>

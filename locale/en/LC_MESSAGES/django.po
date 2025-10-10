@@ -1,0 +1,91 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-10-06 22:55+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: landing/templates/landing/home.html:22
+msgid "True Privacy."
+msgstr ""
+
+#: landing/templates/landing/home.html:22
+msgid "Private Node."
+msgstr ""
+
+#: landing/templates/landing/home.html:22
+msgid "Unlimited Bandwidth."
+msgstr ""
+
+#: landing/templates/landing/home.html:32
+msgid "Get it now"
+msgstr ""
+
+#: landing/templates/landing/home.html:35
+msgid "See Pricing"
+msgstr ""
+
+#: landing/templates/landing/home.html:40
+msgid "Audited No-Logs"
+msgstr ""
+
+#: landing/templates/landing/home.html:41
+msgid "Private node (Annual)"
+msgstr ""
+
+#: landing/templates/landing/home.html:42
+msgid "Stealth obfuscation for restricted regions"
+msgstr ""
+
+#: landing/templates/landing/home.html:43
+msgid "Apps & Extensions"
+msgstr ""
+
+#: landing/views.py:22
+msgid "CoolVPN Annual Plan"
+msgstr ""
+
+#: landing/views.py:24
+msgid "Audited no-logs VPN with private node (annual), unlimited bandwidth."
+msgstr ""
+
+#: landing/views.py:36
+msgid "Do you keep logs?"
+msgstr ""
+
+#: landing/views.py:37
+msgid "No. Our no-logs policy is independently audited."
+msgstr ""
+
+#: landing/views.py:38
+msgid "Does it work on restricted networks?"
+msgstr ""
+
+#: landing/views.py:39
+msgid ""
+"Yes — our obfuscation is engineered to maximize access on restricted "
+"networks."
+msgstr ""
+
+#: landing/views.py:55
+msgid "CoolVPN — Private Node. Obfuscation. No-Logs."
+msgstr ""
+
+#: landing/views.py:56
+msgid ""
+"Bypass restrictions with audited no-logs VPN. Private node on annual plans. "
+"Unlimited bandwidth."
+msgstr ""

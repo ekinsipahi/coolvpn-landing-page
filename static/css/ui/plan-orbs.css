@@ -1,0 +1,118 @@
+/* --- Plan Tabs arka plan orbları --- */
+.kv-plans {
+  position: relative;
+  isolation: isolate; /* z-index bleed engeller */
+}
+
+/* Orbs katmanı */
+.kv-plans .kv-orbs {
+  position: absolute;
+  inset: -40px;
+  z-index: -1;
+  pointer-events: none;
+  filter: blur(36px);
+  opacity: 0.5;
+  transition: opacity 220ms ease;
+}
+
+/* Hover state: bir tık canlı */
+.kv-plans.is-hover .kv-orbs { opacity: 0.7; }
+
+/* Tek tek orb stilleri (radial gradient) */
+.kv-plans .kv-orb {
+  position: absolute;
+  width: 260px; height: 260px;
+  border-radius: 9999px;
+  transform: translate3d(0,0,0) scale(1);
+  transition: transform 320ms ease;
+}
+
+/* Renkler (light/dark dengeli) */
+.kv-plans .orb-emerald {
+  top: -20px; left: -30px;
+  background: radial-gradient(closest-side, rgba(16,185,129,.55), rgba(16,185,129,0));
+}
+.kv-plans .orb-indigo {
+  right: 8%; bottom: -30px;
+  width: 300px; height: 300px;
+  background: radial-gradient(closest-side, rgba(99,102,241,.45), rgba(99,102,241,0));
+}
+.kv-plans .orb-fuchsia {
+  top: 45%; left: 68%;
+  width: 220px; height: 220px;
+  background: radial-gradient(closest-side, rgba(217,70,239,.35), rgba(217,70,239,0));
+}
+
+/* Dark mode: hafif kuvvetlendir */
+.dark .kv-plans .orb-emerald { background: radial-gradient(closest-side, rgba(16,185,129,.6), rgba(16,185,129,0)); }
+.dark .kv-plans .orb-indigo  { background: radial-gradient(closest-side, rgba(99,102,241,.5), rgba(99,102,241,0)); }
+.dark .kv-plans .orb-fuchsia { background: radial-gradient(closest-side, rgba(217,70,239,.4), rgba(217,70,239,0)); }
+
+/* Parallax via CSS variables (JS set eder) */
+.kv-plans {
+  --orb-x: 0; /* -0.5..0.5 */
+  --orb-y: 0;
+}
+.kv-plans .orb-emerald {
+  transform: translate(calc(var(--orb-x) * 18px), calc(var(--orb-y) * 18px));
+}
+.kv-plans .orb-indigo {
+  transform: translate(calc(var(--orb-x) * 28px), calc(var(--orb-y) * 28px));
+}
+.kv-plans .orb-fuchsia {
+  transform: translate(calc(var(--orb-x) * 22px), calc(var(--orb-y) * 22px));
+}
+
+/* Küçük ekranlarda orbları biraz küçült */
+@media (max-width: 640px) {
+  .kv-plans .kv-orb { width: 200px; height: 200px; }
+  .kv-plans .orb-indigo { width: 240px; height: 240px; }
+}
+
+/* #plans içindeki tabs-kapsayıcısı: pozisyon ve izolasyon */
+#plans > .max-w-screen-xl > .rounded-2xl {
+  position: relative;
+  isolation: isolate; /* pseudo-element z-index düzgün çalışsın */
+  overflow: hidden;   /* blur taşması temiz dursun */
+}
+
+/* Orblar: tek pseudo-element içinde multi radial-gradient */
+#plans > .max-w-screen-xl > .rounded-2xl::before {
+  content: "";
+  position: absolute;
+  inset: -60px;           /* kenarların dışına taşıyıp blur yayalım */
+  z-index: -1;            /* içerik arkasında kalsın, ama bölüm arka planının üstünde */
+  pointer-events: none;
+  filter: blur(36px);
+  opacity: .65;
+  transition: opacity .25s ease, transform .35s ease;
+
+  /* 3 adet orb (emerald, indigo, fuchsia) */
+  background:
+    radial-gradient(closest-side at 8% 10%,  rgba(16,185,129,.55),  rgba(16,185,129,0) 60%),
+    radial-gradient(closest-side at 92% 85%, rgba(99,102,241,.45), rgba(99,102,241,0) 60%),
+    radial-gradient(closest-side at 70% 40%, rgba(217,70,239,.32), rgba(217,70,239,0) 58%);
+}
+
+/* Hover’da biraz canlılık */
+#plans > .max-w-screen-xl > .rounded-2xl:hover::before {
+  opacity: .82;
+}
+
+/* Parallax için JS’in ayarladığı değişkenler (opsiyonel) */
+#plans > .max-w-screen-xl > .rounded-2xl {
+  --orbx: 0;
+  --orby: 0;
+}
+#plans > .max-w-screen-xl > .rounded-2xl::before {
+  transform: translate(calc(var(--orbx) * 24px), calc(var(--orby) * 24px));
+}
+
+/* Dark mode: tonları biraz yükseltelim */
+.dark #plans > .max-w-screen-xl > .rounded-2xl::before {
+  background:
+    radial-gradient(closest-side at 8% 10%,  rgba(16,185,129,.62),  rgba(16,185,129,0) 60%),
+    radial-gradient(closest-side at 92% 85%, rgba(99,102,241,.52), rgba(99,102,241,0) 60%),
+    radial-gradient(closest-side at 70% 40%, rgba(217,70,239,.38), rgba(217,70,239,0) 58%);
+  opacity: .72;
+}

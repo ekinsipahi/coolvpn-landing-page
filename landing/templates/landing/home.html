@@ -1,0 +1,87 @@
+{# templates/landing/home.html #}
+{% extends "base.html" %}
+{% load i18n %}
+{% load seo_extras %}
+
+{% block header %}
+  {% include "partials/navbar.html" %}
+{% endblock %}
+
+{% block title %}{{ seo_title }}{% endblock %}
+{% block meta_description %}{{ seo_description }}{% endblock %}
+
+{% block schema_jsonld %}
+  {% blocktrans asvar product_desc %}Audited no logs VPN with private node, unlimited bandwidth.{% endblocktrans %}
+  {% blocktrans asvar product_slogan %}Privacy, speed, control  connect in seconds forget its even on.{% endblocktrans %}
+
+  {% blocktrans asvar feature_nologs %}Independently audited zero logs your activity is never stored.{% endblocktrans %}
+  {% blocktrans asvar feature_dpi %}Stealth obfuscation to bypass DPI and restricted networks.{% endblocktrans %}
+  {% blocktrans asvar feature_adblock %}Built in ad tracker and  blocker for cleaner, faster browsing.{% endblocktrans %}
+  {% blocktrans asvar feature_killswitch %}Instant traffic cut if VPN drops   no IP or DNS leaks.{% endblocktrans %}
+  {% blocktrans asvar feature_autoconnect %}Auto connect on startup and auto reconnect for reliability.{% endblocktrans %}
+  {% blocktrans asvar feature_pertab %}Per tab routing in Chrome   choose which tabs use the VPN.{% endblocktrans %}
+  {% blocktrans asvar feature_capacity %}1000 Gbps backbone for peak throughput and low jitter.{% endblocktrans %}
+  {% blocktrans asvar feature_dedicated %}Annual plans include a dedicated private server (single tenant).{% endblocktrans %}
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": ["Product", "SoftwareApplication"],
+    "name": "CoolVPN",
+    "inLanguage": "{{ LANGUAGE_CODE|default:'en' }}",
+    "url": "{{ canonical_url|default:request.build_absolute_uri }}",
+    "category": "VPN",
+    "applicationCategory": "SecurityApplication",
+    "operatingSystem": "iOS, Android, Windows, macOS, Linux, Chrome",
+    "brand": { "@type": "Brand", "name": "CoolVPN" },
+    "description": "{{ product_desc|escapejs }}",
+    "slogan": "{{ product_slogan|escapejs }}",
+    "isAccessibleForFree": true,
+
+    "additionalProperty": [
+      { "@type": "PropertyValue", "name": "No-logs policy",              "value": "{{ feature_nologs|escapejs }}" },
+      { "@type": "PropertyValue", "name": "DPI/obfuscation",             "value": "{{ feature_dpi|escapejs }}" },
+      { "@type": "PropertyValue", "name": "Ad & tracker blocker",        "value": "{{ feature_adblock|escapejs }}" },
+      { "@type": "PropertyValue", "name": "Kill Switch",                 "value": "{{ feature_killswitch|escapejs }}" },
+      { "@type": "PropertyValue", "name": "Auto-connect on startup",     "value": "{{ feature_autoconnect|escapejs }}" },
+      { "@type": "PropertyValue", "name": "Per-tab routing (Chrome)",    "value": "{{ feature_pertab|escapejs }}" },
+      { "@type": "PropertyValue", "name": "Network capacity",            "value": "{{ feature_capacity|escapejs }}" },
+      { "@type": "PropertyValue", "name": "Annual perk",                 "value": "{{ feature_dedicated|escapejs }}" }
+    ],
+
+    "audience": { "@type": "Audience", "audienceType": "Consumers" },
+
+    "offers": {{ offers_json|safe }}
+  }
+  </script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "inLanguage": "{{ LANGUAGE_CODE|default:'en' }}",
+  "mainEntity": [
+    {% for item in faq_all %}
+    {
+      "@type": "Question",
+      "name": "{{ item.q|escapejs }}",
+      "acceptedAnswer": { "@type": "Answer", "text": "{{ item.a|escapejs }}" }
+    }{% if not forloop.last %},{% endif %}
+    {% endfor %}
+  ]
+}
+</script>
+
+{% endblock %}
+
+
+{% block content %}
+  {% include "partials/hero.html" %}
+  {% include "partials/why_vpn.html" %}
+  {% include "partials/plan_tabs.html" %}
+  {% include "partials/features_premium.html" %}
+  {% include "partials/security.html" %}
+  {% include "partials/supported_platforms.html" %}
+  {% include "partials/faq_teaser.html" %}
+
+{% endblock %}
