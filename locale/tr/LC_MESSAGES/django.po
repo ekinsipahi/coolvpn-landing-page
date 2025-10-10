@@ -1,0 +1,454 @@
+# Turkish translations for CoolVPN
+msgid ""
+msgstr ""
+"Project-Id-Version: CoolVPN Landing\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-10-08 22:57+0000\n"
+"PO-Revision-Date: 2025-10-07 00:10+0300\n"
+"Last-Translator: Your Name <you@example.com>\n"
+"Language-Team: Turkish\n"
+"Language: tr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: landing/templates/landing/home.html:21
+#, fuzzy
+#| msgid "Audited no-logs VPN with private node (annual), unlimited bandwidth."
+msgid "Audited no-logs VPN with private node, unlimited bandwidth."
+msgstr ""
+"Bağımsız denetimli no-logs VPN; özel node (yıllık) ve sınırsız bant "
+"genişliği."
+
+#: landing/templates/landing/home.html:35
+msgid "Do you keep logs?"
+msgstr "Kayıt tutuyor musunuz?"
+
+#: landing/templates/landing/home.html:36
+msgid "No. Our no-logs policy is independently audited."
+msgstr "Hayır. Kayıt tutmama politikamız bağımsız olarak denetlenir."
+
+#: landing/templates/landing/home.html:40
+msgid "Does it work on restricted networks?"
+msgstr "Kısıtlı ağlarda çalışıyor mu?"
+
+#: landing/templates/landing/home.html:41
+msgid ""
+"Yes — our obfuscation is engineered to maximize access on restricted "
+"networks."
+msgstr ""
+"Evet — gizleme (obfuscation) teknolojimiz kısıtlı ağlarda erişimi en üst "
+"düzeye çıkarmak için tasarlanmıştır."
+
+#: landing/templatetags/pricing.py:116
+msgid "Monthly Plan"
+msgstr ""
+
+#: landing/templatetags/pricing.py:116
+#, fuzzy
+#| msgid "CoolVPN Annual Plan"
+msgid "Annual Plan"
+msgstr "CoolVPN Yıllık Plan"
+
+#: landing/views.py:20
+msgid "CoolVPN — Private Node. Obfuscation. No-Logs."
+msgstr "CoolVPN — Özel Node. Gizleme. Kayıt Yok."
+
+#: landing/views.py:22
+msgid ""
+"Bypass restrictions with audited no-logs VPN. Private node on annual plans. "
+"Unlimited bandwidth."
+msgstr ""
+"Bağımsız denetimli no-logs VPN ile kısıtlamaları aşın. Yıllık planda özel "
+"node, sınırsız bant genişliği."
+
+#: templates/partials/hero.html:26
+msgid "Coolvpn is Private. Fast. & Yours."
+msgstr ""
+
+#: templates/partials/hero.html:31
+msgid "One-tap connect. No-logs. No limits. CoolVPN."
+msgstr ""
+
+#: templates/partials/hero.html:38
+msgid "This month only"
+msgstr ""
+
+#: templates/partials/hero.html:40
+#, python-format
+msgid "Save 44%%"
+msgstr ""
+
+#: templates/partials/hero.html:45
+msgid "Current price"
+msgstr ""
+
+#: templates/partials/hero.html:57
+#, python-format
+msgid "or %(sym)s%(yr)s/year"
+msgstr ""
+
+#: templates/partials/hero.html:66 templates/partials/hero.html:113
+msgid "Get Started"
+msgstr ""
+
+#: templates/partials/hero.html:77 templates/partials/hero.html:123
+msgid "See How It Works"
+msgstr ""
+
+#: templates/partials/hero.html:87
+msgid "No-logs policy"
+msgstr ""
+
+#: templates/partials/hero.html:93
+msgid "1-tap connect"
+msgstr ""
+
+#: templates/partials/hero.html:102
+msgid "Blazing speed"
+msgstr ""
+
+#: templates/partials/hero.html:136
+msgid "Ad & Tracker Blocking"
+msgstr ""
+
+#: templates/partials/hero.html:145
+msgid "1000 Gbps Backbone"
+msgstr ""
+
+#: templates/partials/hero.html:154
+msgid "Zero-Logs. Anonymous."
+msgstr ""
+
+#: templates/partials/hero.html:164
+#, fuzzy
+#| msgid "See Pricing"
+msgid "Smart, Fair Pricing"
+msgstr "Fiyatları Gör"
+
+#: templates/partials/navbar.html:20 templates/partials/navbar.html:218
+msgid "Features"
+msgstr ""
+
+#: templates/partials/navbar.html:33 templates/partials/navbar.html:222
+msgid "Stealth / Obfuscation"
+msgstr ""
+
+#: templates/partials/navbar.html:34
+#, fuzzy
+#| msgid ""
+#| "Yes — our obfuscation is engineered to maximize access on restricted "
+#| "networks."
+msgid "Engineered to maximize access on restricted networks"
+msgstr ""
+"Evet — gizleme (obfuscation) teknolojimiz kısıtlı ağlarda erişimi en üst "
+"düzeye çıkarmak için tasarlanmıştır."
+
+#: templates/partials/navbar.html:41 templates/partials/navbar.html:223
+#, fuzzy
+#| msgid "Private Node."
+msgid "Dedicated IP / Private Node"
+msgstr "Özel Node."
+
+#: templates/partials/navbar.html:42
+msgid "Annual plans include your own private endpoint"
+msgstr ""
+
+#: templates/partials/navbar.html:49 templates/partials/navbar.html:224
+msgid "WebRTC Leak Block"
+msgstr ""
+
+#: templates/partials/navbar.html:50
+msgid "Prevent IP leaks in modern browsers"
+msgstr ""
+
+#: templates/partials/navbar.html:57 templates/partials/navbar.html:225
+msgid "Split Tunneling / Whitelist"
+msgstr ""
+
+#: templates/partials/navbar.html:58
+msgid "Choose what routes through VPN"
+msgstr ""
+
+#: templates/partials/navbar.html:68 templates/partials/navbar.html:232
+msgid "Advantages"
+msgstr ""
+
+#: templates/partials/navbar.html:78 templates/partials/navbar.html:236
+msgid "No-Logs by design"
+msgstr ""
+
+#: templates/partials/navbar.html:83 templates/partials/navbar.html:237
+msgid "Privacy-friendly jurisdiction"
+msgstr ""
+
+#: templates/partials/navbar.html:88 templates/partials/navbar.html:238
+#, fuzzy
+#| msgid "Unlimited Bandwidth."
+msgid "Unlimited bandwidth & high throughput"
+msgstr "Sınırsız Bant Genişliği."
+
+#: templates/partials/navbar.html:97 templates/partials/navbar.html:245
+msgid "Our Products"
+msgstr ""
+
+#: templates/partials/navbar.html:107 templates/partials/navbar.html:249
+#, fuzzy
+#| msgid "Apps & Extensions"
+msgid "Browser Extension"
+msgstr "Uygulamalar ve Eklentiler"
+
+#: templates/partials/navbar.html:112 templates/partials/navbar.html:250
+msgid "Desktop App"
+msgstr ""
+
+#: templates/partials/navbar.html:117 templates/partials/navbar.html:251
+msgid "Mobile App"
+msgstr ""
+
+#: templates/partials/navbar.html:122 templates/partials/navbar.html:276
+#, fuzzy
+#| msgid "See Pricing"
+msgid "Pricing"
+msgstr "Fiyatları Gör"
+
+#: templates/partials/navbar.html:123 templates/partials/navbar.html:277
+msgid "Blog"
+msgstr ""
+
+#: templates/partials/navbar.html:124 templates/partials/navbar.html:278
+msgid "FAQ"
+msgstr ""
+
+#: templates/partials/navbar.html:179
+msgid "Dashboard"
+msgstr ""
+
+#: templates/partials/navbar.html:180
+msgid "Settings"
+msgstr ""
+
+#: templates/partials/navbar.html:181
+msgid "Sign out"
+msgstr ""
+
+#: templates/partials/navbar.html:186
+msgid "Sign in"
+msgstr ""
+
+#: templates/partials/navbar.html:258
+msgid "Language"
+msgstr ""
+
+#: templates/partials/plan_tabs.html:26
+msgid "Choose Your Plan"
+msgstr ""
+
+#: templates/partials/plan_tabs.html:37
+msgid "Pricing plans"
+msgstr ""
+
+#: templates/partials/plan_tabs.html:43 templates/partials/plan_tabs.html:247
+msgid "Monthly"
+msgstr ""
+
+#: templates/partials/plan_tabs.html:53
+msgid "6 Months"
+msgstr ""
+
+#: templates/partials/plan_tabs.html:56
+msgid "Save vs monthly"
+msgstr ""
+
+#: templates/partials/plan_tabs.html:67 templates/partials/plan_tabs.html:264
+msgid "Annual"
+msgstr ""
+
+#: templates/partials/plan_tabs.html:70
+msgid "Best value"
+msgstr ""
+
+#: templates/partials/plan_tabs.html:97 templates/partials/plan_tabs.html:144
+#, fuzzy
+#| msgid "Unlimited Bandwidth."
+msgid "Unlimited bandwidth & speed"
+msgstr "Sınırsız Bant Genişliği."
+
+#: templates/partials/plan_tabs.html:102
+msgid "Independently audited no-logs"
+msgstr ""
+
+#: templates/partials/plan_tabs.html:113 templates/partials/plan_tabs.html:325
+msgid "month"
+msgstr ""
+
+#: templates/partials/plan_tabs.html:117
+msgid "Choose Monthly"
+msgstr ""
+
+#: templates/partials/plan_tabs.html:147
+msgid "Ad & tracker blocking"
+msgstr ""
+
+#: templates/partials/plan_tabs.html:148
+msgid "24/7 support"
+msgstr ""
+
+#: templates/partials/plan_tabs.html:159 templates/partials/plan_tabs.html:257
+msgid "6 months"
+msgstr ""
+
+#: templates/partials/plan_tabs.html:169
+msgid "Choose 6-Month"
+msgstr ""
+
+#: templates/partials/plan_tabs.html:199
+#, fuzzy
+#| msgid "Private node (Annual)"
+msgid "Private node on annual plans"
+msgstr "Özel node (Yıllık)"
+
+#: templates/partials/plan_tabs.html:200
+msgid "30-day money-back guarantee"
+msgstr ""
+
+#: templates/partials/plan_tabs.html:201
+msgid "Priority support"
+msgstr ""
+
+#: templates/partials/plan_tabs.html:202
+msgid "Everything in Monthly"
+msgstr ""
+
+#: templates/partials/plan_tabs.html:213
+msgid "year"
+msgstr ""
+
+#: templates/partials/plan_tabs.html:223
+#, fuzzy
+#| msgid "CoolVPN Annual Plan"
+msgid "Choose Annual"
+msgstr "CoolVPN Yıllık Plan"
+
+#: templates/partials/plan_tabs.html:239
+msgid "Plan"
+msgstr ""
+
+#: templates/partials/plan_tabs.html:240
+msgid "CoolVPN"
+msgstr ""
+
+#: templates/partials/plan_tabs.html:241
+msgid "Typical market price"
+msgstr ""
+
+#: templates/partials/plan_tabs.html:242
+msgid "Notes"
+msgstr ""
+
+#: templates/partials/plan_tabs.html:250
+msgid "Often $7–$13/mo"
+msgstr ""
+
+#: templates/partials/plan_tabs.html:255
+msgid "6-Month"
+msgstr ""
+
+#: templates/partials/plan_tabs.html:269
+msgid "Best long-term value"
+msgstr ""
+
+#: templates/partials/why_vpn.html:15
+msgid "Why You Need a VPN Today"
+msgstr ""
+
+#: templates/partials/why_vpn.html:20
+msgid ""
+"Every click, every app, every Wi-Fi network collects your data. CoolVPN "
+"hides your identity, encrypts your traffic, and gives you true online "
+"freedom — on any device, anywhere."
+msgstr ""
+
+#: templates/partials/why_vpn.html:34
+msgid "Stay Safe on Public Wi-Fi"
+msgstr ""
+
+#: templates/partials/why_vpn.html:37
+msgid ""
+"Protect your data from hackers on café or airport networks with AES-256 "
+"encryption."
+msgstr ""
+
+#: templates/partials/why_vpn.html:40
+msgid "Always-on Kill Switch & Leak Protection included."
+msgstr ""
+
+#: templates/partials/why_vpn.html:53
+msgid "Access Restricted Content"
+msgstr ""
+
+#: templates/partials/why_vpn.html:56
+msgid ""
+"Bypass geo-blocks and censorship — stream, play, and browse without borders."
+msgstr ""
+
+#: templates/partials/why_vpn.html:59
+#, fuzzy
+#| msgid "Does it work on restricted networks?"
+msgid "Obfuscation to work on restricted networks."
+msgstr "Kısıtlı ağlarda çalışıyor mu?"
+
+#: templates/partials/why_vpn.html:72
+msgid "Keep Your Privacy Intact"
+msgstr ""
+
+#: templates/partials/why_vpn.html:75
+msgid ""
+"Your ISP and advertisers can’t track what you do online — your activity "
+"stays yours."
+msgstr ""
+
+#: templates/partials/why_vpn.html:78
+#, fuzzy
+#| msgid "No. Our no-logs policy is independently audited."
+msgid "No-logs policy — independently audited."
+msgstr "Hayır. Kayıt tutmama politikamız bağımsız olarak denetlenir."
+
+#: templates/partials/why_vpn.html:87
+msgid "Start in 60 seconds"
+msgstr ""
+
+#: templates/partials/why_vpn.html:96
+msgid "See how it works"
+msgstr ""
+
+#: templates/partials/why_vpn.html:104
+msgid "Light speed VPN Servers"
+msgstr ""
+
+#: templates/partials/why_vpn.html:109
+#, fuzzy
+#| msgid "Unlimited Bandwidth."
+msgid "Unlimited bandwidth"
+msgstr "Sınırsız Bant Genişliği."
+
+#: templates/partials/why_vpn.html:114
+msgid "Apps for iOS • Android • Desktop"
+msgstr ""
+
+#: templates/stubs/simple.html:19
+msgid "This is a placeholder page. Replace with real content when ready."
+msgstr ""
+
+#~ msgid "True Privacy."
+#~ msgstr "Gerçek Gizlilik."
+
+#~ msgid "Get it now"
+#~ msgstr "Hemen indir"
+
+#~ msgid "Audited No-Logs"
+#~ msgstr "Denetimli Kayıt Tutmama"
+
+#~ msgid "Stealth obfuscation for restricted regions"
+#~ msgstr "Kısıtlı bölgeler için gizleme (obfuscation)"

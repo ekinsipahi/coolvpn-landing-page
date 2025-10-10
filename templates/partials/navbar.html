@@ -1,0 +1,288 @@
+{# templates/partials/navbar.html #}
+{% load i18n static %}
+
+<nav class="nav-glass isolate overflow-visible w-[100%] fixed">
+  <div class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex h-16 items-center justify-between">
+
+      <!-- Logo -->
+      <a href="{% url 'home' %}" class="flex items-center gap-3">
+        <img src="{% static 'img/favicon.ico' %}" class="h-8 w-auto" alt="CoolVPN" />
+      </a>
+
+      <!-- Desktop nav -->
+      <div class="hidden md:flex md:items-center md:space-x-6 rtl:space-x-reverse">
+
+        <!-- Features -->
+        <div class="relative">
+          <button id="featBtn" type="button"
+                  class="inline-flex items-center text-sm font-medium text-gray-800 dark:text-gray-200 hover:text-[color:var(--accent)] transition">
+            {% trans "Features" %}
+            <svg class="ms-1 h-4 w-4 opacity-70" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.146l3.71-3.915a.75.75 0 111.08 1.04l-4.24 4.47a.75.75 0 01-1.08 0l-4.24-4.47a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+          </button>
+
+          <!-- dropdown -->
+          <div id="featMenu" class="hidden absolute left-0 mt-2 w-80 z-50 rounded-xl p-2 shadow-xl
+                                   bg-white/95 dark:bg-zinc-950/95 backdrop-blur
+                                   ring-1 ring-black/5 dark:ring-white/10
+                                   text-gray-900 dark:text-gray-100">
+            <a href="{% url 'features:stealth' %}" class="flex items-start gap-3 px-3 py-2 rounded-lg
+               hover:bg-gray-50 dark:hover:bg-zinc-900/70 transition">
+              <svg class="h-4 w-4 mt-0.5 shrink-0 text-emerald-600" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 4 5v6c0 5 3.4 9.7 8 11 4.6-1.3 8-6 8-11V5l-8-3Z"/><path d="M12 11a2 2 0 0 0-2 2v1h4v-1a2 2 0 0 0-2-2Z"/></svg>
+              <div class="leading-5">
+                <div class="font-medium">{% trans "Stealth / Obfuscation" %}</div>
+                <div class="text-sm text-gray-600 dark:text-gray-300">{% trans "Engineered to maximize access on restricted networks" %}</div>
+              </div>
+            </a>
+            <a href="{% url 'features:dedicated_ip' %}" class="flex items-start gap-3 px-3 py-2 rounded-lg
+               hover:bg-gray-50 dark:hover:bg-zinc-900/70 transition">
+              <svg class="h-4 w-4 mt-0.5 shrink-0 text-sky-600" viewBox="0 0 24 24" fill="currentColor"><path d="M14 3a5 5 0 1 0 4.9 6H23v3h-2v2h-2v2h-2v2H12v-2H9l-2-2h3.1A5 5 0 0 0 14 3Z"/></svg>
+              <div class="leading-5">
+                <div class="font-medium">{% trans "Dedicated IP / Private Node" %}</div>
+                <div class="text-sm text-gray-600 dark:text-gray-300">{% trans "Annual plans include your own private endpoint" %}</div>
+              </div>
+            </a>
+            <a href="{% url 'features:webrtc' %}" class="flex items-start gap-3 px-3 py-2 rounded-lg
+               hover:bg-gray-50 dark:hover:bg-zinc-900/70 transition">
+              <svg class="h-4 w-4 mt-0.5 shrink-0 text-amber-600" viewBox="0 0 24 24" fill="currentColor"><path d="m2 2 20 20-1.5 1.5L14.8 18A7 7 0 0 0 5 18l-2-2a9 9 0 0 1 9-3c1.1 0 2.1.2 3 .6L7.4 7.4A13 13 0 0 0 1 10l-2-2a15 15 0 0 1 7.1-3.7L.5 2.5 2 1l20 20-2 2z"/></svg>
+              <div class="leading-5">
+                <div class="font-medium">{% trans "WebRTC Leak Block" %}</div>
+                <div class="text-sm text-gray-600 dark:text-gray-300">{% trans "Prevent IP leaks in modern browsers" %}</div>
+              </div>
+            </a>
+            <a href="{% url 'features:split_tunnel' %}" class="flex items-start gap-3 px-3 py-2 rounded-lg
+               hover:bg-gray-50 dark:hover:bg-zinc-900/70 transition">
+              <svg class="h-4 w-4 mt-0.5 shrink-0 text-purple-600" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4a2 2 0 1 1 0 4H5v7a3 3 0 0 0 3 3h4a2 2 0 1 1 0 2H8a5 5 0 0 1-5-5V8H2a2 2 0 1 1 0-4h4Z"/><circle cx="18" cy="6" r="2"/><circle cx="18" cy="18" r="2"/></svg>
+              <div class="leading-5">
+                <div class="font-medium">{% trans "Split Tunneling / Whitelist" %}</div>
+                <div class="text-sm text-gray-600 dark:text-gray-300">{% trans "Choose what routes through VPN" %}</div>
+              </div>
+            </a>
+          </div>
+        </div>
+
+        <!-- Advantages -->
+        <div class="relative">
+          <button id="advBtn" type="button"
+                  class="inline-flex items-center text-sm font-medium text-gray-800 dark:text-gray-200 hover:text-[color:var(--accent)] transition">
+            {% trans "Advantages" %}
+            <svg class="ms-1 h-4 w-4 opacity-70" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.146l3.71-3.915a.75.75 0 111.08 1.04l-4.24 4.47a.75.75 0 01-1.08 0l-4.24-4.47a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+          </button>
+          <div id="advMenu" class="hidden absolute left-0 mt-2 w-72 z-50 rounded-xl p-2 shadow-xl
+                                   bg-white/95 dark:bg-zinc-950/95 backdrop-blur
+                                   ring-1 ring-black/5 dark:ring-white/10
+                                   text-gray-900 dark:text-gray-100">
+            <a href="{% url 'advantages:no_logs' %}" class="flex items-center gap-3 px-3 py-2 rounded-lg
+               hover:bg-gray-50 dark:hover:bg-zinc-900/70 transition">
+              <svg class="h-4 w-4 shrink-0 text-emerald-600" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 3 6v6c0 5 3.8 9.4 9 10 5.2-.6 9-5 9-10V6l-9-4Zm-1 13-3-3 1.5-1.5L11 11l4.5-4.5L17 8l-6 7Z"/></svg>
+              <span class="leading-5">{% trans "No-Logs by design" %}</span>
+            </a>
+            <a href="{% url 'advantages:jurisdiction' %}" class="flex items-center gap-3 px-3 py-2 rounded-lg
+               hover:bg-gray-50 dark:hover:bg-zinc-900/70 transition">
+              <svg class="h-4 w-4 shrink-0 text-sky-600" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c2.8 0 5 2.2 5 5v2h3v13H4V9h3V7c0-2.8 2.2-5 5-5Zm-3 7h6V7a3 3 0 0 0-6 0v2Z"/></svg>
+              <span class="leading-5">{% trans "Privacy-friendly jurisdiction" %}</span>
+            </a>
+            <a href="{% url 'advantages:speed' %}" class="flex items-center gap-3 px-3 py-2 rounded-lg
+               hover:bg-gray-50 dark:hover:bg-zinc-900/70 transition">
+              <svg class="h-4 w-4 shrink-0 text-indigo-600" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3a9 9 0 1 0 9 9h-2a7 7 0 1 1-7-7V3Zm7.3 1.3 1.4 1.4-6.4 6.4A3 3 0 1 1 12 9l7.3-4.7Z"/></svg>
+              <span class="leading-5">{% trans "Unlimited bandwidth & high throughput" %}</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Our Products -->
+        <div class="relative">
+          <button id="prdBtn" type="button"
+                  class="inline-flex items-center text-sm font-medium text-gray-800 dark:text-gray-200 hover:text-[color:var(--accent)] transition">
+            {% trans "Our Products" %}
+            <svg class="ms-1 h-4 w-4 opacity-70" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.146l3.71-3.915a.75.75 0 111.08 1.04l-4.24 4.47a.75.75 0 01-1.08 0l-4.24-4.47a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+          </button>
+          <div id="prdMenu" class="hidden absolute left-0 mt-2 w-64 z-50 rounded-xl p-2 shadow-xl
+                                   bg-white/95 dark:bg-zinc-950/95 backdrop-blur
+                                   ring-1 ring-black/5 dark:ring-white/10
+                                   text-gray-900 dark:text-gray-100">
+            <a href="{% url 'products:extension' %}" class="flex items-center gap-3 px-3 py-2 rounded-lg
+               hover:bg-gray-50 dark:hover:bg-zinc-900/70 transition">
+              <svg class="h-4 w-4 shrink-0 text-sky-600" viewBox="0 0 24 24" fill="currentColor"><path d="M8 3h8l1 2h3v5h-3l-1 2h-2l-1 2H9l-1-2H6l-1-2H2V5h3l1-2Z"/></svg>
+              <span class="leading-5">{% trans "Browser Extension" %}</span>
+            </a>
+            <a href="{% url 'products:desktop' %}" class="flex items-center gap-3 px-3 py-2 rounded-lg
+               hover:bg-gray-50 dark:hover:bg-zinc-900/70 transition">
+              <svg class="h-4 w-4 shrink-0 text-teal-600" viewBox="0 0 24 24" fill="currentColor"><path d="M3 4h18v12H3V4Zm6 14h6l1 2H8l1-2Z"/></svg>
+              <span class="leading-5">{% trans "Desktop App" %}</span>
+            </a>
+            <a href="{% url 'products:mobile' %}" class="flex items-center gap-3 px-3 py-2 rounded-lg
+               hover:bg-gray-50 dark:hover:bg-zinc-900/70 transition">
+              <svg class="h-4 w-4 shrink-0 text-emerald-600" viewBox="0 0 24 24" fill="currentColor"><path d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm5 18a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z"/></svg>
+              <span class="leading-5">{% trans "Mobile App" %}</span>
+            </a>
+          </div>
+        </div>
+
+        <a href="{% url 'pricing' %}" class="text-sm font-medium text-gray-800 dark:text-gray-200 hover:text-[color:var(--accent)] transition">{% trans "Pricing" %}</a>
+        <a href="{% url 'blog:index' %}" class="text-sm font-medium text-gray-800 dark:text-gray-200 hover:text-[color:var(--accent)] transition">{% trans "Blog" %}</a>
+        <a href="{% url 'faq' %}" class="text-sm font-medium text-gray-800 dark:text-gray-200 hover:text-[color:var(--accent)] transition">{% trans "FAQ" %}</a>
+      </div>
+
+      <!-- Right: theme + language + user -->
+      <div class="hidden md:flex items-center gap-2">
+
+        <!-- Theme toggle (desktop) -->
+        <button id="themeToggle" type="button" aria-label="Toggle dark mode"
+                class="inline-flex items-center justify-center w-9 h-9 rounded-lg
+                       text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800
+                       ring-1 ring-black/5 dark:ring-white/10 transition">
+          <svg id="iconMoon" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/></svg>
+        </button>
+
+        <!-- Language (desktop) -->
+        <div class="relative">
+          <button id="langBtn" type="button"
+                  class="inline-flex items-center px-3 py-2 rounded-lg text-sm
+                         text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+            🌐 <span class="ms-2 uppercase">{{ LANGUAGE_CODE|default:'en' }}</span>
+            <svg class="ms-1 h-4 w-4 opacity-70" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.146l3.71-3.915a.75.75 0 111.08 1.04l-4.24 4.47a.75.75 0 01-1.08 0l-4.24-4.47a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+          </button>
+          <div id="langMenu" class="hidden absolute right-0 mt-2 w-56 z-50 rounded-xl p-2 shadow-xl
+                                   bg-white/95 dark:bg-zinc-950/95 backdrop-blur
+                                   ring-1 ring-black/5 dark:ring-white/10
+                                   text-gray-900 dark:text-gray-100">
+            {% get_current_language as CURRENT_LANG %}
+            {% get_available_languages as LANGUAGES %}
+            {% get_language_info_list for LANGUAGES as languages %}
+            {% for lang in languages %}
+              <a href="#" data-lang="{{ lang.code }}"
+                 class="block px-3 py-2 rounded-lg
+                        hover:bg-gray-50 dark:hover:bg-zinc-900/70 transition
+                        {% if lang.code == CURRENT_LANG %}text-[color:var(--accent)] font-medium{% endif %}">
+                {{ lang.name_local }} ({{ lang.code }})
+              </a>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- User -->
+        {% if request.user.is_authenticated %}
+        <div class="relative">
+          <button id="userBtn" class="flex items-center text-sm rounded-full focus:outline-none p-1 bg-white/70 dark:bg-white/10 ring-1 ring-black/5 dark:ring-white/10">
+            <img class="h-8 w-8 rounded-full" src="{% static 'img/avatar-default.png' %}" alt="{{ request.user.email|default:request.user.username }}">
+          </button>
+          <div id="userMenu" class="hidden absolute right-0 mt-2 w-56 z-50 overflow-hidden rounded-xl p-2 shadow-xl
+                                   bg-white/95 dark:bg-zinc-950/95 backdrop-blur
+                                   ring-1 ring-black/5 dark:ring-white/10
+                                   text-gray-900 dark:text-gray-100">
+            <div class="px-3 py-2">
+              <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ request.user.username }}</div>
+              <div class="text-xs text-gray-600 dark:text-gray-300 truncate">{{ request.user.email }}</div>
+            </div>
+            <div class="py-1">
+              <a href="{% url 'dashboard' %}" class="block px-3 py-2 text-sm rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-900/70">{% trans "Dashboard" %}</a>
+              <a href="{% url 'account_settings' %}" class="block px-3 py-2 text-sm rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-900/70">{% trans "Settings" %}</a>
+              <a href="{% url 'logout' %}" class="block px-3 py-2 text-sm rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-900/70">{% trans "Sign out" %}</a>
+            </div>
+          </div>
+        </div>
+        {% else %}
+          <a href="{% url 'login' %}" class="nav-cta">{% trans "Sign in" %}</a>
+        {% endif %}
+      </div>
+
+      <!-- Mobile: theme + hamburger -->
+      <div class="md:hidden flex items-center gap-2">
+        <button id="themeToggleMobile" type="button" aria-label="Toggle dark mode"
+                class="inline-flex items-center justify-center w-9 h-9 rounded-lg
+                       text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800
+                       ring-1 ring-black/5 dark:ring-white/10 transition">
+          <svg id="iconMoonM" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/></svg>
+        </button>
+
+        <button id="navToggle" class="inline-flex items-center justify-center rounded-md p-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none" aria-controls="mobileMenu" aria-expanded="false">
+          <span class="sr-only">Open main menu</span>
+          <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Mobile menu -->
+  <div id="mobileMenu"
+       class="md:hidden hidden z-50 border-t border-gray-100 dark:border-gray-800
+              bg-white/95 dark:bg-zinc-950/95 backdrop-blur
+              text-gray-900 dark:text-gray-100">
+    <div class="px-4 py-4 space-y-1">
+
+      <!-- Features -->
+      <details class="group">
+        <summary class="flex items-center justify-between cursor-pointer py-2 text-gray-900 dark:text-gray-100">
+          <span>{% trans "Features" %}</span>
+          <svg class="h-4 w-4 opacity-70 group-open:rotate-180 transition" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.146l3.71-3.915a.75.75 0 111.08 1.04l-4.24 4.47a.75.75 0 01-1.08 0l-4.24-4.47a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+        </summary>
+        <div class="mt-1 pl-3 space-y-1">
+          <a href="{% url 'features:stealth' %}" class="block py-2 text-sm hover:text-[color:var(--accent)]">{% trans "Stealth / Obfuscation" %}</a>
+          <a href="{% url 'features:dedicated_ip' %}" class="block py-2 text-sm hover:text-[color:var(--accent)]">{% trans "Dedicated IP / Private Node" %}</a>
+          <a href="{% url 'features:webrtc' %}" class="block py-2 text-sm hover:text-[color:var(--accent)]">{% trans "WebRTC Leak Block" %}</a>
+          <a href="{% url 'features:split_tunnel' %}" class="block py-2 text-sm hover:text-[color:var(--accent)]">{% trans "Split Tunneling / Whitelist" %}</a>
+        </div>
+      </details>
+
+      <!-- Advantages -->
+      <details class="group">
+        <summary class="flex items-center justify-between cursor-pointer py-2 text-gray-900 dark:text-gray-100">
+          <span>{% trans "Advantages" %}</span>
+          <svg class="h-4 w-4 opacity-70 group-open:rotate-180 transition" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.146l3.71-3.915a.75.75 0 111.08 1.04l-4.24 4.47a.75.75 0 01-1.08 0l-4.24-4.47a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+        </summary>
+        <div class="mt-1 pl-3 space-y-1">
+          <a href="{% url 'advantages:no_logs' %}" class="block py-2 text-sm hover:text-[color:var(--accent)]">{% trans "No-Logs by design" %}</a>
+          <a href="{% url 'advantages:jurisdiction' %}" class="block py-2 text-sm hover:text-[color:var(--accent)]">{% trans "Privacy-friendly jurisdiction" %}</a>
+          <a href="{% url 'advantages:speed' %}" class="block py-2 text-sm hover:text-[color:var(--accent)]">{% trans "Unlimited bandwidth & high throughput" %}</a>
+        </div>
+      </details>
+
+      <!-- Our Products -->
+      <details class="group">
+        <summary class="flex items-center justify-between cursor-pointer py-2 text-gray-900 dark:text-gray-100">
+          <span>{% trans "Our Products" %}</span>
+          <svg class="h-4 w-4 opacity-70 group-open:rotate-180 transition" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.146l3.71-3.915a.75.75 0 111.08 1.04l-4.24 4.47a.75.75 0 01-1.08 0l-4.24-4.47a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+        </summary>
+        <div class="mt-1 pl-3 space-y-1">
+          <a href="{% url 'products:extension' %}" class="block py-2 text-sm hover:text-[color:var(--accent)]">{% trans "Browser Extension" %}</a>
+          <a href="{% url 'products:desktop' %}" class="block py-2 text-sm hover:text-[color:var(--accent)]">{% trans "Desktop App" %}</a>
+          <a href="{% url 'products:mobile' %}" class="block py-2 text-sm hover:text-[color:var(--accent)]">{% trans "Mobile App" %}</a>
+        </div>
+      </details>
+
+      <!-- Mobile Language -->
+      <details class="group">
+        <summary class="flex items-center justify-between cursor-pointer py-2 text-gray-900 dark:text-gray-100">
+          <span>{% trans "Language" %} ({{ LANGUAGE_CODE|default:'en'|upper }})</span>
+          <svg class="h-4 w-4 opacity-70 group-open:rotate-180 transition" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.146l3.71-3.915a.75.75 0 111.08 1.04l-4.24 4.47a.75.75 0 01-1.08 0l-4.24-4.47a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+        </summary>
+        <div id="langMenuMobile" class="mt-1 pl-3 space-y-1">
+          {% get_current_language as CURRENT_LANG %}
+          {% get_available_languages as LANGUAGES %}
+          {% get_language_info_list for LANGUAGES as languages %}
+          {% for lang in languages %}
+            <a href="#" data-lang="{{ lang.code }}"
+               class="block py-2 text-sm rounded-lg
+                      hover:bg-gray-100 dark:hover:bg-zinc-900/70
+                      {% if lang.code == CURRENT_LANG %}text-[color:var(--accent)] font-medium{% endif %}">
+              {{ lang.name_local }} ({{ lang.code }})
+            </a>
+          {% endfor %}
+        </div>
+      </details>
+
+      <a href="{% url 'pricing' %}" class="block py-2 hover:text-[color:var(--accent)]">{% trans "Pricing" %}</a>
+      <a href="{% url 'blog:index' %}" class="block py-2 hover:text-[color:var(--accent)]">{% trans "Blog" %}</a>
+      <a href="{% url 'faq' %}" class="block py-2 hover:text-[color:var(--accent)]">{% trans "FAQ" %}</a>
+    </div>
+  </div>
+
+  <!-- set_language formu -->
+  <form id="langForm" action="{% url 'set_language' %}" method="post" class="hidden">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+    <input type="hidden" name="language" id="langInput">
+  </form>
+</nav>

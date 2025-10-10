@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---- Brand renkleri (değerler senin verdiğin paletten) ---- */
+:root{
+  --deep-blue:#0B3D91;
+  --accent:#0099FF;
+  --accent-dark:#007ACC;
+  --sky:#7FD3FF;
+  --teal:#00B3A6;
+  --navy:#031A2D;
+  --soft:#F5F8FB;
+}
+
+/* ---- Bileşen stilleri (Tailwind + ufak CSS) ---- */
+@layer components {
+  .nav-glass{
+    @apply sticky top-0 z-50 border-b backdrop-blur;
+    /* ışıkta hafif cam, karanlıkta navy cam */
+    background: linear-gradient(to bottom, rgba(255,255,255,.85), rgba(245,248,251,.78));
+    border-color: rgba(2,6,23,.06);
+  }
+  .dark .nav-glass{
+    background: linear-gradient(to bottom, rgba(3,26,45,.82), rgba(3,26,45,.72));
+    border-color: rgba(255,255,255,.06);
+  }
+
+  .nav-link{
+    @apply text-gray-700 dark:text-white/90 hover:no-underline transition;
+  }
+  .nav-link:hover{ color: var(--accent); }
+  .dark .nav-link:hover{ color: var(--sky); }
+
+  .nav-cta{
+    @apply inline-flex items-center gap-2 rounded-lg px-4 py-2 font-medium text-white shadow-sm transition;
+    background: linear-gradient(135deg, var(--deep-blue), var(--accent));
+  }
+  .nav-cta:hover{ filter: brightness(1.05); }
+  .nav-cta:active{ transform: translateY(1px); }
+
+  .menu-card{
+    @apply rounded-xl border shadow-xl p-2 bg-white dark:bg-gray-900 transition;
+    border-color: rgba(2,6,23,.08);
+  }
+  .dark .menu-card{ border-color: rgba(255,255,255,.06); }
+
+  .menu-item{
+    @apply flex items-start gap-3 px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition;
+  }
+
+  /* hover açılırken daha ipeksi his */
+  .fly{
+    @apply invisible opacity-0 pointer-events-none translate-y-1;
+  }
+  .group:hover .fly{
+    @apply visible opacity-100 pointer-events-auto translate-y-0;
+  }
+}
