@@ -3381,10 +3381,6 @@ video {
   opacity: 0.3;
 }
 
-.dark\:opacity-80:is(.dark *) {
-  opacity: 0.8;
-}
-
 .dark\:ring-fuchsia-300\/25:is(.dark *) {
   --tw-ring-color: rgb(240 171 252 / 0.25);
 }
