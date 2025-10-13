@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="max-w-lg mx-auto p-6">
+  <h1 class="text-xl font-semibold">Payment status</h1>
+  <p id="msg" class="mt-2 text-sm text-gray-600">Checking your payment…</p>
+  <div class="mt-4">
+    <a id="dl" href="/account" class="hidden underline">Go to your account →</a>
+  </div>
+</section>
+<script>
+  const orderId = "{{ order_id|escapejs }}";
+
+  async function check(){
+    const r = await fetch(`/api/order/status/?order_id=${encodeURIComponent(orderId)}`, {credentials:'same-origin'});
+    const d = await r.json();
+    const msg = document.getElementById('msg'); const dl = document.getElementById('dl');
+
+    if(!d?.ok){
+      msg.textContent = 'Order not found or not ready yet.';
+      return false;
+    }
+    if(d.paid){
+      msg.textContent = 'Payment confirmed ✔ Your subscription is active.';
+      dl.classList.remove('hidden');
+      return true;
+    }
+    if(d.status === 'failed' || d.status === 'expired' || d.status === 'refunded'){
+      msg.textContent = 'Payment did not complete ('+d.status+'). Please try again.';
+      return true;
+    }
+
+    // Hâlâ pending → (opsiyonel) reconcile dene (aşırı sık çağırma!)
+    try{
+      await fetch('/api/payment/nowpay/reconcile/', {
+        method:'POST',
+        headers:{'Content-Type':'application/x-www-form-urlencoded','X-CSRFToken': (document.cookie.match(/csrftoken=([^;]+)/)||[])[1]||''},
+        body: new URLSearchParams({order_id: orderId})
+      });
+    }catch(_){}
+
+    msg.textContent = 'Awaiting confirmations on the network…';
+    return false;
+  }
+
+  (async function loop(){
+    for(let i=0;i<24;i++){         // ~2 dk
+      const done = await check();
+      if(done) return;
+      await new Promise(r=>setTimeout(r, 5000));
+    }
+    // zaman aşımı
+    document.getElementById('msg').textContent = 'Still pending. We will activate as soon as it confirms.';
+  })();
+</script>
+{% endblock %}

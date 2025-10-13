@@ -4,23 +4,34 @@
 <link rel="stylesheet" href="{% static 'css/ui/plan-orbs.css' %}">
 
 <section class="kv-hero mt-[-30px] relative overflow-hidden">
-  <!-- 🔹 Yeni: Arka plan video layer -->
+  <!-- 🔹 Hafif: Arka plan video (lazy + poster + guardrails) -->
   <div class="kv-video-layer pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden="true">
     <video
       class="w-full h-full object-cover opacity-80 dark:opacity-80"
-      autoplay
       muted
       loop
-      preload="none"
       playsinline
-      preload="metadata">
-      <source src="{% static 'videos/hero-animation.webm' %}" type="video/webm">
+      preload="none"
+      poster="{% static 'img/hero-poster.jpg' %}"
+      x-webkit-airplay="allow"
+      webkit-playsinline="true"
+      disablepictureinpicture
+      controlslist="nodownload noplaybackrate noremoteplayback">
+      <!-- Kaynaklar görünür olunca JS ile yüklenecek -->
+      <source data-src="{% static 'videos/hero-animation.webm' %}" type="video/webm">
+      <!-- (opsiyonel) Safari için mp4 yedeği -->
+      <source data-src="{% static 'videos/hero-animation.mp4' %}" type="video/mp4">
     </video>
 
     <!-- Kontrast için yumuşak overlay -->
     <div class="absolute inset-0 bg-gradient-to-b
                 from-white/70 via-white/20 to-white/70
                 dark:from-neutral-950/80 dark:via-neutral-950/35 dark:to-neutral-950/85"></div>
+
+    <!-- JS kapalıysa poster gösterilsin -->
+    <noscript>
+      <img src="{% static 'img/hero-poster.jpg' %}" alt="" class="w-full h-full object-cover" />
+    </noscript>
   </div>
 
   <div class="kv-bg" style="opacity: 0.8;"></div>
@@ -163,27 +174,67 @@
   </div>
 </section>
 
-<!-- Reduce-motion + görünürlük kontrolü -->
+<!-- Hafif video kontrolü (lazy-load, intersection, reduce-motion/data, tab visibility) -->
 <script>
   document.addEventListener('DOMContentLoaded', function () {
-    const video = document.querySelector('.kv-video-layer video');
+    const wrapper = document.querySelector('.kv-video-layer');
+    const video = wrapper?.querySelector('video');
     if (!video) return;
 
-    const prefersReduced = window.matchMedia &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReduced) {
-      video.pause();
+    const sources = Array.from(video.querySelectorAll('source'));
+    const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    const prefersReducedData   = window.matchMedia?.('(prefers-reduced-data: reduce)').matches;
+    const isMobile             = window.matchMedia?.('(max-width: 768px)').matches;
+
+    // Ağır cihaz/bağlantı durumunda video yerine poster
+    if (prefersReducedMotion || prefersReducedData || isMobile) {
+      try { video.pause(); } catch(e){}
       video.removeAttribute('autoplay');
       return;
     }
 
+    let loaded = false;
+
+    function injectSourcesOnce() {
+      if (loaded) return;
+      loaded = true;
+      sources.forEach(s => {
+        const ds = s.getAttribute('data-src');
+        if (ds) s.setAttribute('src', ds);
+      });
+      video.load();
+    }
+
+    function tryPlay() {
+      video.muted = true;
+      video.play().catch(()=>{});
+    }
+
     const io = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting) {
-        video.play().catch(()=>{});
+        injectSourcesOnce();
+        tryPlay();
       } else {
-        video.pause();
+        try { video.pause(); } catch(e){}
       }
     }, { threshold: 0.15 });
     io.observe(video);
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        try { video.pause(); } catch(e){}
+      } else {
+        const r = video.getBoundingClientRect();
+        const inView = r.bottom > 0 && r.right > 0 && r.top < (innerHeight || document.documentElement.clientHeight) && r.left < (innerWidth || document.documentElement.clientWidth);
+        if (inView && loaded) tryPlay();
+      }
+    }, { passive: true });
+
+    try {
+      const rm = window.matchMedia('(prefers-reduced-motion: reduce)');
+      rm.addEventListener?.('change', e => {
+        if (e.matches) { try { video.pause(); } catch(e){} }
+      });
+    } catch(e){}
   });
 </script>

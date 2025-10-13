@@ -54,6 +54,8 @@
   bindMenuToggle('prdBtn', 'prdMenu');
   bindMenuToggle('langBtn', 'langMenu');
   bindMenuToggle('userBtn', 'userMenu'); // opsiyonel
+  bindMenuToggle('userBtnM', 'userMenuM');
+
 
   // Click outside => sadece dropdownları kapat
   document.addEventListener('click', () => {

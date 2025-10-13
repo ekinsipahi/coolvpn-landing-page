@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% load i18n static %}
+{# templates/landing/pricing.html #}
+
+{% block header %}
+  {% include "partials/navbar.html" %}
+{% endblock %}
+
+{# ---- SEO meta ---- #}
+{% block title %}{{ seo_title }}{% endblock %}
+{% block meta_description %}{{ seo_description }}{% endblock %}
+
+{# ---- JSON-LD ---- #}
+{% block schema_jsonld %}
+  {# Sitewide: Organization + WebSite (tekil @id’lerle) #}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "@id": "{{ request.build_absolute_uri|slice:':-1' }}/#org",
+    "name": "{{ site_name }}",
+    "url": "{{ request.build_absolute_uri|default:canonical_url }}",
+    "logo": {"@type":"ImageObject","url":"{{ request.build_absolute_uri|cut:request.get_full_path }}{% static 'img/apple-touch-icon-180.png' %}"}
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "@id": "{{ request.build_absolute_uri|slice:':-1' }}/#website",
+    "url": "{{ request.build_absolute_uri|default:canonical_url }}",
+    "name": "{{ site_name }}",
+    "publisher": {"@id": "{{ request.build_absolute_uri|slice:':-1' }}/#org"},
+    "inLanguage": "{{ LANGUAGE_CODE|default:'en' }}"
+  }
+  </script>
+
+  {# Breadcrumbs (Home → Pricing) #}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1,
+        "name": "{% trans 'Home' %}",
+        "item": "{{ request.build_absolute_uri|cut:request.get_full_path }}/" },
+      { "@type": "ListItem", "position": 2,
+        "name": "{% trans 'Pricing' %}",
+        "item": "{{ canonical_url|default:request.build_absolute_uri }}" }
+    ]
+  }
+  </script>
+
+  {# Product + OfferCatalog (home’daki @id ile aynı Product @id kullanılır — kanonik tekil varlık!) #}
+  {% blocktrans asvar product_desc %}Audited no-logs VPN with private node, unlimited bandwidth.{% endblocktrans %}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": ["Product", "SoftwareApplication"],
+    "@id": "{{ request.build_absolute_uri|slice:':-1' }}/product/coolvpn",
+    "name": "CoolVPN",
+    "brand": { "@type": "Brand", "name": "CoolVPN" },
+    "category": "VPN",
+    "applicationCategory": "SecurityApplication",
+    "operatingSystem": "iOS, Android, Windows, macOS, Linux, Chrome",
+    "description": "{{ product_desc|escapejs }}",
+    "isAccessibleForFree": true,
+    "audience": { "@type": "Audience", "audienceType": "Consumers" },
+    "offers": {{ offers_json|safe }},
+    "isRelatedTo": { "@id": "{{ request.build_absolute_uri|slice:':-1' }}/#website" }
+  }
+  </script>
+
+  {# Görünür planları ayrıca OfferCatalog olarak belirtelim (Google “Pricing” sinyali güçlenir). #}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "OfferCatalog",
+    "name": "CoolVPN Pricing",
+    "url": "{{ canonical_url|default:request.build_absolute_uri }}",
+    "itemListElement": [
+      {
+        "@type": "Offer",
+        "sku": "coolvpn-monthly",
+        "price": "4.99",
+        "priceCurrency": "{{ ui_currency|default:'USD' }}",
+        "availability": "https://schema.org/InStock",
+        "category": "subscription",
+        "itemOffered": { "@id": "{{ request.build_absolute_uri|slice:':-1' }}/product/coolvpn" }
+      },
+      {
+        "@type": "Offer",
+        "sku": "coolvpn-semiannual",
+        "price": "25.80",
+        "priceCurrency": "{{ ui_currency|default:'USD' }}",
+        "availability": "https://schema.org/InStock",
+        "category": "subscription",
+        "itemOffered": { "@id": "{{ request.build_absolute_uri|slice:':-1' }}/product/coolvpn" }
+      },
+      {
+        "@type": "Offer",
+        "sku": "coolvpn-annual",
+        "price": "39.99",
+        "priceCurrency": "{{ ui_currency|default:'USD' }}",
+        "availability": "https://schema.org/InStock",
+        "category": "subscription",
+        "itemOffered": { "@id": "{{ request.build_absolute_uri|slice:':-1' }}/product/coolvpn" }
+      }
+    ]
+  }
+  </script>
+{% endblock %}
+
+{% block content %}
+  {% include "partials/pricing_block.html" %}
+{% endblock %}
+
+
+
+

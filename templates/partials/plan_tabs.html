@@ -107,7 +107,7 @@
                   class="text-base font-normal text-gray-600 dark:text-gray-300">/
                   {% trans "month" %}</span>
               </div>
-              <a href="{% url 'pricing' %}?term=monthly"
+              <a href="{% url 'pricing' %}?plan=monthly"
                 class="mt-5 inline-flex w-full justify-center rounded-xl px-4 py-2 text-white bg-gray-900 dark:bg-white dark:text-black hover:opacity-90 transition">
                 {% trans "Choose Monthly" %}
               </a>
@@ -155,7 +155,7 @@
                 data-total="{{ ui_semiannual }}"
                 data-months="6">
               </div>
-              <a href="{% url 'pricing' %}?term=semi"
+              <a href="{% url 'pricing' %}?plan=semi"
                 class="mt-5 inline-flex w-full justify-center rounded-xl px-4 py-2 text-white bg-emerald-600 hover:bg-emerald-500 transition">
                 {% trans "Choose 6-Month" %}
               </a>
@@ -208,7 +208,7 @@
                 data-total="{{ ui_annual }}"
                 data-months="12">
               </div>
-              <a href="{% url 'pricing' %}?term=annual"
+              <a href="{% url 'pricing' %}?plan=annual"
                 class="mt-5 inline-flex w-full justify-center rounded-xl px-4 py-2 text-white bg-emerald-600 hover:bg-emerald-500 transition">
                 {% trans "Choose Annual" %}
               </a>

@@ -1,5 +1,7 @@
 {# templates/partials/navbar.html #}
 {% load i18n static %}
+{% load i18n flags %}
+{% load i18n static socialaccount %}
 
 <nav class="nav-glass isolate overflow-visible w-[100%] fixed">
   <div class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -144,18 +146,18 @@
             <svg class="ms-1 h-4 w-4 opacity-70" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.146l3.71-3.915a.75.75 0 111.08 1.04l-4.24 4.47a.75.75 0 01-1.08 0l-4.24-4.47a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
           </button>
           <div id="langMenu" class="hidden absolute right-0 mt-2 w-56 z-50 rounded-xl p-2 shadow-xl
-                                   bg-white/95 dark:bg-zinc-950/95 backdrop-blur
-                                   ring-1 ring-black/5 dark:ring-white/10
-                                   text-gray-900 dark:text-gray-100">
+                                  bg-white/95 dark:bg-zinc-950/95 backdrop-blur
+                                  ring-1 ring-black/5 dark:ring-white/10
+                                  text-gray-900 dark:text-gray-100
+                                  max-h-[60vh] overflow-y-auto overscroll-contain">
             {% get_current_language as CURRENT_LANG %}
             {% get_available_languages as LANGUAGES %}
             {% get_language_info_list for LANGUAGES as languages %}
             {% for lang in languages %}
               <a href="#" data-lang="{{ lang.code }}"
-                 class="block px-3 py-2 rounded-lg
-                        hover:bg-gray-50 dark:hover:bg-zinc-900/70 transition
+                class="block px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-900/70 transition
                         {% if lang.code == CURRENT_LANG %}text-[color:var(--accent)] font-medium{% endif %}">
-                {{ lang.name_local }} ({{ lang.code }})
+                <span class="me-2">{{ lang.code|flag_emoji }}</span>{{ lang.name_local }} ({{ lang.code }})
               </a>
             {% endfor %}
           </div>
@@ -165,7 +167,7 @@
         {% if request.user.is_authenticated %}
         <div class="relative">
           <button id="userBtn" class="flex items-center text-sm rounded-full focus:outline-none p-1 bg-white/70 dark:bg-white/10 ring-1 ring-black/5 dark:ring-white/10">
-            <img class="h-8 w-8 rounded-full" src="{% static 'img/avatar-default.png' %}" alt="{{ request.user.email|default:request.user.username }}">
+            <img class="h-8 w-8 rounded-full" src="{% static 'img/flying-bird.png' %}" alt="{{ request.user.email|default:request.user.username }}">
           </button>
           <div id="userMenu" class="hidden absolute right-0 mt-2 w-56 z-50 overflow-hidden rounded-xl p-2 shadow-xl
                                    bg-white/95 dark:bg-zinc-950/95 backdrop-blur
@@ -176,10 +178,24 @@
               <div class="text-xs text-gray-600 dark:text-gray-300 truncate">{{ request.user.email }}</div>
             </div>
             <div class="py-1">
-              <a href="{% url 'dashboard' %}" class="block px-3 py-2 text-sm rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-900/70">{% trans "Dashboard" %}</a>
-              <a href="{% url 'account_settings' %}" class="block px-3 py-2 text-sm rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-900/70">{% trans "Settings" %}</a>
-              <a href="{% url 'logout' %}" class="block px-3 py-2 text-sm rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-900/70">{% trans "Sign out" %}</a>
+              <a href="{% url 'dashboard' %}" class="block px-3 py-2 text-sm rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-900/70">
+                {% trans "Dashboard" %}
+              </a>
+
+              <a href="{% url 'account_settings' %}" class="block px-3 py-2 text-sm rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-900/70">
+                {% trans "Settings" %}
+              </a>
+
+              <!-- Logout (POST) -->
+              <form action="{% url 'account_logout' %}" method="post" class="m-0">
+                {% csrf_token %}
+                <button type="submit"
+                        class="w-full text-left block px-3 py-2 text-sm rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-900/70">
+                  {% trans "Sign out" %}
+                </button>
+              </form>
             </div>
+
           </div>
         </div>
         {% else %}
@@ -200,8 +216,40 @@
           <span class="sr-only">Open main menu</span>
           <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
         </button>
+        <!-- (MOBIL) User -->
+        {% if request.user.is_authenticated %}
+        <div class="relative">
+          <button id="userBtnM" class="flex items-center text-sm rounded-full focus:outline-none p-1 bg-white/70 dark:bg-white/10 ring-1 ring-black/5 dark:ring-white/10">
+            <img class="h-8 w-8 rounded-full" src="{% static 'img/flying-bird.png' %}" alt="{{ request.user.email|default:request.user.username }}">
+          </button>
+          <div id="userMenuM" class="hidden absolute right-0 mt-2 w-56 z-[9999] overflow-hidden rounded-xl p-2 shadow-xl
+                                      bg-white/95 dark:bg-zinc-950/95 backdrop-blur
+                                      ring-1 ring-black/5 dark:ring-white/10
+                                      text-gray-900 dark:text-gray-100">
+            <div class="px-3 py-2">
+              <div class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ request.user.username }}</div>
+              <div class="text-xs text-gray-600 dark:text-gray-300 truncate">{{ request.user.email }}</div>
+            </div>
+            <div class="py-1">
+              <a href="{% url 'dashboard' %}" class="block px-3 py-2 text-sm rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-900/70">
+                {% trans "Dashboard" %}
+              </a>
+              <a href="{% url 'account_settings' %}" class="block px-3 py-2 text-sm rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-900/70">
+                {% trans "Settings" %}
+              </a>
+              <form action="{% url 'account_logout' %}" method="post" class="m-0">
+                {% csrf_token %}
+                <button type="submit" class="w-full text-left block px-3 py-2 text-sm rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-900/70">
+                  {% trans "Sign out" %}
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+        {% else %}
+          <a href="{% url 'login' %}" class="nav-cta">{% trans "Sign in" %}</a>
+        {% endif %}
       </div>
-
     </div>
   </div>
 
@@ -258,16 +306,16 @@
           <span>{% trans "Language" %} ({{ LANGUAGE_CODE|default:'en'|upper }})</span>
           <svg class="h-4 w-4 opacity-70 group-open:rotate-180 transition" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.146l3.71-3.915a.75.75 0 111.08 1.04l-4.24 4.47a.75.75 0 01-1.08 0l-4.24-4.47a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
         </summary>
-        <div id="langMenuMobile" class="mt-1 pl-3 space-y-1">
+        <div id="langMenuMobile" class="mt-1 pl-3 space-y-1
+                                      max-h-[60vh] overflow-y-auto overscroll-contain">
           {% get_current_language as CURRENT_LANG %}
           {% get_available_languages as LANGUAGES %}
           {% get_language_info_list for LANGUAGES as languages %}
           {% for lang in languages %}
             <a href="#" data-lang="{{ lang.code }}"
-               class="block py-2 text-sm rounded-lg
-                      hover:bg-gray-100 dark:hover:bg-zinc-900/70
+              class="block py-2 text-sm rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-900/70
                       {% if lang.code == CURRENT_LANG %}text-[color:var(--accent)] font-medium{% endif %}">
-              {{ lang.name_local }} ({{ lang.code }})
+              <span class="me-2">{{ lang.code|flag_emoji }}</span>{{ lang.name_local }} ({{ lang.code }})
             </a>
           {% endfor %}
         </div>
@@ -279,6 +327,8 @@
     </div>
   </div>
 
+  
+
   <!-- set_language formu -->
   <form id="langForm" action="{% url 'set_language' %}" method="post" class="hidden">
     {% csrf_token %}
@@ -286,3 +336,15 @@
     <input type="hidden" name="language" id="langInput">
   </form>
 </nav>
+<style>
+  /* optional: daha ince scrollbar */
+  #langMenu, #langMenuMobile {
+    scrollbar-width: thin;            /* Firefox */
+    scrollbar-color: #999 transparent;
+  }
+  #langMenu::-webkit-scrollbar,
+  #langMenuMobile::-webkit-scrollbar { width: 8px; }
+  #langMenu::-webkit-scrollbar-thumb,
+  #langMenuMobile::-webkit-scrollbar-thumb { border-radius: 9999px; background: #9ca3af; }
+</style>
+

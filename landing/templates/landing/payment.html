@@ -1,0 +1,679 @@
+{% extends "base.html" %}
+{% load i18n static socialaccount %}
+
+{% block title %}{% trans "Checkout" %} — {{ site_name }}{% endblock %}
+{% block meta_description %}{% trans "Secure checkout. Sign in and complete your CoolVPN purchase." %}{% endblock %}
+{% block meta_robots %}noindex,nofollow{% endblock %}
+
+{% block header %}
+  {% include "partials/navbar.html" %}
+{% endblock %}
+
+{% block schema_jsonld %}
+<script type="application/ld+json">
+{{ offers_json|safe }}
+</script>
+{% endblock %}
+
+{% block content %}
+<section class="relative isolate overflow-hidden bg-white dark:bg-neutral-950 py-10 md:py-14">
+  <div id="plan-bg"
+       class="pointer-events-none absolute inset-0 -z-10 opacity-15 bg-center bg-no-repeat bg-[length:720px_auto]"
+       style="background-image:url('{% static plan.poster %}')"></div>
+
+  <div class="pointer-events-none absolute inset-0 -z-10">
+    <div class="absolute -top-24 -left-24 h-72 w-72 rounded-full blur-3xl bg-rose-300/30 dark:bg-rose-400/20"></div>
+    <div class="absolute bottom-0 right-1/4 h-72 w-72 rounded-full blur-3xl bg-fuchsia-300/25 dark:bg-fuchsia-400/20"></div>
+    <div class="absolute top-1/3 left-1/2 -translate-x-1/2 h-64 w-64 rounded-full blur-3xl bg-indigo-300/20 dark:bg-indigo-400/15"></div>
+  </div>
+
+  <div class="max-w-screen-xl mx-auto px-6">
+    <div class="rounded-3xl border border-black/10 dark:border-white/10 bg-white/60 dark:bg-white/[0.04] backdrop-blur-xl shadow-xl overflow-hidden relative group">
+      <div id="card-bg"
+           class="absolute inset-0 pointer-events-none opacity-10 bg-center bg-no-repeat bg-[length:520px_auto]"
+           style="background-image:url('{% static plan.poster %}')"></div>
+
+      <div class="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+           style="background: radial-gradient(1200px 300px at 20% 0%, rgba(244,114,182,.12), transparent 60%), radial-gradient(800px 240px at 80% 100%, rgba(167,139,250,.10), transparent 60%);"></div>
+
+      <!-- HEADER STRIP -->
+      <div class="relative px-6 py-5 md:px-8 md:py-6 flex items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <div class="h-10 w-10 rounded-xl bg-gradient-to-br from-rose-500/80 to-fuchsia-500/80 shadow-md flex items-center justify-center">
+            <svg viewBox="0 0 24 24" class="h-6 w-6 text-emerald-400" fill="currentColor" aria-hidden="true">
+              <path d="M12 2.5L4.5 5v6.7c0 5 3.6 9.6 7.5 9.8c3.9-.2 7.5-4.8 7.5-9.8V5L12 2.5zM10.9 16.2l-3.1-3.1 1.4-1.4 1.7 1.7 4-4 1.4 1.4-5.4 5.4z" />
+            </svg>
+          </div>
+          <div>
+            <h1 class="text-xl md:text-2xl font-semibold tracking-tight text-gray-900 dark:text-gray-100">{% trans "Secure Checkout" %}</h1>
+            <p class="text-xs md:text-sm text-gray-600 dark:text-gray-300">{% trans "Finish sign-in, pick a gateway, and confirm your order." %}</p>
+          </div>
+        </div>
+
+        {% if not user.is_authenticated %}
+        <button id="btn-google-open-top" type="button"
+                class="hidden md:inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium
+                       text-white bg-gradient-to-r from-rose-600 via-fuchsia-600 to-indigo-600
+                       hover:opacity-95 active:opacity-100 transition shadow-md">
+          <svg width="18" height="18" viewBox="0 0 48 48" class="opacity-95">
+            <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.5 32.7 29.1 36 24 36 16.8 36 11 30.2 11 23S16.8 10 24 10c3.4 0 6.5 1.3 8.8 3.5l5.7-5.7C34.7 4.1 29.7 2 24 2 15 2 7.6 6.7 3.7 14.7z"/>
+            <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.4 16 18.9 13 24 13c3.4 0 6.5 1.3 8.8 3.5l5.7-5.7C34.7 4.1 29.7 2 24 2 15 2 7.6 6.7 3.7 14.7z"/>
+            <path fill="#4CAF50" d="M24 46c5.1 0 10-1.9 13.6-5.2l-6.3-5.2C29 37.4 26.7 38 24 38c-5 0-9.3-3.2-10.9-7.7l-6.6 5.1C8.6 39.9 15.8 46 24 46z"/>
+            <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3C34.8 32 30.8 36 24 36c-5 0-9.3-3.2-10.9-7.7l-6.6 5.1C8.6 39.9 15.8 46 24 46c11 0 21-8 21-22 0-1.2-.1-2.3-.4-3.5z"/>
+          </svg>
+          <span>{% trans "Continue with Google" %}</span>
+        </button>
+        {% endif %}
+      </div>
+
+      <div class="divide-y divide-black/10 dark:divide-white/10">
+        <!-- TOP: Plan ribbon -->
+        <div class="relative px-6 md:px-8 py-4">
+          <div class="flex items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+              <div class="h-12 w-28 md:w-40 overflow-hidden rounded-lg ring-1 ring-black/10 dark:ring-white/10">
+                <video id="plan-ribbon" class="h-full w-full object-cover opacity-95" playsinline muted loop preload="metadata"
+                       poster="{% static plan.poster %}">
+                  <source id="src-webm" src="{% static plan.webm %}" type="video/webm">
+                  <source id="src-mp4"  src="{% static plan.mp4  %}" type="video/mp4">
+                </video>
+              </div>
+              <div>
+                <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                  <span id="plan-name">{{ plan.name }}</span>
+                </div>
+                <div class="text-xs text-gray-600 dark:text-gray-300">
+                  <span id="plan-devices">{{ plan.devices }}</span> {% trans "devices" %}
+                </div>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="text-2xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-gray-900 via-rose-600 to-gray-900 dark:from-white dark:via-rose-300 dark:to-white">
+                <span class="align-top text-sm">{{ ui_currency_symbol }}</span>
+                <span id="plan-price">{{ plan.price }}</span>
+              </div>
+              <div class="text-xs text-gray-600 dark:text-gray-300" id="plan-interval">{{ plan.interval }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MIDDLE: Identity + Gateways + Coupon -->
+        <div class="grid gap-6 lg:grid-cols-3 px-6 md:px-8 py-6">
+          <!-- LEFT: Email / Signed-in state -->
+          <section class="rounded-2xl bg-white/60 dark:bg-white/[0.04] ring-1 ring-black/10 dark:ring-white/10 p-5 hover:shadow-lg transition-all duration-300">
+            {% if user.is_authenticated %}
+              {% get_social_accounts user as accounts %}
+              <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">{% trans "Already signed in" %}</h2>
+              {% if accounts.google %}
+                <p class="mt-1 text-xs text-gray-600 dark:text-gray-300">{% trans "Signed in with Google" %} — <strong>{{ user.email|default:user.get_username }}</strong></p>
+              {% else %}
+                <p class="mt-1 text-xs text-gray-600 dark:text-gray-300">{% trans "Signed in with email" %} — <strong>{{ user.email|default:user.get_username }}</strong></p>
+              {% endif %}
+            {% else %}
+              <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">{% trans "Your email" %}</h2>
+              <p class="mt-1 text-xs text-gray-600 dark:text-gray-300">{% trans "Premium’u tanımlayabilmemiz için gerekli. Faturanızı ve lisans bilgilerini buraya göndereceğiz." %}</p>
+
+              <div class="mt-3">
+                <input id="email" type="email" autocomplete="email" inputmode="email"
+                       class="w-full rounded-xl bg-white/90 dark:bg-white/[0.06] ring-1 ring-black/10 dark:ring-white/10 px-3 py-2 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-rose-400/60 transition"
+                       placeholder="you@example.com">
+              </div>
+              <div id="email-alert" class="mt-2 text-xs text-rose-600 dark:text-rose-400" aria-live="polite"></div>
+
+              <!-- PASSWORD (gizli, email yoksa açılacak) -->
+            <div id="password-wrap" class="mt-2 hidden">
+            <div class="relative">
+                <input id="password" type="password" autocomplete="new-password"
+                    class="w-full pr-10 rounded-xl bg-white/90 dark:bg-white/[0.06] ring-1 ring-black/10 dark:ring-white/10 px-3 py-2 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-rose-400/60 transition"
+                    placeholder="{% trans 'Create a password' %}">
+                <button id="btn-toggle-pass" type="button"
+                        class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+                        aria-label="{% trans 'Show password' %}">
+                <!-- basit göz ikonu -->
+                <svg id="icon-eye" viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                </svg>
+                <svg id="icon-eye-off" viewBox="0 0 24 24" class="h-5 w-5 hidden" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M3 3l18 18M10.6 10.6A3 3 0 0 0 12 15a3 3 0 0 0 2.4-4.4M4.5 7.5S8 5 12 5s7.5 2.5 7.5 2.5c1.2.9 2.5 2.1 3.5 4.5-1 2.4-2.3 3.6-3.5 4.5 0 0-3.5 2.5-7.5 2.5S4.5 17 4.5 17C3.3 16.1 2 14.9 1 12.5"/>
+                </svg>
+                </button>
+            </div>
+            <p class="mt-1 text-[11px] text-gray-600 dark:text-gray-400">
+                {% trans "We couldn't find an account. Create a password to continue." %}
+            </p>
+            </div>
+
+
+              <div class="relative my-4">
+                <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-black/10 dark:border-white/10"></div></div>
+                <div class="relative flex justify-center">
+                  <span class="bg-white/90 dark:bg-neutral-950 px-2 text-[11px] uppercase tracking-wide text-gray-500">{% trans "or" %}</span>
+                </div>
+              </div>
+
+              <!-- Google popup -->
+              <button id="btn-google-open" type="button"
+                      class="w-full inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-medium
+                             text-white bg-gradient-to-r from-rose-600 via-fuchsia-600 to-indigo-600
+                             hover:opacity-95 active:opacity-100 transition shadow-md">
+                <svg width="18" height="18" viewBox="0 0 48 48" class="opacity-95">
+                  <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.5 32.7 29.1 36 24 36 16.8 36 11 30.2 11 23S16.8 10 24 10c3.4 0 6.5 1.3 8.8 3.5l5.7-5.7C34.7 4.1 29.7 2 24 2 15 2 7.6 6.7 3.7 14.7z"/>
+                  <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.4 16 18.9 13 24 13c3.4 0 6.5 1.3 8.8 3.5l5.7-5.7C34.7 4.1 29.7 2 24 2 15 2 7.6 6.7 3.7 14.7z"/>
+                  <path fill="#4CAF50" d="M24 46c5.1 0 10-1.9 13.6-5.2l-6.3-5.2C29 37.4 26.7 38 24 38c-5 0-9.3-3.2-10.9-7.7l-6.6 5.1C8.6 39.9 15.8 46 24 46z"/>
+                  <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3C34.8 32 30.8 36 24 36c-5 0-9.3-3.2-10.9-7.7l-6.6 5.1C8.6 39.9 15.8 46 24 46c11 0 21-8 21-22 0-1.2-.1-2.3-.4-3.5z"/>
+                </svg>
+                {% trans "Continue with Google" %}
+              </button>
+
+              <div id="google-btn-slot-inline" class="hidden"></div>
+
+              <p class="mt-3 text-[11px] text-gray-600 dark:text-gray-400">
+                {% blocktrans trimmed %}Devam ederek <a href="/terms" class="underline">Şartlar</a> ve <a href="/privacy" class="underline">Gizlilik</a>’i kabul edersiniz.{% endblocktrans %}
+              </p>
+            {% endif %}
+          </section>
+
+        <!-- MIDDLE: Gateways -->
+        <section class="rounded-2xl bg-white/60 dark:bg-white/[0.04] ring-1 ring-black/10 dark:ring-white/10 p-5 hover:shadow-lg transition-all duration-300">
+        <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">{% trans "Payment method" %}</h2>
+        <p class="mt-1 text-xs text-gray-600 dark:text-gray-300">{% trans "Pay with crypto via NOWPayments (150+ coins)." %}</p>
+
+        <!-- Gateway Card -->
+        <div id="gw-list" class="mt-4 grid gap-3"></div>
+
+        <div id="checkout-alert" class="mt-3 text-sm text-rose-600 dark:text-rose-400" aria-live="polite"></div>
+        <button id="btn-pay" target="_blank" class="mt-4 w-full inline-flex items-center justify-center rounded-xl px-4 py-2
+                text-white bg-gray-900 hover:bg-gray-800 active:bg-black
+                dark:bg-white dark:text-black dark:hover:bg-white/90 transition">
+            {% trans "Pay now" %}
+        </button>
+        </section>
+
+
+          <!-- RIGHT: Coupon + Totals -->
+          <aside class="rounded-2xl bg-white/60 dark:bg-white/[0.04] ring-1 ring-black/10 dark:ring-white/10 p-5 hover:shadow-lg transition-all duration-300">
+            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">{% trans "Order summary" %}</h2>
+            <div class="mt-3">
+              <label for="coupon" class="block text-xs font-medium text-gray-900 dark:text-gray-100 mb-1">{% trans "Have a coupon?" %}</label>
+              <div class="flex gap-2">
+                <input id="coupon" type="text"
+                       class="flex-1 rounded-xl bg-white/90 dark:bg-white/[0.06] ring-1 ring-black/10 dark:ring-white/10 px-3 py-2 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+                       placeholder="{% trans 'Enter code' %}">
+                <button id="btn-apply" class="rounded-xl px-3 py-2 text-sm ring-1 ring-black/10 dark:ring-white/10 bg-white hover:bg-gray-50 dark:bg-white/[0.06] dark:hover:bg-white/[0.1] transition">
+                  {% trans "Apply" %}
+                </button>
+              </div>
+              <div id="coupon-alert" class="mt-2 text-xs text-rose-600 dark:text-rose-400" aria-live="polite"></div>
+            </div>
+            <dl class="mt-4 space-y-1 text-sm text-gray-800 dark:text-gray-300">
+              <div class="flex justify-between">
+                <dt>{% trans "Subtotal" %}</dt>
+                <dd><span id="sum-sub">{{ ui_currency_symbol }}<span id="sum-sub-v">{{ plan.price }}</span></span></dd>
+              </div>
+              <div class="flex justify-between">
+                <dt>{% trans "Discount" %}</dt>
+                <dd class="text-emerald-600 dark:text-emerald-400">-{{ ui_currency_symbol }}<span id="sum-disc">0.00</span></dd>
+              </div>
+              <div class="flex justify-between">
+                <dt>{% trans "Fees" %}</dt>
+                <dd>{{ ui_currency_symbol }}<span id="sum-fee">0.00</span></dd>
+              </div>
+              <div class="flex justify-between font-semibold text-gray-900 dark:text-gray-100 pt-2 border-t border-black/10 dark:border-white/10">
+                <dt>{% trans "Total" %}</dt>
+                <dd>{{ ui_currency_symbol }}<span id="sum-total">{{ plan.price }}</span></dd>
+              </div>
+              <p class="mt-2 text-[11px] text-gray-600 dark:text-gray-400">{% trans "VAT may apply at payment." %}</p>
+              <a href="{% url 'pricing' %}" class="mt-2 inline-block text-xs underline text-gray-600 dark:text-gray-300">{% trans "Change plan" %}</a>
+            </dl>
+          </aside>
+        </div>
+
+        <!-- INCLUDED FEATURES + TRUST -->
+        <div class="px-6 md:px-8 py-6">
+          <div class="rounded-2xl ring-1 ring-black/10 dark:ring-white/10 bg-white/60 dark:bg-white/[0.04] p-6">
+            <div class="flex items-center justify-between gap-4">
+              <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">{% trans "Included in all plans" %}</h3>
+              <div class="flex items-center gap-2 text-xs text-gray-700 dark:text-gray-300">
+                <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full ring-1 ring-black/10 dark:ring-white/10 bg-white/80 dark:bg-white/[0.06]">💬 {% trans "24/7 Live Support" %}</span>
+                <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full ring-1 ring-black/10 dark:ring-white/10 bg-white/80 dark:bg-white/[0.06]">↩️ {% trans "30-day Money-Back" %}</span>
+                <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full ring-1 ring-black/10 dark:ring-white/10 bg-white/80 dark:bg-white/[0.06]">🛑 {% trans "Zero logs" %}</span>
+              </div>
+            </div>
+
+            <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm text-gray-800 dark:text-gray-300">
+              <div class="flex items-start gap-2"><span>🟢</span><div><strong>{% trans "Always-on protection" %}</strong><br>{% trans "Launches with your device and reconnects automatically." %}</div></div>
+              <div class="flex items-start gap-2"><span>🪓</span><div><strong>{% trans "Kill Switch" %}</strong><br>{% trans "If the VPN drops, traffic is cut instantly — no leaks." %}</div></div>
+              <div class="flex items-start gap-2"><span>🚫</span><div><strong>{% trans "Built-in Ad & Tracker Blocker" %}</strong><br>{% trans "Cleaner pages, fewer trackers — no extra extensions." %}</div></div>
+              <div class="flex items-start gap-2"><span>🧾</span><div><strong>{% trans "Zero logs" %}</strong><br>{% trans "We don’t track the sites you visit or what you do online." %}</div></div>
+              <div class="flex items-start gap-2"><span>🕶️</span><div><strong>{% trans "100% anonymous" %}</strong><br>{% trans "Shared exit nodes and masked IP keep identity separate from activity." %}</div></div>
+              <div class="flex items-start gap-2"><span>⚡</span><div><strong>{% trans "1000 Gbps network core" %}</strong><br>{% trans "Backbone capacity for peak throughput and low jitter." %}</div></div>
+              <div class="flex items-start gap-2"><span>🪟</span><div><strong>{% trans "Per-tab routing for Chrome" %}</strong><br>{% trans "Send one tab through VPN and keep another on your regular connection." %}</div></div>
+              <div class="flex items-start gap-2"><span>🫥</span><div><strong>{% trans "DPI inspection bypass" %}</strong><br>{% trans "Stealth obfuscation to evade deep packet inspection and port blocks." %}</div></div>
+            </div>
+
+            <div class="mt-5 rounded-xl p-4 ring-1 ring-rose-300/40 dark:ring-rose-400/30 bg-gradient-to-br from-rose-50 to-fuchsia-50 dark:from-rose-900/10 dark:to-fuchsia-900/10">
+              <div class="flex items-start gap-3">
+                <div class="h-8 w-8 rounded-lg bg-rose-500/90 text-white flex items-center justify-center">★</div>
+                <div class="text-sm">
+                  <div class="font-semibold text-gray-900 dark:text-gray-100">{% trans "Dedicated private server" %} — <span class="uppercase tracking-wide text-rose-600 dark:text-rose-400">{% trans "Annual only" %}</span></div>
+                  <div class="text-gray-700 dark:text-gray-300">{% trans "Single-tenant performance, consistent IP, lower latency — your own VPN server." %}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- FOOT BANNER -->
+        <div id="checkout-banner" class="hidden px-6 md:px-8 py-3 text-sm bg-rose-50 text-rose-700 dark:bg-rose-900/20 dark:text-rose-300" role="alert" aria-live="polite">
+          <div class="flex items-start gap-2">
+            <strong class="font-medium">{% trans "Heads up" %}:</strong>
+            <span id="checkout-banner-text">{% trans "Something went wrong. Please try again." %}</span>
+            <button type="button" class="ml-auto opacity-70 hover:opacity-100" onclick="this.closest('#checkout-banner').classList.add('hidden')">✕</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{{ plan_map|json_script:"plan-map" }}
+{{ checkout_config|json_script:"checkout-config" }}
+
+{% block scripts %}
+{{ block.super }}
+<style>
+  .gw-card{
+    border-radius: 14px;
+    background: rgba(255,255,255,.7);
+    border: 1px solid rgba(0,0,0,.1);
+    padding: 12px;
+    transition: box-shadow .2s, transform .2s, border-color .2s, background .2s;
+  }
+  .dark .gw-card{ background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.1); }
+  .gw-card:hover{ transform: translateY(-1px); box-shadow: 0 8px 28px rgba(0,0,0,.08); }
+  .gw-card.is-selected{ box-shadow: 0 0 0 3px rgba(52,211,153,.45); border-color: rgba(16,185,129,.5); }
+
+  .gw-head{ display:flex; align-items:center; gap:10px; }
+  .gw-title{ font-weight:600; color:#111827; }
+  .dark .gw-title{ color:#f3f4f6; }
+  .gw-note{ font-size:12px; color:#6b7280; }
+  .dark .gw-note{ color:#d1d5db; }
+
+  .coin-row{ display:flex; align-items:center; gap:8px; margin-top:10px; opacity:.95; flex-wrap:wrap; }
+  .coin-badge{
+    height:28px; width:auto; padding:0 8px; border-radius:999px; display:inline-flex; gap:6px;
+    align-items:center; border:1px solid rgba(0,0,0,.08); background: #fff;
+  }
+  .dark .coin-badge{ background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.1); }
+  .coin-badge svg{ height:14px; width:14px; display:block; }
+  .gw-right{
+    margin-left:auto; display:flex; align-items:center; gap:8px;
+    font-size:12px; color:#6b7280;
+  }
+  .dark .gw-right{ color:#d1d5db; }
+  .tick{ display:none; }
+  .is-selected .tick{ display:inline-flex; color:#10b981; }
+
+</style>
+
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+
+<script>
+  /* ---------- Utils ---------- */
+  const qs=(s,r=document)=>r.querySelector(s);
+  const qsa=(s,r=document)=>Array.from(r.querySelectorAll(s));
+  const getCookie=(name)=>(document.cookie.match('(^|;)\\s*'+name+'\\s*=\\s*([^;]+)')||[]).pop()||'';
+  const readJSON=(id)=>{const el=document.getElementById(id); if(!el) return null; try{return JSON.parse(el.textContent)}catch(_){return null}};
+
+  /* ---------- Extra Utils ---------- */
+  const debounce=(fn,ms=300)=>{let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms)}};
+  const emailTldReady=(val)=>{ const v=(val||"").toLowerCase(); return /@[^@\s]+\.(com|net|org|co|io|me)(\.[a-z]{2})?$/.test(v); };
+  function togglePassword(show){ const w=qs('#password-wrap'); if(!w) return; w.classList.toggle('hidden', !show); }
+
+  /* ---------- State ---------- */
+  const PLAN_MAP = readJSON('plan-map') || {};
+  const CFG      = readJSON('checkout-config') || {messages:{}};
+  const MSG      = (CFG && CFG.messages) || {};
+  let selectedGW = null;
+  let couponCode = '';
+  let gisReady   = false, inlineBtnRendered=false, googleCbOverridden=false;
+  let emailExists = null; // null: bilinmiyor, true: kayıt var, false: yok
+
+  /* ---------- Gateways (ikon içeride) ---------- */
+    function renderGateways(){
+    const box = qs('#gw-list'); if(!box) return;
+    box.innerHTML = '';
+
+    // Inline SVG ikonlar
+    const ICONS = {
+        nowpay: `
+        <svg viewBox="0 0 64 64" class="h-6 w-6" aria-hidden="true">
+            <defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#ec4899"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient></defs>
+            <rect x="4" y="4" rx="14" ry="14" width="56" height="56" fill="url(#g)"/>
+            <text x="32" y="38" text-anchor="middle" font-size="18" font-family="ui-sans-serif,system-ui" fill="white" font-weight="700">NP</text>
+        </svg>`,
+        btc: `
+        <svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="#F7931A"/><path fill="#fff" d="M19.8 15.3c1-.6 1.6-1.5 1.4-2.9c-.3-2.1-2.1-2.8-4.5-3V6.9h-2v2.4h-1.2V6.9h-2v2.4H8.6v2h1.1c.6 0 .8.2.8.7v7c0 .5-.2.7-.8.7H8.6v2h2v2.3h2v-2.3h1.2v2.3h2v-2.4c2.7-.2 4.6-1 4.9-3.5c.2-1.6-.5-2.6-1.9-3.1Z"/></svg>`,
+        eth: `
+        <svg viewBox="0 0 256 417"><path fill="#343434" d="m127.9 0l-1.1 3.8v279.2l1.1 1.1l127.9-75.6z"/><path fill="#8C8C8C" d="M127.9 0L0 208.5L127.9 284V0z"/><path fill="#3C3C3B" d="m127.9 312.5l-.7.8v102.5l.7 1.9L256 245z"/><path fill="#8C8C8C" d="M127.9 417V312.5L0 245z"/><path fill="#141414" d="m127.9 284l127.9-75.6l-127.9-58.1z"/><path fill="#393939" d="m0 208.5l127.9 75.6V150.3z"/></svg>`,
+        usdt: `
+        <svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="#26A17B"/><path fill="#fff" d="M17.6 16.9v5.9h-3.2v-5.9c-3.5-.2-6.1-.8-6.1-1.6c0-.7 2.6-1.3 6.1-1.6V11h3.2v2.6c3.4.2 6 .9 6 1.6s-2.6 1.4-6 1.7Z"/></svg>`
+    };
+
+    // Tek gateway: NOWPayments (any coin)
+    const card = document.createElement('button');
+    card.type = 'button';
+    card.className = 'gw-card w-full text-left';
+    card.dataset.gw = 'nowpay_any';
+    card.innerHTML = `
+        <div class="gw-head">
+        <div class="h-10 w-10 rounded-xl ring-1 ring-black/10 dark:ring-white/10 bg-white dark:bg-white/[0.06] flex items-center justify-center">
+            ${ICONS.nowpay}
+        </div>
+        <div>
+            <div class="gw-title">NOWPayments</div>
+            <div class="gw-note">Pay with 150+ coins</div>
+        </div>
+        <div class="gw-right">
+            <span class="hidden sm:inline">Crypto</span>
+            <span class="tick">✔</span>
+        </div>
+        </div>
+        <div class="coin-row">
+        </div>
+    `;
+    card.addEventListener('click', ()=>{
+        qsa('.gw-card').forEach(c=>c.classList.remove('is-selected'));
+        card.classList.add('is-selected');
+        selectedGW = 'nowpay_any';
+    });
+
+    box.appendChild(card);
+
+    // İlk yükte seçili olsun (istersen kapat)
+    card.click();
+    }
+
+  /* ---------- Coupon ---------- */
+  function showCoupon(msg, ok=false){
+    const el=qs('#coupon-alert'); if(!el) return;
+    el.textContent=msg||'';
+    el.classList.toggle('text-emerald-600',ok); el.classList.toggle('dark:text-emerald-400',ok);
+  }
+  function applyCoupon(p){
+    const code=qs('#coupon')?.value.trim();
+    if(!code){ showCoupon(MSG.enter_coupon||'Please enter a coupon.'); return; }
+    fetch('/api/checkout/price/',{
+      method:'POST', headers:{'Content-Type':'application/json','X-CSRFToken':getCookie('csrftoken')||''},
+      body: JSON.stringify({ plan:(p&&p.key)||'{{ plan.key }}', coupon:code, gateway:selectedGW })
+    }).then(r=>r.json()).then(d=>{
+      if(d?.ok){
+        couponCode=code;
+        const disc=qs('#sum-disc'), fee=qs('#sum-fee'), tot=qs('#sum-total');
+        if(disc) disc.textContent=(+d.discount||0).toFixed(2);
+        if(fee)  fee.textContent=(+d.fee||0).toFixed(2);
+        if(tot)  tot.textContent=(+d.total||0).toFixed(2);
+        showCoupon(MSG.coupon_ok||'Coupon applied.', true);
+      } else { showCoupon(d?.error || MSG.coupon_bad || 'Coupon not valid.'); }
+    }).catch(()=> showCoupon(MSG.generic_err||'Something went wrong. Please try again.'));
+  }
+
+  /* ---------- Alerts ---------- */
+  function showAlert(m){ const el=qs('#checkout-alert'); if(el) el.textContent=m||''; }
+  function showBanner(m, ok=false){
+    const el=qs('#checkout-banner'); const txt=qs('#checkout-banner-text');
+    if(!el||!txt) return; txt.textContent=m||''; el.classList.toggle('hidden', !m);
+    el.classList.toggle('bg-emerald-50', ok); el.classList.toggle('text-emerald-700', ok);
+  }
+
+  // --- Şifre göz ikonu ---
+  function bindPasswordToggle(){
+    const btn = qs('#btn-toggle-pass');
+    const input = qs('#password');
+    const eye = qs('#icon-eye');
+    const off = qs('#icon-eye-off');
+    if(!btn || !input) return;
+    btn.addEventListener('click', ()=>{
+      const show = input.type === 'password';
+      input.type = show ? 'text' : 'password';
+      if(eye && off){
+        eye.classList.toggle('hidden', !show);
+        off.classList.toggle('hidden', show);
+      }
+      btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+    });
+  }
+
+  // --- Email ile upsert-login ---
+  async function emailUpsertLogin(){
+    const email = (qs('#email')?.value || '').trim();
+    const pass  = (qs('#password')?.value || '');
+    if(!email || !email.includes('@') || pass.length < 6){
+      return {ok:false, skip:true};
+    }
+    try{
+      const r = await fetch('/auth/email-upsert-login/', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded','X-CSRFToken': getCookie('csrftoken')||''},
+        body: new URLSearchParams({email, password: pass}),
+        credentials: 'same-origin'
+      });
+      const d = await r.json();
+      if(d?.ok){ CFG.is_auth = true; }
+      return d;
+    }catch(e){
+      return {ok:false, error:'network'};
+    }
+  }
+
+  /* ---------- Pay ---------- */
+  async function startPayment(p){
+    if(!selectedGW){
+      showAlert(MSG.must_choose_gw || 'Please select a payment method.');
+      return;
+    }
+    showAlert('');
+
+    const emailVal = (qs('#email')?.value || '').trim();
+    const passVal  = (qs('#password')?.value || '');
+
+    // Mevcut hesap + login değil + parola yok → ödeme başlatma
+    if(!CFG.is_auth && emailExists === true && (!passVal || passVal.length < 6)){
+      showBanner(MSG.must_login_with_password || 'We found an account. Please log in with your password.', false);
+      togglePassword(true);
+      return;
+    }
+
+    // Login değilse ve geçerli email+parola varsa önce giriş dene
+    if(!CFG.is_auth && emailVal && emailVal.includes('@') && passVal && passVal.length >= 6){
+      const authResp = await emailUpsertLogin();
+      if(!authResp?.ok && !authResp?.skip){
+        showBanner(MSG.generic_err || (authResp?.error === 'invalid_credentials' ? 'Invalid credentials.' : 'Sign-in failed.'), false);
+        return;
+      }
+    }
+
+    // Ödemeyi başlat
+    fetch('/api/checkout/create/',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-CSRFToken':getCookie('csrftoken')||''},
+      body: JSON.stringify({ plan:(p&&p.key)||'{{ plan.key }}', gateway:selectedGW, coupon:couponCode||null, currency:CFG.ui_currency }),
+      credentials:'same-origin'
+    }).then(r=>r.json()).then(d=>{
+      if(d?.redirect_url){ location.href=d.redirect_url; return; }
+      showBanner(d?.error || (MSG.pay_fail || 'Unable to start the payment. Try again.'));
+    }).catch(()=> showBanner(MSG.generic_err || 'Something went wrong. Please try again.'));
+  }
+
+  /* ---------- Email capture (otomatik, mesaj basma) ---------- */
+  function saveEmail(){
+    const val=(qs('#email')?.value||'').trim();
+    if(!val || !val.includes('@')){
+      const el=qs('#email-alert');
+      if(el) el.textContent=MSG.enter_email || 'Please enter a valid email address.';
+      return;
+    }
+    fetch('/api/checkout/capture-email/',{
+      method:'POST',
+      headers:{'Content-Type':'application/x-www-form-urlencoded','X-CSRFToken':getCookie('csrftoken')||''},
+      body: new URLSearchParams({email:val})
+    }).then(()=>{/* no-op: mesaj basmıyoruz */})
+      .catch(()=>{
+        const el=qs('#email-alert'); if(el) el.textContent = MSG.generic_err || 'Something went wrong.';
+      });
+  }
+
+  /* ---------- Google ---------- */
+  async function finishWithToken(idToken){
+    const r = await fetch('/auth/google/finish/', {
+      method:'POST',
+      headers:{'Content-Type':'application/x-www-form-urlencoded','X-CSRFToken':getCookie('csrftoken')||''},
+      body: new URLSearchParams({credential: idToken})
+    });
+    return r.json();
+  }
+
+  window.onGoogleCredential = async function(resp){
+    if(!resp || !resp.credential){ return; }
+    try{
+      const d = await finishWithToken(resp.credential);
+      if(d?.ok){
+        showBanner('Signed in ✔', true);
+        setTimeout(()=>location.reload(), 300);
+      } else {
+        showBanner(d?.error || 'Google sign-in failed.', false);
+      }
+    }catch(e){
+      showBanner('Google sign-in failed.', false);
+    }
+  };
+
+  function initGIS(){
+    if (gisReady) return true;
+    if (!(window.google && google.accounts && google.accounts.id)) return false;
+    google.accounts.id.initialize({
+      client_id: "{{ GOOGLE_CLIENT_ID }}",
+      callback: onGoogleCredential,
+      ux_mode: "popup",
+      auto_select: false,
+      context: "signin"
+    });
+    gisReady = true;
+    return true;
+  }
+
+  function tryGooglePopup(){
+    const ok = initGIS();
+    let gotToken = false;
+
+    try{
+      if (ok) {
+        const slot = qs('#google-btn-slot-inline');
+        if (!inlineBtnRendered && slot) {
+          google.accounts.id.renderButton(slot, {type:"standard", size:"large", theme:"outline", shape:"pill", text:"continue_with", logo_alignment:"left"});
+          inlineBtnRendered = true;
+        }
+        if (!googleCbOverridden) {
+          const prev = window.onGoogleCredential;
+          window.onGoogleCredential = function(r){ gotToken = true; prev(r); };
+          googleCbOverridden = true;
+        }
+        const realBtn = slot?.querySelector('div[role="button"], .nsm7Bb-HzV7m-LgbsSe');
+        if (realBtn) {
+          try{ realBtn.click(); }catch(_){}
+          setTimeout(()=>{ if(!gotToken){ showBanner('Popup blocked or Google is not ready. Please allow popups and try again.', false); }}, 1200);
+        } else {
+          showBanner('Google is not ready. Please try again.', false);
+        }
+      } else {
+        showBanner('Google is not loaded yet. Please try again.', false);
+      }
+    }catch(_){
+      showBanner('Could not open Google popup.', false);
+    }
+  }
+
+  /* ---------- Dinamik e-posta kontrolü ---------- */
+  async function checkEmailExistence(email){
+    try{
+      const r = await fetch('/auth/check-email/', {
+        method: 'POST',
+        headers: {'Content-Type':'application/x-www-form-urlencoded','X-CSRFToken': getCookie('csrftoken')||''},
+        body: new URLSearchParams({email})
+      });
+      const d = await r.json();
+      if(!d?.ok) throw new Error(d?.error||'bad');
+
+      emailExists = !!d.exists;
+
+      // Parola alanını GÖSTER (her iki durumda da)
+      togglePassword(true);
+
+      // Parola altındaki açıklama metnini duruma göre güncelle
+      const passHint = qs('#password-wrap p');
+      if(passHint){
+        if(emailExists){
+          passHint.textContent = MSG.must_login_with_password || 'We found an account. Please log in with your password.';
+        }else{
+          passHint.textContent = MSG.create_password || 'Account not found. Please create a password.';
+        }
+      }
+
+      // Üstteki küçük alert rengini & mesajını güncelle
+      const el=qs('#email-alert');
+      if(el){
+        if(emailExists){
+          el.textContent = MSG.must_login_with_password || 'We found an account. Please log in with your password.';
+          el.classList.remove('text-rose-600','dark:text-rose-400');
+          el.classList.add('text-emerald-600','dark:text-emerald-400');
+        }else{
+          el.textContent = MSG.create_password || 'Account not found. Please create a password.';
+          el.classList.remove('text-emerald-600','dark:text-emerald-400');
+          el.classList.add('text-rose-600','dark:text-rose-400');
+        }
+      }
+    }catch(_){}
+  }
+
+  const onEmailType = debounce((e)=>{
+    const v=(e.target.value||'').trim();
+    if(emailTldReady(v)){ saveEmail(); checkEmailExistence(v); }
+  }, 250);
+
+  /* ---------- Init ---------- */
+  document.addEventListener('DOMContentLoaded', ()=>{
+    bindPasswordToggle();
+
+    const emailInput = qs('#email');
+    if(emailInput){ emailInput.addEventListener('input', onEmailType); }
+
+    qs('#btn-apply')?.addEventListener('click', ()=> applyCoupon({key:'{{ plan.key }}'}));
+    qs('#btn-pay')?.addEventListener('click',   ()=> startPayment({key:'{{ plan.key }}'}));
+
+    // Google
+    qs('#btn-google-open')?.addEventListener('click', tryGooglePopup);
+    qs('#btn-google-open-top')?.addEventListener('click', tryGooglePopup);
+    let tries=0; const iv=setInterval(()=>{ tries++; if(initGIS()) clearInterval(iv); if(tries>30) clearInterval(iv); }, 100);
+
+    // Video görünürlük kontrolü
+    try{
+      const v=qs('#plan-ribbon');
+      if(window.IntersectionObserver && v){
+        const io=new IntersectionObserver(es=>es.forEach(({isIntersecting,target})=> isIntersecting?target.play?.():target.pause?.()),{threshold:.25});
+        io.observe(v);
+      }
+    }catch(_){}
+
+    // Gateways
+    try{
+      fetch('/api/payment/crypto-gateways/')
+        .then(r=>r.json()).then(d=> renderGateways(d?.gateways || []))
+        .catch(()=> renderGateways([{key:'nowpayments', name:'NOWPayments', note:'TRC20/ETH/BTC', icon:'/static/img/nowpayments.svg'}]));
+    }catch(_){
+      renderGateways([{key:'nowpayments', name:'NOWPayments', note:'TRC20/ETH/BTC', icon:'/static/img/nowpayments.svg'}]);
+    }
+  });
+</script>
+{% endblock %}
