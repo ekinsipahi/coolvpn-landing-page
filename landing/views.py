@@ -14,6 +14,7 @@ from google.auth.transport import requests as g_requests
 
 # django
 from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth import authenticate, get_user_model, login as auth_login
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
@@ -727,10 +728,100 @@ def login_view(request):
 def dashboard(request):
     """
     /dashboard/ — Kullanıcının durumu + cihazları
+    Ayrıca: POST ile 'add_device_uuid' alır -> client_uuid olarak kaydeder.
+    Destekler hem normal POST (redirect + messages) hem de AJAX (JSON).
     """
+    # --- Eğer POST ise yeni cihaz ekleme denemesi ---
+    if request.method == "POST" and "add_device_uuid" in request.POST:
+        uuid_raw = (request.POST.get("add_device_uuid") or "").strip()
+        is_ajax = request.headers.get("x-requested-with") == "XMLHttpRequest"
+
+        if not uuid_raw:
+            msg = "UUID boş olamaz."
+            if is_ajax:
+                return JsonResponse({"ok": False, "error": msg}, status=400)
+            messages.error(request, msg)
+            return redirect("dashboard")
+
+        if len(uuid_raw) > 64:
+            msg = "UUID çok uzun."
+            if is_ajax:
+                return JsonResponse({"ok": False, "error": msg}, status=400)
+            messages.error(request, msg)
+            return redirect("dashboard")
+
+        # --- capacity check ---
+        _now = now()
+        active_sub = (
+            Subscription.objects
+            .filter(user=request.user, ends_at__gte=_now)
+            .order_by("-ends_at")
+            .first()
+        )
+        plan_key = active_sub.plan_key if active_sub else None
+        device_cap = plan_device_limit(plan_key)
+        used_count = Device.objects.filter(user=request.user, is_active=True).count()
+        remaining = max(0, device_cap - used_count)
+        if remaining <= 0:
+            msg = "Cihaz limiti dolu. Bir cihaz iptal edin veya yükseltme yapın."
+            if is_ajax:
+                return JsonResponse({"ok": False, "error": msg}, status=400)
+            messages.error(request, msg)
+            return redirect("dashboard")
+
+        # --- check for existing device with this client_uuid ---
+        try:
+            existing = Device.objects.get(user=request.user, client_uuid=uuid_raw)
+        except Device.DoesNotExist:
+            existing = None
+
+        if existing:
+            if existing.is_active:
+                msg = "Bu cihaz zaten hesabınıza ekli ve aktif."
+                if is_ajax:
+                    return JsonResponse({"ok": False, "error": msg}, status=409)
+                messages.info(request, msg)
+                return redirect("dashboard")
+
+            # Eğer daha önce eklenmiş ama revoked ise -> re-activate
+            existing.is_active = True
+            existing.last_seen = now()
+            existing.name = existing.name or "Added from web"
+            existing.last_subscription = active_sub if active_sub else existing.last_subscription
+            existing.save(update_fields=["is_active", "last_seen", "name", "last_subscription"])
+            msg = "Cihaz yeniden aktifleştirildi."
+            if is_ajax:
+                return JsonResponse({"ok": True, "reactivated": True, "device": {"id": existing.id, "client_uuid": existing.client_uuid}})
+            messages.success(request, msg)
+            return redirect("dashboard")
+
+        # create device
+        try:
+            d = Device.objects.create(
+                user = request.user,
+                client_uuid = uuid_raw,
+                platform = "other",
+                name = "Added from web",
+                is_active = True,
+                last_subscription = active_sub if active_sub else None,
+            )
+        except Exception as e:
+            msg = "Cihaz eklenemedi. Hata: %s" % (str(e),)
+            if is_ajax:
+                return JsonResponse({"ok": False, "error": msg}, status=500)
+            messages.error(request, msg)
+            return redirect("dashboard")
+
+        # başarı
+        msg = "Cihaz eklendi."
+        if is_ajax:
+            return JsonResponse({"ok": True, "device": {"id": d.id, "client_uuid": d.client_uuid, "name": d.name}})
+        messages.success(request, msg)
+        return redirect("dashboard")
+
+    # --- GET: render eski dashboard (senin mevcut kodların) ---
     ctx_ui, _region = build_ui_context(request)
 
-    # En güncel aktif subscription (bitmemiş olan)
     _now = now()
     active_sub = (
         Subscription.objects
@@ -747,7 +838,7 @@ def dashboard(request):
         left_seconds = max(0, int((ends_at - _now).total_seconds()))
         pct = int(left_seconds * 100 / total_seconds)
         days_left = left_seconds // 86400
-        hours_left = (left_seconds % 86400) // 3600
+        hours_left = (left_seconds % 8640000) // 3600
         status_label = "Premium"
     else:
         plan_key = None
@@ -758,17 +849,14 @@ def dashboard(request):
         hours_left = 0
         status_label = "Free"
 
-    # Plan bazlı cihaz limiti
     device_cap = plan_device_limit(plan_key)
 
-    # Cihazlar (aktif/aktif değil)
     devices = (
         Device.objects
         .filter(user=request.user)
         .order_by("-is_active", "-last_seen", "-created_at")
     )
 
-    # Aktif cihaz sayısı (revoked yerine is_active kullanıyoruz)
     used_count = devices.filter(is_active=True).count()
     remaining = max(0, device_cap - used_count)
 
@@ -783,7 +871,7 @@ def dashboard(request):
         "days_left": days_left,
         "hours_left": hours_left,
         "device_cap": device_cap,
-        "devices": devices,        # template'te device.is_active ile gri/aktif stil ver
+        "devices": devices,
         "used_count": used_count,
         "remaining": remaining,
     }
@@ -876,20 +964,43 @@ def device_register(request):
 def device_revoke(request):
     """
     POST /api/devices/revoke/
-    Body: uuid=<uuid>
+    Body: uuid=<uuid>   (client_uuid veya Device.uuid kabul edilir)
     """
-    uuid_str = (request.POST.get("uuid") or "").strip()
+    is_ajax = request.headers.get("x-requested-with") == "XMLHttpRequest"
+    uuid_str = (request.POST.get("uuid") or request.POST.get("client_uuid") or "").strip()
     if not uuid_str:
-        return JsonResponse({"ok": False, "error": "missing_uuid"}, status=400)
+        if is_ajax:
+            return JsonResponse({"ok": False, "error": "missing_uuid"}, status=400)
+        messages.error(request, "UUID eksik.")
+        return redirect("dashboard")
 
+    device = None
     try:
-        d = Device.objects.get(user=request.user, uuid=uuid_str)
+        device = Device.objects.get(user=request.user, client_uuid=uuid_str)
     except Device.DoesNotExist:
-        return JsonResponse({"ok": False, "error": "not_found"}, status=404)
+        try:
+            device = Device.objects.get(user=request.user, uuid=uuid_str)
+        except Device.DoesNotExist:
+            device = None
 
-    if d.is_active:
-        return JsonResponse({"ok": True})  # idempotent
+    if not device:
+        if is_ajax:
+            return JsonResponse({"ok": False, "error": "not_found"}, status=404)
+        messages.error(request, "Cihaz bulunamadı.")
+        return redirect("dashboard")
 
-    d.is_active = True
-    d.save(update_fields=["is_active"])
-    return JsonResponse({"ok": True})
+    # Eğer zaten pasifse idempotent cevap ver
+    if not device.is_active:
+        if is_ajax:
+            return JsonResponse({"ok": True, "revoked": False})
+        messages.info(request, "Cihaz zaten iptal edilmiş.")
+        return redirect("dashboard")
+
+    device.is_active = False
+    device.save(update_fields=["is_active"])
+
+    if is_ajax:
+        return JsonResponse({"ok": True, "revoked": True, "client_uuid": device.client_uuid, "uuid": str(device.uuid)})
+    messages.success(request, "Cihaz iptal edildi.")
+    return redirect("dashboard")
+

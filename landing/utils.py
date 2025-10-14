@@ -1,11 +1,7 @@
-# landing/services/subscription.py
-from datetime import timedelta
-from django.db import transaction
-from django.utils import timezone
-
+# landing/utils.py
 from typing import Dict, Optional
 from django.utils.timezone import now
-from landing.models import Subscription
+from .models import Subscription
 
 # senin normalize tablon (kopyalıyorum)
 NORMALIZE_TABLE = {
@@ -19,66 +15,6 @@ def normalize_plan_slug(raw: Optional[str]) -> str:
     if not raw:
         return "monthly"
     return NORMALIZE_TABLE.get(raw.strip().lower(), "monthly")
-
-PLAN_DURATIONS = {
-    "monthly": timedelta(days=30),
-    "semi":    timedelta(days=182),   # ~6 ay
-    "annual":  timedelta(days=365),
-}
-
-@transaction.atomic
-def grant_subscription(user, plan_key: str, order=None):
-    """
-    Her PAID order sonrası çağır.
-    - Mevcut aktif abonelik varsa, bitişten devam ederek uzatır.
-    - Yoksa 'şimdi'den başlatır.
-    - Her çağrıda YENİ bir Subscription kaydı oluşturur ve (varsa) order'a bağlar.
-    Idempotency:
-      - Eğer order already has subscription → direkt onu döndürür (çift IPN vs. durumlarında güvenli).
-    """
-    # Order zaten bir aboneliğe bağlanmışsa tekrar yaratma
-    if order and getattr(order, "subscription", None):
-        return order.subscription
-
-    from landing.models import Subscription  # circular import'tan kaçınmak için lokal import
-
-    now = timezone.now()
-    duration = PLAN_DURATIONS.get(plan_key, PLAN_DURATIONS["monthly"])
-
-    # Kullanıcının en güncel aboneliğini kilitleyip al
-    latest = (
-        Subscription.objects
-        .select_for_update()
-        .filter(user=user)
-        .order_by("-ends_at")
-        .first()
-    )
-
-    base_start = latest.ends_at if (latest and latest.ends_at and latest.ends_at > now) else now
-    starts_at  = base_start
-    ends_at    = base_start + duration
-
-    sub = Subscription.objects.create(
-        user=user,
-        plan_key=plan_key,
-        starts_at=starts_at,
-        ends_at=ends_at,
-        order=order  # None olabilir
-    )
-    return sub
-
-
-# landing/helpers/subscription.py
-
-from typing import Optional
-
-# Plan → cihaz limiti (iş gereksinimi)
-_DEVICE_LIMITS = {
-    "monthly": 5,
-    "semi": 10,          # normalize edilmiş 'semi' anahtarı
-    "semi-annual": 10,   # olası eski/ham değer için güvenli eşleştirme
-    "annual": 20,
-}
 
 # kapasite mapping
 _PLAN_DEVICE_CAP = {
@@ -123,4 +59,3 @@ def plan_device_limit(plan_key: Optional[str] = None, user=None, prefer_highest:
 
     # fallback
     return 1
-

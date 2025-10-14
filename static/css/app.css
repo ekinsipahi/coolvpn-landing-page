@@ -1205,10 +1205,6 @@ video {
   width: 100%;
 }
 
-.w-\[33\%\] {
-  width: 33%;
-}
-
 .w-auto {
   width: auto;
 }
@@ -1484,6 +1480,10 @@ video {
 
 .divide-black\/10 > :not([hidden]) ~ :not([hidden]) {
   border-color: rgb(0 0 0 / 0.1);
+}
+
+.overflow-auto {
+  overflow: auto;
 }
 
 .overflow-hidden {
@@ -2205,6 +2205,10 @@ video {
 
 .align-top {
   vertical-align: top;
+}
+
+.font-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
 .text-2xl {
@@ -3177,6 +3181,10 @@ video {
   background-color: rgb(255 255 255 / 0.05);
 }
 
+.dark\:bg-white\/\[0\.02\]:is(.dark *) {
+  background-color: rgb(255 255 255 / 0.02);
+}
+
 .dark\:bg-white\/\[0\.04\]:is(.dark *) {
   background-color: rgb(255 255 255 / 0.04);
 }
@@ -3429,6 +3437,10 @@ video {
   --tw-ring-color: rgb(255 255 255 / 0.1);
 }
 
+.dark\:ring-white\/5:is(.dark *) {
+  --tw-ring-color: rgb(255 255 255 / 0.05);
+}
+
 .dark\:placeholder\:text-gray-400:is(.dark *)::-moz-placeholder {
   --tw-text-opacity: 1;
   color: rgb(156 163 175 / var(--tw-text-opacity, 1));
@@ -3596,6 +3608,10 @@ video {
 
   .md\:hidden {
     display: none;
+  }
+
+  .md\:h-\[100vh\] {
+    height: 100vh;
   }
 
   .md\:min-h-\[calc\(100vh-8rem\)\] {

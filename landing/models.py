@@ -1,9 +1,12 @@
 # landing/models.py
-import uuid
+import uuid as uuidlib
+from datetime import timedelta
 from django.conf import settings
 from django.db import models
+from django.contrib.auth import get_user_model
 from django.utils import timezone
-from datetime import timedelta
+
+User = get_user_model()
 
 class Order(models.Model):
     STATUS_CHOICES = [
@@ -14,20 +17,17 @@ class Order(models.Model):
         ("refunded", "Refunded"),
     ]
     id = models.BigAutoField(primary_key=True)
-    order_id = models.CharField(max_length=64, unique=True, db_index=True)  # biz oluşturuyoruz
+    order_id = models.CharField(max_length=64, unique=True, db_index=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="orders")
-    plan_key = models.CharField(max_length=20)  # monthly|semi|annual (normalize edilmiş)
+    plan_key = models.CharField(max_length=20)
     price_amount = models.DecimalField(max_digits=10, decimal_places=2)
-    price_currency = models.CharField(max_length=10)   # USD/EUR/TRY...
-    pay_currency   = models.CharField(max_length=20, blank=True, default="")  # TRX/BTC/...
+    price_currency = models.CharField(max_length=10)
+    pay_currency   = models.CharField(max_length=20, blank=True, default="")
     gateway = models.CharField(max_length=40, default="nowpayments")
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
-
-    # NOWPayments alanları
     np_invoice_id = models.CharField(max_length=64, blank=True, default="")
     np_payment_id = models.CharField(max_length=64, blank=True, default="")
     np_raw = models.JSONField(blank=True, null=True)
-
     created_at = models.DateTimeField(auto_now_add=True)
     paid_at    = models.DateTimeField(blank=True, null=True)
 
@@ -36,15 +36,11 @@ class Order(models.Model):
 
 
 class Subscription(models.Model):
-    """
-    Çok basit bir subscription: başlangıç-bitiş tarihleri.
-    """
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="subscriptions")
     plan_key = models.CharField(max_length=20)
     starts_at = models.DateTimeField()
     ends_at   = models.DateTimeField()
     order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name="subscription", null=True, blank=True)
-
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -52,11 +48,11 @@ class Subscription(models.Model):
 
     def is_active(self):
         return self.ends_at >= timezone.now()
-from django.db import models
-from django.contrib.auth import get_user_model
-import uuid as uuidlib
 
-User = get_user_model()
+    @property
+    def active(self):
+        return self.is_active()
+
 
 class Device(models.Model):
     PLATFORM_CHOICES = [
@@ -73,7 +69,6 @@ class Device(models.Model):
     user        = models.ForeignKey(User, on_delete=models.CASCADE, related_name="devices")
     uuid        = models.UUIDField(default=uuidlib.uuid4, editable=False, db_index=True)
     client_uuid = models.CharField(max_length=64, blank=True, default="", db_index=True)
-
     platform    = models.CharField(max_length=16, choices=PLATFORM_CHOICES, default="other", db_index=True)
     name        = models.CharField(max_length=120, blank=True, default="")
     os_version  = models.CharField(max_length=64, blank=True, default="")
@@ -81,19 +76,15 @@ class Device(models.Model):
     ip          = models.GenericIPAddressField(blank=True, null=True)
     city        = models.CharField(max_length=64, blank=True, default="")
     country     = models.CharField(max_length=64, blank=True, default="")
-
     last_seen   = models.DateTimeField(auto_now=True)
     created_at  = models.DateTimeField(auto_now_add=True)
     is_active   = models.BooleanField(default=True)
-
-    # (opsiyonel) Kayıt anında hangi abonelik varken bağlandığını tutmak istersen:
     last_subscription = models.ForeignKey(
         "Subscription", null=True, blank=True, on_delete=models.SET_NULL, related_name="devices_snapshot"
     )
 
     class Meta:
         ordering = ("-last_seen",)
-        # Aynı kullanıcıda aynı client_uuid bir kez olsun:
         constraints = [
             models.UniqueConstraint(fields=["user", "client_uuid"], name="uniq_user_client_uuid")
         ]
