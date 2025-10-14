@@ -115,3 +115,54 @@ def get_pricing_for_request(request):
         "semiannual": data["semiannual"],
         "annual": data["annual"],
     }
+
+
+def _abs_localized_url(request, viewname: str) -> str:
+    path = reverse(viewname)
+    return request.build_absolute_uri(path)
+
+def build_all_offers_json(pricing_by_country: dict, request) -> str:
+    """
+    Product.offers için TÜM ülkeler (monthly + 6-month + annual)
+    Her offer içine minimal shippingDetails + hasMerchantReturnPolicy eklenir.
+    """
+    offers = []
+    for cc, p in pricing_by_country.items():
+        for plan_name, key in (
+            ("Monthly Plan", "monthly"),
+            ("6-Month Plan", "semiannual"),
+            ("Annual Plan", "annual"),
+        ):
+            price_val = p[key]
+            price_str = f"{price_val:.2f}" if isinstance(price_val, float) else f"{price_val}"
+            # basit shippingDetails (örnek) -- ülke bazlı olabiliyor
+            shipping = {
+                "@type": "OfferShippingDetails",
+                "shippingDestination": {
+                    "@type": "DefinedRegion",
+                    "addressCountry": cc
+                },
+                "shippingRate": {
+                    "@type": "MonetaryAmount",
+                    "value": "0",
+                    "currency": p["currency"]
+                }
+            }
+            merchant_return = {
+                "@type": "MerchantReturnPolicy",
+                # Kısa/manifest bir kategori koyuyoruz; gerekirse detaylandır.
+                "returnPolicyCategory": "https://schema.org/MerchantReturnUnspecified"
+            }
+
+            offers.append({
+                "@type": "Offer",
+                "name": plan_name,
+                "priceCurrency": p["currency"],
+                "price": price_str,
+                "availability": "https://schema.org/InStock",
+                "eligibleRegion": cc,
+                "url": _abs_localized_url(request, "pricing"),
+                "shippingDetails": shipping,
+                "hasMerchantReturnPolicy": merchant_return
+            })
+    return json.dumps(offers, ensure_ascii=False)

@@ -30,6 +30,7 @@
     "name": "CoolVPN",
     "inLanguage": "{{ LANGUAGE_CODE|default:'en' }}",
     "url": "{{ canonical_url|default:request.build_absolute_uri }}",
+    "image": "{{ logo_url }}",
     "category": "VPN",
     "applicationCategory": "SecurityApplication",
     "operatingSystem": "iOS, Android, Windows, macOS, Linux, Chrome",
@@ -49,7 +50,7 @@
       { "@type": "PropertyValue", "name": "Annual perk",                 "value": "{{ feature_dedicated|escapejs }}" }
     ],
 
-    "audience": { "@type": "Audience", "audienceType": "Consumers" },
+    "audience": {{ audience_json|safe }},
 
     "offers": {{ offers_json|safe }}
   }

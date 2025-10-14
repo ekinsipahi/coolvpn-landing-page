@@ -39,6 +39,7 @@ from landing.templatetags.pricing import (
     PRICING_BY_COUNTRY,
     build_all_offers_json,
     detect_country,
+    get_pricing_for_request
 )
 from .models import Device, Order, Subscription
 
@@ -50,6 +51,22 @@ def home(request):
     ctx_ui, region = build_ui_context(request)
     faq_sorted = sorted(FAQ_QUESTIONS, key=lambda x: x.get("priority", 999))
     faq_teaser = [q for q in faq_sorted if q.get("teaser", False)][:6]
+
+    # pricing + offers
+    offers_json = build_all_offers_json(PRICING_BY_COUNTRY, request)  # string JSON list
+    # mutlak logo url (image)
+    logo_url = request.build_absolute_uri(static('img/COOLVPN-LOGO.png'))
+    
+    # audience object (PeopleAudience) — burada önerdiğin suggested age aralığını koy
+    audience_obj = {
+        "@type": "PeopleAudience",
+        "audienceType": "Consumers",
+        "suggestedMinAge": 18,
+        "suggestedMaxAge": 60,
+        "suggestedGender": "Any"
+    }
+    
+    # temel ctx
     ctx = {
         "seo_title": _("CoolVPN — Private Node. Obfuscation. No-Logs."),
         "seo_description": _(
@@ -58,9 +75,73 @@ def home(request):
         **ctx_ui,
         "faq_all": faq_sorted,
         "faq_teaser": faq_teaser,
-    }
-    return render(request, "landing/home.html", ctx)
+        "offers_json": offers_json,
+        "logo_url": logo_url,
+        "audience_json": json.dumps(audience_obj, ensure_ascii=False),
 
+    }
+
+    # --- pricing / json-ld oluşturma ---
+    try:
+        # logo (mutlak url)
+        logo_abs = request.build_absolute_uri(static('img/COOLVPN-LOGO.png'))
+
+        # request için bölge ve o bölgeye özel fiyat
+        pricing_for_req = get_pricing_for_request(request)
+        region_code = pricing_for_req.get("country_code")
+        currency_code = pricing_for_req.get("currency_code")
+        monthly_price = pricing_for_req.get("monthly")
+
+        # bütün ülkeler için offers listesi (JSON string). JSON-yığını template'e vermek için parse ediyoruz
+        offers_json_str = build_all_offers_json(PRICING_BY_COUNTRY, request)
+        offers_list = json.loads(offers_json_str)
+
+        # Ayrıca kullanıcının bölgesi için tek bir offer (kısa gösterim / fallback)
+        regional_offer = {
+            "@type": "Offer",
+            "name": _("Monthly Plan"),
+            "priceCurrency": currency_code,
+            "price": f"{monthly_price:.2f}" if isinstance(monthly_price, float) else str(monthly_price),
+            "availability": "https://schema.org/InStock",
+            "eligibleRegion": region_code,
+            "url": request.build_absolute_uri('/pricing/')
+        }
+
+        # product JSON-LD objesi
+        product_obj = {
+            "@context": "https://schema.org",
+            "@type": ["Product", "SoftwareApplication"],
+            "name": ctx.get("site_name", "CoolVPN"),
+            "inLanguage": getattr(request, "LANGUAGE_CODE", getattr(settings, "LANGUAGE_CODE", "en")),
+            "url": request.build_absolute_uri(),
+            "image": logo_abs,
+            "category": "VPN",
+            "applicationCategory": "SecurityApplication",
+            "operatingSystem": "iOS, Android, Windows, macOS, Linux, Chrome",
+            "brand": {"@type": "Brand", "name": "CoolVPN"},
+            "description": ctx.get("seo_description"),
+            "slogan": ctx.get("seo_title"),
+            "isAccessibleForFree": True,
+            "audience": {
+                "@type": "PeopleAudience",
+                "audienceType": "Consumers",
+                "suggestedMinAge": 18,
+                "suggestedMaxAge": 60,
+                "suggestedGender": "Any",
+                "geographicArea": {"@type": "Country", "name": region_code or "Global"}
+            },
+            # offers: hem bölgeye özel kısa offer, hem Google için "offers" listesi -> tüm offers_list'i de koyabiliriz.
+            # Burada iki yaklaşım var: (a) sadece bölgesel tek offer (b) tüm offers (ör: offers_list)
+            # Google bazen birden fazla offer kabul eder. biz hem kısa hem de full koyuyoruz:
+            "offers": [regional_offer] + offers_list
+        }
+
+        ctx["product_jsonld"] = json.dumps(product_obj, ensure_ascii=False)
+    except Exception as e:
+        # hata olursa boş bırak
+        ctx["product_jsonld"] = None
+
+    return render(request, "landing/home.html", ctx)
 
 def pricing(request):
     ctx_ui, region = build_ui_context(request)
