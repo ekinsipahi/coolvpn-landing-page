@@ -5,10 +5,12 @@ from django.utils import timezone
 from django.urls import reverse
 from django.conf import settings
 
-from .models import Order, Subscription
+from .models import Order, Subscription, Device
 
 
-# ---- INLINE: Order → Subscription (OneToOne)
+# =========================
+# INLINE: Order → Subscription (OneToOne)
+# =========================
 class SubscriptionInline(admin.StackedInline):
     model = Subscription
     can_delete = False
@@ -25,7 +27,9 @@ class SubscriptionInline(admin.StackedInline):
         return False
 
 
-# ---- ORDER ADMIN
+# =========================
+# ORDER ADMIN
+# =========================
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     list_display = (
@@ -120,14 +124,69 @@ class OrderAdmin(admin.ModelAdmin):
     mark_failed.short_description = "Mark as FAILED (not for paid orders)"
 
 
-# ---- SUBSCRIPTION ADMIN
+# =========================
+# INLINE: Subscription → snapshot olarak bağlı cihazlar
+#   (Device.last_subscription, related_name='devices_snapshot')
+# =========================
+class DevicesSnapshotInline(admin.TabularInline):
+    model = Device
+    fields = ("uuid", "client_uuid", "user_link", "platform", "name", "is_active", "last_seen", "created_at")
+    readonly_fields = ("uuid", "client_uuid", "user_link", "platform", "name", "is_active", "last_seen", "created_at")
+    extra = 0
+    can_delete = False
+    verbose_name = "Device (snapshot)"
+    verbose_name_plural = "Devices (snapshot)"
+
+    def user_link(self, obj):
+        try:
+            url = reverse(
+                f"admin:{obj.user._meta.app_label}_{obj.user._meta.model_name}_change",
+                args=[obj.user_id],
+            )
+            label = obj.user.get_username() or obj.user_id
+            return format_html('<a href="{}">{}</a>', url, label)
+        except Exception:
+            return obj.user_id
+
+    user_link.short_description = "User"
+
+
+# =========================
+# SUBSCRIPTION ADMIN
+# =========================
 @admin.register(Subscription)
 class SubscriptionAdmin(admin.ModelAdmin):
-    list_display = ("user", "plan_key", "starts_at", "ends_at", "is_active_badge", "order")
+    list_display = ("user_link", "plan_key", "starts_at", "ends_at", "is_active_badge", "order_link")
     list_filter = ("plan_key", "starts_at", "ends_at")
     search_fields = ("user__email", "user__username", "order__order_id")
     date_hierarchy = "starts_at"
     readonly_fields = ("created_at",)
+
+    inlines = [DevicesSnapshotInline]
+
+    def user_link(self, obj):
+        try:
+            url = reverse(
+                f"admin:{obj.user._meta.app_label}_{obj.user._meta.model_name}_change",
+                args=[obj.user_id],
+            )
+            label = obj.user.get_username() or obj.user_id
+            return format_html('<a href="{}">{}</a>', url, label)
+        except Exception:
+            return obj.user
+
+    user_link.short_description = "User"
+
+    def order_link(self, obj):
+        if not obj.order_id:
+            return "-"
+        try:
+            url = reverse("admin:landing_order_change", args=[obj.order_id])
+            return format_html('<a href="{}">{}</a>', url, obj.order.order_id)
+        except Exception:
+            return obj.order_id
+
+    order_link.short_description = "Order"
 
     def is_active_badge(self, obj):
         active = bool(obj.ends_at and obj.ends_at >= timezone.now())
@@ -138,3 +197,102 @@ class SubscriptionAdmin(admin.ModelAdmin):
         )
 
     is_active_badge.short_description = "Status"
+
+
+# =========================
+# DEVICE ADMIN
+# =========================
+@admin.register(Device)
+class DeviceAdmin(admin.ModelAdmin):
+    list_display = (
+        "uuid",
+        "client_uuid",
+        "user_link",
+        "platform",
+        "name",
+        "is_active_badge",
+        "last_seen",
+        "created_at",
+        "last_subscription_link",
+    )
+    list_filter = (
+        "platform",
+        "is_active",
+        ("last_seen", admin.DateFieldListFilter),
+        ("created_at", admin.DateFieldListFilter),
+    )
+    search_fields = (
+        "uuid",
+        "client_uuid",
+        "name",
+        "user__username",
+        "user__email",
+        "country",
+        "city",
+    )
+    readonly_fields = (
+        "uuid",
+        "client_uuid",
+        "user",
+        "platform",
+        "name",
+        "os_version",
+        "app_version",
+        "ip",
+        "city",
+        "country",
+        "last_seen",
+        "created_at",
+        "is_active",
+        "last_subscription",
+    )
+    date_hierarchy = "created_at"
+    list_per_page = 50
+
+    actions = ["activate_devices", "deactivate_devices"]
+
+    def user_link(self, obj):
+        try:
+            url = reverse(
+                f"admin:{obj.user._meta.app_label}_{obj.user._meta.model_name}_change",
+                args=[obj.user_id],
+            )
+            label = obj.user.get_username() or obj.user_id
+            return format_html('<a href="{}">{}</a>', url, label)
+        except Exception:
+            return obj.user_id
+
+    user_link.short_description = "User"
+
+    def last_subscription_link(self, obj):
+        if not obj.last_subscription_id:
+            return "-"
+        try:
+            url = reverse("admin:landing_subscription_change", args=[obj.last_subscription_id])
+            return format_html('<a href="{}">#{}</a>', url, obj.last_subscription_id)
+        except Exception:
+            return obj.last_subscription_id
+
+    last_subscription_link.short_description = "Last Sub."
+
+    def is_active_badge(self, obj):
+        return format_html(
+            '<span style="padding:2px 6px;border-radius:8px;background:{};color:#fff;">{}</span>',
+            "#16a34a" if obj.is_active else "#6b7280",
+            "Active" if obj.is_active else "Inactive",
+        )
+
+    is_active_badge.short_description = "Device"
+
+    # Basit toplu aksiyonlar (opsiyonel)
+    def activate_devices(self, request, queryset):
+        updated = queryset.update(is_active=True)
+        self.message_user(request, f"{updated} cihaz aktif edildi.")
+
+    activate_devices.short_description = "Activate selected devices"
+
+    def deactivate_devices(self, request, queryset):
+        updated = queryset.update(is_active=False)
+        self.message_user(request, f"{updated} cihaz pasif edildi.")
+
+    deactivate_devices.short_description = "Deactivate selected devices"

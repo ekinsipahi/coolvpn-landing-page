@@ -23,6 +23,7 @@ from django.db.models import Q
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect, render
 from django.templatetags.static import static
+from django.db.models import DateTimeField
 from django.utils import timezone
 from django.utils.timezone import now
 from django.utils.translation import gettext as _
@@ -1006,18 +1007,96 @@ def device_revoke(request):
 
 
 
-def _active_sub(user):
-    return (Subscription.objects
-            .filter(user=user, ends_at__gte=timezone.now())
-            .order_by("-ends_at")
-            .first())
+def _active_sub_for_user(user):
+    """
+    Sadece kullanıcıya bakar: aktif subscription var mı?
+    DateTimeField olduğu için: ends_at is null OR ends_at >= now (veya date>=today).
+    """
+    now = timezone.now()
+    today = timezone.localdate()
+    ends_field = Subscription._meta.get_field('ends_at')
+
+    qs = Subscription.objects.filter(user=user)
+    if isinstance(ends_field, DateTimeField):
+        qs = qs.filter(Q(ends_at__isnull=True) | Q(ends_at__gte=now) | Q(ends_at__date__gte=today))
+    else:
+        qs = qs.filter(Q(ends_at__isnull=True) | Q(ends_at__gte=today))
+
+    sub = qs.order_by('-ends_at').first()
+    print(f"[_active_sub_for_user] user_id={getattr(user,'id',None)} now={now} hit={bool(sub)}")
+    return sub
+
+
+def _resolve_premium_by_client_uuid(client_uuid: str):
+    """
+    1) Aynı client_uuid'ye sahip TÜM **aktif cihazları** bul (is_active=True).
+    2) Bu cihazların kullanıcıları arasında **aktif aboneliği** olan var mı? (en geç biten kazanır)
+    3) O kullanıcı altındaki (client_uuid eşleşen) **aktif cihazın** uuid’sini döndür.
+
+    Dönüş: (premium_bool, resolved_user_id_or_None, device_uuid_or_None)
+    """
+    if not client_uuid:
+        print("[_resolve_premium_by_client_uuid] empty client_uuid -> skip")
+        return (False, None, None)
+
+    now = timezone.now()
+    today = timezone.localdate()
+    ends_field = Subscription._meta.get_field('ends_at')
+
+    # 1) Aynı client_uuid + aktif cihazlar
+    dev_qs = (
+        Device.objects
+        .filter(client_uuid=client_uuid, is_active=True)
+        .order_by('-last_seen')  # sadece sıralama, join yok
+    )
+    user_ids = list(dev_qs.values_list('user_id', flat=True).distinct())
+    print(f"[_resolve_premium_by_client_uuid] client_uuid={client_uuid} active_devices={dev_qs.count()} distinct_users={user_ids}")
+
+    if not user_ids:
+        return (False, None, None)
+
+    # 2) Bu kullanıcılar içinde aktif subscription arıyoruz
+    sub_qs = Subscription.objects.filter(user_id__in=user_ids)
+    if isinstance(ends_field, DateTimeField):
+        sub_qs = sub_qs.filter(Q(ends_at__isnull=True) | Q(ends_at__gte=now) | Q(ends_at__date__gte=today))
+    else:
+        sub_qs = sub_qs.filter(Q(ends_at__isnull=True) | Q(ends_at__gte=today))
+
+    sub_hit = sub_qs.order_by('-ends_at').values('user_id', 'id', 'ends_at').first()
+    if not sub_hit:
+        print(f"[_resolve_premium_by_client_uuid] no active sub among users={user_ids}")
+        return (False, None, None)
+
+    resolved_user_id = sub_hit['user_id']
+
+    # 3) O kullanıcı altında bu client_uuid’ye sahip **aktif** cihazın uuid’si
+    device_uuid = (
+        dev_qs.filter(user_id=resolved_user_id)
+        .values_list('uuid', flat=True)
+        .first()
+    )
+    device_uuid = str(device_uuid) if device_uuid else None
+
+    print(f"[_resolve_premium_by_client_uuid] RESOLVED user_id={resolved_user_id} device_uuid={device_uuid} sub_id={sub_hit['id']} ends_at={sub_hit['ends_at']}")
+    return (True, resolved_user_id, device_uuid)
+
 
 @csrf_exempt
 @login_required
 def extension_handshake(request):
     """
-    POST body (JSON): {"client_uuid": "<optional>"}
-    Returns: {"device_uuid": "...", "premium": true/false}
+    POST JSON: {"client_uuid": "<optional>"}
+    Response:
+      {
+        "premium": bool,               # client_uuid tarafında aktif abonelik varsa True
+        "device_uuid": "<uuid>|null",  # o kullanıcı altındaki aktif device’ın uuid’si
+        "existing": bool               # current user altında bu client_uuid’ye ait aktif device var mı?
+      }
+
+    - Yeni Device OLUŞTURMAZ.
+    - client_uuid boşsa sadece current user’ın premium’unu kontrol eder.
+    - client_uuid doluysa: TÜM user’larda (aktif cihazlar) kontrol eder,
+      aktif aboneliği olan user bulunursa onu baz alır (premium=True).
     """
     if request.method != "POST":
         return HttpResponseBadRequest("POST only")
@@ -1029,18 +1108,76 @@ def extension_handshake(request):
 
     client_uuid = (data.get("client_uuid") or "").strip()
 
-    # device bul/oluştur (user + client_uuid unique)
-    dev = None
+    # Varsayılan: mevcut kullanıcının durumu
+    premium_by_current = _active_sub_for_user(request.user) is not None
+
+    # UUID varsa, tüm user’lara göre çöz (aktif cihazlar)
     if client_uuid:
-        dev = Device.objects.filter(user=request.user, client_uuid=client_uuid).first()
+        premium_by_uuid, resolved_user_id, resolved_device_uuid = _resolve_premium_by_client_uuid(client_uuid)
+        premium = premium_by_uuid  # UUID tarafı baskın
+        device_uuid = resolved_device_uuid
+    else:
+        premium = premium_by_current
+        device_uuid = None
 
-    if dev is None:
-        dev = Device.objects.create(user=request.user, client_uuid=client_uuid or "")
+    # existing: current user altında bu uuid’ye ait **aktif** device var mı?
+    existing = False
+    if client_uuid:
+        existing = Device.objects.filter(user=request.user, client_uuid=client_uuid, is_active=True).exists()
 
-    # premium kontrolü (sadece DB)
-    premium = _active_sub(request.user) is not None
+    resp = {
+        "premium": bool(premium),
+        "device_uuid": device_uuid,
+        "existing": bool(existing),
+    }
+    print(f"[handshake] RESP {resp}")
+    return JsonResponse(resp)
 
-    return JsonResponse({
-        "device_uuid": str(dev.uuid),
-        "premium": premium,
-    })
+    """
+    POST JSON: {"client_uuid": "<optional>"}
+    Response:
+      {
+        "premium": bool,           # client_uuid tarafında aktif abonelik varsa True
+        "device_uuid": "<uuid>|null",  # o kullanıcı altındaki aktif device’ın uuid’si
+        "existing": bool               # current user altında bu client_uuid’ya ait aktif device var mı?
+      }
+
+    - Kesinlikle yeni Device oluşturmaz.
+    - client_uuid boşsa sadece current user’ın premium’unu kontrol eder.
+    - client_uuid doluysa TÜM user’larda (aktif cihazlar) kontrol eder,
+      aktif aboneliği olan user bulunursa onu baz alır (premium=True).
+    """
+    if request.method != "POST":
+        return HttpResponseBadRequest("POST only")
+
+    try:
+        data = json.loads(request.body.decode("utf-8") or "{}")
+    except Exception:
+        data = {}
+
+    client_uuid = (data.get("client_uuid") or "").strip()
+
+    # Varsayılan: mevcut kullanıcının durumu
+    premium_by_current = _active_sub_for_user(request.user) is not None
+
+    # Eğer client_uuid gelmişse: tüm user’lar arasında çöz
+    if client_uuid:
+        premium_by_uuid, resolved_user_id, resolved_device_uuid = _resolve_premium_by_client_uuid(client_uuid)
+        premium = premium_by_uuid  # İSTENEN DAVRANIŞ: UUID tarafı baskın
+        device_uuid = resolved_device_uuid
+    else:
+        premium = premium_by_current
+        device_uuid = None
+
+    # existing: current user altında bu uuid’ye ait aktif device var mı?
+    existing = False
+    if client_uuid:
+        existing = Device.objects.filter(user=request.user, client_uuid=client_uuid, is_active=True).exists()
+
+    resp = {
+        "premium": bool(premium),
+        "device_uuid": device_uuid,   # yoksa None döner
+        "existing": bool(existing)
+    }
+    print(f"[handshake] RESP {resp}")
+    return JsonResponse(resp)
