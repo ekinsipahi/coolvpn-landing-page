@@ -1082,7 +1082,6 @@ def _resolve_premium_by_client_uuid(client_uuid: str):
 
 
 @csrf_exempt
-@login_required
 def extension_handshake(request):
     """
     POST JSON: {"client_uuid": "<optional>"}
