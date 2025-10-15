@@ -1,0 +1,139 @@
+{% load static i18n %}
+{% now "Y-m-d" as today_iso %}
+
+<!doctype html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="utf-8">
+  <title>Terms of Service · CoolVPN</title>
+  <meta name="description" content="CoolVPN Terms of Service — acceptable use, payments, renewals, limitations, and legal notices.">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="{% static 'css/tailwind.css' %}" rel="stylesheet">
+  <link rel="icon" href="{% static 'img/favicon.ico' %}">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "name": "Sipahi Software Ltd.",
+      "url": "https://coolvpn.app",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://coolvpn.app{% static 'img/COOLVPN-LOGO.png' %}"
+      },
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "customer support",
+        "email": "support@coolvpn.app",
+        "availableLanguage": ["en","tr"]
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://coolvpn.app/" },
+        { "@type": "ListItem", "position": 2, "name": "Privacy Policy", "item": "https://coolvpn.app/privacy-policy/" }
+      ]
+    },
+    {
+      "@type": "PrivacyPolicy",
+      "name": "CoolVPN Privacy Policy",
+      "inLanguage": "en",
+      "url": "https://coolvpn.app/privacy-policy/",
+      "dateModified": "2025-10-15",
+      "publisher": { "@type": "Organization", "name": "Sipahi Software Ltd.", "url": "https://coolvpn.app" },
+      "isPartOf": { "@type": "WebSite", "url": "https://coolvpn.app", "name": "CoolVPN" },
+      "about": { "@type": "Product", "name": "CoolVPN", "url": "https://coolvpn.app" }
+    }
+  ]
+}
+</script>
+</head>
+<body class="h-full bg-white text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-100">
+  <main class="mx-auto max-w-3xl px-4 py-10 sm:py-14">
+    <nav class="mb-6 text-sm text-zinc-500 dark:text-zinc-400">
+      <a href="{% url 'home' %}" class="hover:text-zinc-800 dark:hover:text-zinc-200">Home</a>
+      <span class="mx-2">/</span>
+      <span>Terms of Service</span>
+    </nav>
+
+    <header class="mb-8">
+      <h1 class="text-3xl font-extrabold tracking-tight sm:text-4xl">Terms of Service</h1>
+      <p class="mt-2 text-zinc-600 dark:text-zinc-400">
+        Last updated: {{ today_iso }}
+      </p>
+    </header>
+
+    <article class="prose prose-zinc max-w-none dark:prose-invert">
+      <p>These Terms govern your use of <strong>CoolVPN</strong>, operated by
+         <strong>{{ COMPANY_NAME|default:"Sipahi Software Ltd." }}</strong>. By using the Service, you agree to these Terms.</p>
+
+      <h2>1) Account & Eligibility</h2>
+      <ul>
+        <li>You must be legally capable to contract in your jurisdiction.</li>
+        <li>Keep credentials confidential; you’re responsible for account activity.</li>
+      </ul>
+
+      <h2>2) License</h2>
+      <p>We grant a limited, revocable, non-transferable license to use the Service in accordance with these Terms.</p>
+
+      <h2>3) Acceptable Use</h2>
+      <p>Do not use the Service for illegal activities, infringement, spam/DDoS, malware, or to bypass limits/abuse the network.
+         We may suspend/terminate for violations.</p>
+
+      <h2>4) Privacy & No-Logs</h2>
+      <p>We operate with a no-activity-logs practice as described in our
+         <a href="{% url 'home' %}privacy-policy/" class="underline decoration-zinc-300 dark:decoration-zinc-600 hover:no-underline">Privacy Policy</a>.</p>
+
+      <h2>5) Features & Fair Use</h2>
+      <p>All plans include always-on protection, auto-connect, Kill Switch, optional ad/tracker blocking, per-tab routing (Chrome),
+         DPI bypass/Stealth profiles, and access to our multi-Gbps backbone. Capacity varies by region and conditions; we may apply fair-use
+         to maintain stability.</p>
+      <p><strong>Annual+ (Dedicated server)</strong> on eligible annual plans: single-tenant node with consistent IP. Geography and provisioning times vary.</p>
+
+      <h2>6) Availability & Changes</h2>
+      <p>Service is provided “as is” and “as available.” We may update features, clients, or discontinue legacy versions for security.</p>
+
+      <h2>7) Payments, Renewals, Refunds</h2>
+      <ul>
+        <li>Subscriptions renew automatically unless canceled.</li>
+        <li>Prices/currencies/taxes depend on billing region.</li>
+        <li>Refunds follow our <a href="/refunds/" class="underline decoration-zinc-300 dark:decoration-zinc-600 hover:no-underline">Refund Policy</a>.</li>
+      </ul>
+
+      <h2>8) Disclaimers</h2>
+      <p>No guarantee of access to every third-party platform; geo-unblocking can vary due to third-party countermeasures.</p>
+
+      <h2>9) Limitation of Liability</h2>
+      <p>To the maximum extent permitted by law, we’re not liable for indirect/special/consequential damages or lost data/profits.
+         Aggregate liability is limited to fees paid in the 12 months preceding the claim.</p>
+
+      <h2>10) Termination</h2>
+      <p>You may cancel anytime. We may suspend or terminate for breach, abuse, or non-payment. License ends upon termination.</p>
+
+      <h2>11) Governing Law & Disputes</h2>
+      <p>Governing law and venue: <strong>{{ GOVERNING_LAW|default:"England & Wales" }}</strong>;
+         courts of <strong>{{ VENUE|default:"London, UK" }}</strong> have exclusive jurisdiction (consumers retain non-waivable rights).</p>
+
+      <h2>12) Contact</h2>
+      <p>
+        <strong>{{ COMPANY_NAME|default:"Sipahi Software Ltd." }}</strong><br>
+        Email: <a href="mailto:{{ SUPPORT_EMAIL|default:'support@coolvpn.app' }}">{{ SUPPORT_EMAIL|default:'support@coolvpn.app' }}</a>
+      </p>
+    </article>
+
+    <div class="mt-10 flex flex-wrap gap-3">
+      <a href="{% url 'pricing' %}" class="inline-flex items-center rounded-lg px-4 py-2
+         bg-emerald-600 text-white font-medium shadow hover:bg-emerald-500">
+        View Plans
+      </a>
+      <a href="{% url 'home' %}" class="inline-flex items-center rounded-lg px-4 py-2
+         border border-zinc-200 text-zinc-700 hover:bg-zinc-50
+         dark:border-white/10 dark:text-zinc-200 dark:hover:bg-white/5">
+        Back to Home
+      </a>
+    </div>
+  </main>
+</body>
+</html>

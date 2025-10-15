@@ -32,6 +32,9 @@ urlpatterns = [
     path("api/payment/nowpayments/ipn/", views.nowpayments_ipn, name="nowpayments_ipn"),
     
     path("api/extension/handshake/", views.extension_handshake, name="extension_handshake"),
+    
+    path("privacy-policy/", views.privacy_policy, name="privacy_policy"),
+    path("terms/", views.terms_of_service, name="terms_of_service"),
 ]
 
 

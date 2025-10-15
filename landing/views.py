@@ -1167,3 +1167,13 @@ def extension_handshake(request):
     }
     print(f"[handshake] RESP {resp}")
     return JsonResponse(resp)
+
+
+
+def privacy_policy(request):
+    today_iso = timezone.localdate().isoformat()
+    return render(request, "landing/privacy_policy.html", {"today_iso": today_iso})
+
+def terms_of_service(request):
+    today_iso = timezone.localdate().isoformat()
+    return render(request, "landing/terms.html", {"today_iso": today_iso})

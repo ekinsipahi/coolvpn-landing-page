@@ -1,0 +1,148 @@
+{% load static i18n %}
+{% now "Y-m-d" as today_iso %}
+
+<!doctype html>
+<html lang="en" class="h-full" >
+<head>
+  <meta charset="utf-8">
+  <title>Privacy Policy · CoolVPN</title>
+  <meta name="description" content="CoolVPN Privacy Policy — no activity logs, minimal telemetry, on-device ad & tracker blocking.">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="{% static 'css/tailwind.css' %}" rel="stylesheet">
+  <link rel="icon" href="{% static 'img/favicon.ico' %}">
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "name": "Sipahi Software Ltd.",
+      "url": "https://coolvpn.app",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://coolvpn.app{% static 'img/COOLVPN-LOGO.png' %}"
+      }
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://coolvpn.app/" },
+        { "@type": "ListItem", "position": 2, "name": "Terms of Service", "item": "https://coolvpn.app/terms/" }
+      ]
+    },
+    {
+      "@type": "TermsOfService",
+      "name": "CoolVPN Terms of Service",
+      "inLanguage": "en",
+      "url": "https://coolvpn.app/terms/",
+      "dateModified": "2025-10-15",
+      "publisher": { "@type": "Organization", "name": "Sipahi Software Ltd.", "url": "https://coolvpn.app" },
+      "isPartOf": { "@type": "WebSite", "url": "https://coolvpn.app", "name": "CoolVPN" }
+    }
+  ]
+}
+</script>
+
+</head>
+<body class="h-full bg-white text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-100">
+  <main class="mx-auto max-w-3xl px-4 py-10 sm:py-14">
+    <!-- Header / Breadcrumb -->
+    <nav class="mb-6 text-sm text-zinc-500 dark:text-zinc-400">
+      <a href="{% url 'home' %}" class="hover:text-zinc-800 dark:hover:text-zinc-200">Home</a>
+      <span class="mx-2">/</span>
+      <span>Privacy Policy</span>
+    </nav>
+
+    <header class="mb-8">
+      <h1 class="text-3xl font-extrabold tracking-tight sm:text-4xl">Privacy Policy</h1>
+      <p class="mt-2 text-zinc-600 dark:text-zinc-400">
+        Last updated: {{ today_iso }}
+      </p>
+    </header>
+
+    <article class="prose prose-zinc max-w-none dark:prose-invert">
+      <p><strong>CoolVPN</strong> (“we”, “us”, “our”) is provided by
+        <strong>{{ COMPANY_NAME|default:"Sipahi Software Ltd." }}</strong>.
+        This policy explains what we collect, why, and your choices.</p>
+
+      <h2>Summary</h2>
+      <ul>
+        <li>We <strong>do not log</strong> your browsing activity, DNS queries, or traffic content.</li>
+        <li>Only minimal account/billing data is kept to operate the service and comply with law.</li>
+        <li>The browser extension applies ad/tracker blocking <em>on-device</em> via DNR. Data is not sold.</li>
+      </ul>
+
+      <h2>Data We Process</h2>
+      <h3>Account Data</h3>
+      <p>Email or federated ID, subscription status/plan, invoices and payment status; optional device nickname.</p>
+
+      <h3>Payments</h3>
+      <p>Processed by third-party gateways; we receive non-sensitive metadata (paid/failed/refunded, currency, plan).
+         We do not store full card numbers.</p>
+
+      <h3>Service Telemetry (Minimal)</h3>
+      <p>Authentication events (success/fail timestamps), device identifier (seat limits/abuse prevention),
+         aggregate server load (no activity/content ties). Retention is short and limited.</p>
+
+      <h3>No Activity Logs</h3>
+      <p>We do <strong>not</strong> collect: websites visited, app content, original IP after connection, DNS lookups, or payloads.</p>
+
+      <h2>Extension Permissions</h2>
+      <ul>
+        <li><code>proxy</code> — to route browser traffic via VPN proxy.</li>
+        <li><code>declarativeNetRequest</code> — optional on-device ad & tracker blocking.</li>
+        <li><code>storage</code> — preferences (auto-connect, kill switch, ad-block) & client UUID.</li>
+        <li><code>tabs</code> (if enabled) — used for per-tab routing decisions; page contents aren’t read.</li>
+      </ul>
+
+      <h2>Cookies & Local Storage</h2>
+      <p>Website uses session/CSRF cookies; extension stores preferences and client UUID locally/sync.</p>
+
+      <h2>Legal Bases (GDPR)</h2>
+      <ul>
+        <li>Contract performance — providing the VPN.</li>
+        <li>Legitimate interests — abuse prevention, security.</li>
+        <li>Consent — optional marketing emails.</li>
+      </ul>
+
+      <h2>Retention</h2>
+      <p>Account/billing per statutory periods; device links while active; security logs short-lived unless needed for incidents.</p>
+
+      <h2>Your Rights</h2>
+      <p>Where applicable, you may request access, correction, deletion, portability, or object/restrict.
+         Contact: <a href="mailto:{{ SUPPORT_EMAIL|default:'support@coolvpn.app' }}">{{ SUPPORT_EMAIL|default:'support@coolvpn.app' }}</a>.</p>
+
+      <h2>International Transfers</h2>
+      <p>We may use providers outside your country with appropriate safeguards (e.g., SCCs where applicable).</p>
+
+      <h2>Security</h2>
+      <p>Encrypted transport, hardened infra, least-privilege access, regular patching.</p>
+
+      <h2>Children</h2>
+      <p>Not intended for under 16s.</p>
+
+      <h2>Contact</h2>
+      <p>
+        Controller: <strong>{{ COMPANY_NAME|default:"Sipahi Software Ltd." }}</strong><br>
+        Email: <a href="mailto:{{ SUPPORT_EMAIL|default:'support@coolvpn.app' }}">{{ SUPPORT_EMAIL|default:'support@coolvpn.app' }}</a>
+      </p>
+
+      <h2>Changes</h2>
+      <p>We may update this policy. We’ll post changes here and update the “Last updated” date.</p>
+    </article>
+
+    <!-- footer cta -->
+    <div class="mt-10 flex flex-wrap gap-3">
+      <a href="{% url 'pricing' %}" class="inline-flex items-center rounded-lg px-4 py-2
+         bg-emerald-600 text-white font-medium shadow hover:bg-emerald-500">
+        View Plans
+      </a>
+      <a href="{% url 'home' %}" class="inline-flex items-center rounded-lg px-4 py-2
+         border border-zinc-200 text-zinc-700 hover:bg-zinc-50
+         dark:border-white/10 dark:text-zinc-200 dark:hover:bg-white/5">
+        Back to Home
+      </a>
+    </div>
+  </main>
+</body>
+</html>
