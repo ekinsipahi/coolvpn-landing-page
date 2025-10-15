@@ -1007,78 +1007,123 @@ def device_revoke(request):
 
 
 
-def _active_sub_for_user(user):
+def _active_sub_for_user_id(user_id: int):
     """
-    Sadece kullanıcıya bakar: aktif subscription var mı?
-    DateTimeField olduğu için: ends_at is null OR ends_at >= now (veya date>=today).
+    Verilen user_id için aktif subscription objesini döndür (yoksa None).
+    DateTimeField ends_at için:
+      aktif = (ends_at is null) OR (ends_at >= now)  [date>=today guard’ı da ekli]
     """
+    if not user_id:
+        return None
+
     now = timezone.now()
     today = timezone.localdate()
     ends_field = Subscription._meta.get_field('ends_at')
 
-    qs = Subscription.objects.filter(user=user)
+    qs = Subscription.objects.filter(user_id=user_id)
     if isinstance(ends_field, DateTimeField):
-        qs = qs.filter(Q(ends_at__isnull=True) | Q(ends_at__gte=now) | Q(ends_at__date__gte=today))
+        qs = qs.filter(
+            Q(ends_at__isnull=True) |
+            Q(ends_at__gte=now) |
+            Q(ends_at__date__gte=today)
+        )
     else:
         qs = qs.filter(Q(ends_at__isnull=True) | Q(ends_at__gte=today))
 
     sub = qs.order_by('-ends_at').first()
-    print(f"[_active_sub_for_user] user_id={getattr(user,'id',None)} now={now} hit={bool(sub)}")
+    print(f"[_active_sub_for_user_id] user_id={user_id} now={now} hit={bool(sub)}")
     return sub
 
 
-def _resolve_premium_by_client_uuid(client_uuid: str):
+def _best_active_sub_among_users(user_ids):
     """
-    1) Aynı client_uuid'ye sahip TÜM **aktif cihazları** bul (is_active=True).
-    2) Bu cihazların kullanıcıları arasında **aktif aboneliği** olan var mı? (en geç biten kazanır)
-    3) O kullanıcı altındaki (client_uuid eşleşen) **aktif cihazın** uuid’sini döndür.
-
-    Dönüş: (premium_bool, resolved_user_id_or_None, device_uuid_or_None)
+    Aday user_id’ler arasında en iyi (bitişi en geç) aktif subscription’ı seç.
+    Dönüş: {'user_id': int, 'id': sub_id, 'ends_at': dt} veya None
     """
-    if not client_uuid:
-        print("[_resolve_premium_by_client_uuid] empty client_uuid -> skip")
-        return (False, None, None)
+    if not user_ids:
+        return None
 
     now = timezone.now()
     today = timezone.localdate()
     ends_field = Subscription._meta.get_field('ends_at')
 
-    # 1) Aynı client_uuid + aktif cihazlar
+    qs = Subscription.objects.filter(user_id__in=user_ids)
+    if isinstance(ends_field, DateTimeField):
+        qs = qs.filter(
+            Q(ends_at__isnull=True) |
+            Q(ends_at__gte=now) |
+            Q(ends_at__date__gte=today)
+        )
+    else:
+        qs = qs.filter(Q(ends_at__isnull=True) | Q(ends_at__gte=today))
+
+    row = qs.order_by('-ends_at').values('user_id', 'id', 'ends_at').first()
+    print(f"[_best_active_sub_among_users] candidates={user_ids} result={row}")
+    return row or None
+
+
+def _resolve_premium_by_client_uuid(client_uuid: str):
+    """
+    1) Aynı client_uuid’ye sahip TÜM **aktif** cihazları bul (is_active=True).
+    2) Bu cihazların kullanıcıları (distinct user_id) arasında **aktif aboneliği** olan var mı?
+       -> En geç biteni (max ends_at) seç.
+    3) Seçilen kullanıcı altında, yine **aynı client_uuid**’ye sahip **aktif** cihazlardan
+       last_seen en yeni olanın `uuid`'sini döndür.
+
+    Ek: Seçilen kullanıcının **tüm aktif cihazlarının client_uuid** listesini de (debug için) çıkarıyoruz.
+
+    Dönüş: (premium_bool, resolved_user_id_or_None, device_uuid_or_None, user_all_client_uuids_list)
+    """
+    if not client_uuid:
+        print("[_resolve_premium_by_client_uuid] empty client_uuid -> skip")
+        return (False, None, None, [])
+
+    # 1) aynı client_uuid + aktif cihazlar
     dev_qs = (
         Device.objects
         .filter(client_uuid=client_uuid, is_active=True)
-        .order_by('-last_seen')  # sadece sıralama, join yok
+        .only('id', 'user_id', 'uuid', 'client_uuid', 'is_active', 'last_seen')
+        .order_by('-last_seen')  # performans: sıralama ama join yok
     )
     user_ids = list(dev_qs.values_list('user_id', flat=True).distinct())
     print(f"[_resolve_premium_by_client_uuid] client_uuid={client_uuid} active_devices={dev_qs.count()} distinct_users={user_ids}")
 
     if not user_ids:
-        return (False, None, None)
+        return (False, None, None, [])
 
-    # 2) Bu kullanıcılar içinde aktif subscription arıyoruz
-    sub_qs = Subscription.objects.filter(user_id__in=user_ids)
-    if isinstance(ends_field, DateTimeField):
-        sub_qs = sub_qs.filter(Q(ends_at__isnull=True) | Q(ends_at__gte=now) | Q(ends_at__date__gte=today))
-    else:
-        sub_qs = sub_qs.filter(Q(ends_at__isnull=True) | Q(ends_at__gte=today))
-
-    sub_hit = sub_qs.order_by('-ends_at').values('user_id', 'id', 'ends_at').first()
-    if not sub_hit:
+    # 2) bu kullanıcılar içinde en iyi aktif abonelik
+    best = _best_active_sub_among_users(user_ids)
+    if not best:
         print(f"[_resolve_premium_by_client_uuid] no active sub among users={user_ids}")
-        return (False, None, None)
+        return (False, None, None, [])
 
-    resolved_user_id = sub_hit['user_id']
+    resolved_user_id = best['user_id']
 
-    # 3) O kullanıcı altında bu client_uuid’ye sahip **aktif** cihazın uuid’si
+    # 3) resolved user altında bu client_uuid’ye sahip aktif cihazın uuid’si (en yeni last_seen)
     device_uuid = (
-        dev_qs.filter(user_id=resolved_user_id)
+        Device.objects
+        .filter(user_id=resolved_user_id, client_uuid=client_uuid, is_active=True)
+        .order_by('-last_seen')
         .values_list('uuid', flat=True)
         .first()
     )
     device_uuid = str(device_uuid) if device_uuid else None
 
-    print(f"[_resolve_premium_by_client_uuid] RESOLVED user_id={resolved_user_id} device_uuid={device_uuid} sub_id={sub_hit['id']} ends_at={sub_hit['ends_at']}")
-    return (True, resolved_user_id, device_uuid)
+    # debug: bu hesabın aktif client_uuid set’i
+    user_all_client_uuids = list(
+        Device.objects
+        .filter(user_id=resolved_user_id, is_active=True)
+        .exclude(client_uuid="")
+        .values_list('client_uuid', flat=True)
+        .distinct()
+    )
+
+    print(
+        f"[_resolve_premium_by_client_uuid] RESOLVED user_id={resolved_user_id} "
+        f"device_uuid={device_uuid} sub_id={best['id']} ends_at={best['ends_at']} "
+        f"user_all_client_uuids={user_all_client_uuids}"
+    )
+    return (True, resolved_user_id, device_uuid, user_all_client_uuids)
 
 
 @csrf_exempt
@@ -1087,15 +1132,17 @@ def extension_handshake(request):
     POST JSON: {"client_uuid": "<optional>"}
     Response:
       {
-        "premium": bool,               # client_uuid tarafında aktif abonelik varsa True
-        "device_uuid": "<uuid>|null",  # o kullanıcı altındaki aktif device’ın uuid’si
-        "existing": bool               # current user altında bu client_uuid’ye ait aktif device var mı?
+        "premium": bool,                # client_uuid tarafında aktif abonelik varsa True
+        "device_uuid": "<uuid>|null",   # resolved user altındaki aynı client_uuid’ye sahip aktif device’ın uuid’si
+        "existing": bool,               # (sadece login ise) current user altında bu client_uuid’ye ait aktif device var mı?
+        "linked_client_uuids": [..]     # (debug/ops amaçlı) resolved user’ın aktif cihazlarındaki tüm client_uuid’ler
       }
 
+    Notlar:
     - Yeni Device OLUŞTURMAZ.
-    - client_uuid boşsa sadece current user’ın premium’unu kontrol eder.
-    - client_uuid doluysa: TÜM user’larda (aktif cihazlar) kontrol eder,
-      aktif aboneliği olan user bulunursa onu baz alır (premium=True).
+    - Login gerekmez. Anonymous istekler çalışır.
+    - Bir client_uuid birden fazla hesaba bağlıysa, **aktif aboneliği olan** ve **ends_at en geç olan**
+      kullanıcı seçilir. “En doğru olanı” = “subscription’ı kesin ve en uzun kalan”.
     """
     if request.method != "POST":
         return HttpResponseBadRequest("POST only")
@@ -1106,77 +1153,37 @@ def extension_handshake(request):
         data = {}
 
     client_uuid = (data.get("client_uuid") or "").strip()
+    print(f"[handshake] client_uuid={client_uuid!r}")
 
-    # Varsayılan: mevcut kullanıcının durumu
-    premium_by_current = _active_sub_for_user(request.user) is not None
+    premium = False
+    device_uuid = None
+    linked_client_uuids = []
 
-    # UUID varsa, tüm user’lara göre çöz (aktif cihazlar)
     if client_uuid:
-        premium_by_uuid, resolved_user_id, resolved_device_uuid = _resolve_premium_by_client_uuid(client_uuid)
-        premium = premium_by_uuid  # UUID tarafı baskın
+        premium_by_uuid, resolved_user_id, resolved_device_uuid, user_client_uuids = _resolve_premium_by_client_uuid(client_uuid)
+        premium = premium_by_uuid
         device_uuid = resolved_device_uuid
+        linked_client_uuids = user_client_uuids
     else:
-        premium = premium_by_current
+        # UUID gelmediyse premium = False kabul ediyoruz (isteğine göre 400 da yapabilirsin)
+        premium = False
         device_uuid = None
 
-    # existing: current user altında bu uuid’ye ait **aktif** device var mı?
+    # existing: sadece login ise kontrol et (Anonymous ise False)
     existing = False
-    if client_uuid:
-        existing = Device.objects.filter(user=request.user, client_uuid=client_uuid, is_active=True).exists()
+    if client_uuid and getattr(request.user, 'is_authenticated', False):
+        existing = Device.objects.filter(
+            user_id=getattr(request.user, 'id', None),
+            client_uuid=client_uuid,
+            is_active=True
+        ).exists()
 
     resp = {
         "premium": bool(premium),
         "device_uuid": device_uuid,
         "existing": bool(existing),
-    }
-    print(f"[handshake] RESP {resp}")
-    return JsonResponse(resp)
-
-    """
-    POST JSON: {"client_uuid": "<optional>"}
-    Response:
-      {
-        "premium": bool,           # client_uuid tarafında aktif abonelik varsa True
-        "device_uuid": "<uuid>|null",  # o kullanıcı altındaki aktif device’ın uuid’si
-        "existing": bool               # current user altında bu client_uuid’ya ait aktif device var mı?
-      }
-
-    - Kesinlikle yeni Device oluşturmaz.
-    - client_uuid boşsa sadece current user’ın premium’unu kontrol eder.
-    - client_uuid doluysa TÜM user’larda (aktif cihazlar) kontrol eder,
-      aktif aboneliği olan user bulunursa onu baz alır (premium=True).
-    """
-    if request.method != "POST":
-        return HttpResponseBadRequest("POST only")
-
-    try:
-        data = json.loads(request.body.decode("utf-8") or "{}")
-    except Exception:
-        data = {}
-
-    client_uuid = (data.get("client_uuid") or "").strip()
-
-    # Varsayılan: mevcut kullanıcının durumu
-    premium_by_current = _active_sub_for_user(request.user) is not None
-
-    # Eğer client_uuid gelmişse: tüm user’lar arasında çöz
-    if client_uuid:
-        premium_by_uuid, resolved_user_id, resolved_device_uuid = _resolve_premium_by_client_uuid(client_uuid)
-        premium = premium_by_uuid  # İSTENEN DAVRANIŞ: UUID tarafı baskın
-        device_uuid = resolved_device_uuid
-    else:
-        premium = premium_by_current
-        device_uuid = None
-
-    # existing: current user altında bu uuid’ye ait aktif device var mı?
-    existing = False
-    if client_uuid:
-        existing = Device.objects.filter(user=request.user, client_uuid=client_uuid, is_active=True).exists()
-
-    resp = {
-        "premium": bool(premium),
-        "device_uuid": device_uuid,   # yoksa None döner
-        "existing": bool(existing)
+        # ops/debug için faydalı; UI’da göstermek zorunda değilsin.
+        "linked_client_uuids": linked_client_uuids,
     }
     print(f"[handshake] RESP {resp}")
     return JsonResponse(resp)
