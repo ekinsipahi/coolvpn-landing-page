@@ -115,7 +115,7 @@ def home(request):
             "name": ctx.get("site_name", "CoolVPN"),
             "inLanguage": getattr(request, "LANGUAGE_CODE", getattr(settings, "LANGUAGE_CODE", "en")),
             "url": request.build_absolute_uri(),
-            "image": logo_abs,
+            "image": [logo_abs],
             "category": "VPN",
             "applicationCategory": "SecurityApplication",
             "operatingSystem": "iOS, Android, Windows, macOS, Linux, Chrome",
@@ -128,7 +128,7 @@ def home(request):
                 "audienceType": "Consumers",
                 "suggestedMinAge": 18,
                 "suggestedMaxAge": 60,
-                "suggestedGender": "Any",
+                "suggestedGender": "Unisex",
                 "geographicArea": {"@type": "Country", "name": region_code or "Global"}
             },
             # offers: hem bölgeye özel kısa offer, hem Google için "offers" listesi -> tüm offers_list'i de koyabiliriz.
