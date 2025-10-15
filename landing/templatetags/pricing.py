@@ -124,45 +124,85 @@ def _abs_localized_url(request, viewname: str) -> str:
 def build_all_offers_json(pricing_by_country: dict, request) -> str:
     """
     Product.offers için TÜM ülkeler (monthly + 6-month + annual)
-    Her offer içine minimal shippingDetails + hasMerchantReturnPolicy eklenir.
+    -> Her offer için:
+       - shippingDetails (deliveryTime dahil)
+       - hasMerchantReturnPolicy (DAİMA var):
+           * US+EU (Tier A + AT/CH) -> 30 gün iade (Finite)
+           * Diğer ülkeler -> iade yok (NotPermitted)
     """
+    EU_OR_TIERA_ISO = ["US", "GB", "DE", "FR", "IT", "NL", "ES", "AT", "CH"]
+
+    def make_shipping_details(cc: str, currency: str) -> dict:
+        return {
+            "@type": "OfferShippingDetails",
+            "shippingDestination": {
+                "@type": "DefinedRegion",
+                "addressCountry": cc
+            },
+            "shippingRate": {
+                "@type": "MonetaryAmount",
+                "value": "0",
+                "currency": currency
+            },
+            "deliveryTime": {
+                "@type": "ShippingDeliveryTime",
+                "handlingTime": {"@type": "QuantitativeValue", "minValue": 0, "maxValue": 0, "unitCode": "DAY"},
+                "transitTime":  {"@type": "QuantitativeValue", "minValue": 0, "maxValue": 0, "unitCode": "DAY"}
+            }
+        }
+
+    def make_return_policy(cc: str) -> dict:
+        if cc in EU_OR_TIERA_ISO:
+            # 30 gün iade
+            return {
+                "@type": "MerchantReturnPolicy",
+                "applicableCountry": cc,
+                "returnPolicyCountry": "IE",
+                "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+                "merchantReturnDays": 30,
+                "itemCondition": "https://schema.org/NewCondition",
+                "returnMethod": "https://schema.org/ReturnByMail",
+                "returnFees": "https://schema.org/FreeReturn",
+                "refundType": "https://schema.org/FullRefund",
+                "returnLabelSource": "https://schema.org/ReturnLabelCustomerResponsibility",
+                "returnPolicyUrl": request.build_absolute_uri("/return-policy/")
+            }
+        else:
+            # iade yok
+            return {
+                "@type": "MerchantReturnPolicy",
+                "applicableCountry": cc,
+                "returnPolicyCountry": "IE",
+                "returnPolicyCategory": "https://schema.org/MerchantReturnNotPermitted",
+                "itemCondition": "https://schema.org/NewCondition",
+                "returnMethod": "https://schema.org/ReturnByMail",
+                "returnFees": "https://schema.org/FreeReturn",
+                "refundType": "https://schema.org/FullRefund",
+                "returnLabelSource": "https://schema.org/ReturnLabelCustomerResponsibility",
+                "returnPolicyUrl": request.build_absolute_uri("/return-policy/")
+            }
+
     offers = []
     for cc, p in pricing_by_country.items():
         for plan_name, key in (
-            ("Monthly Plan", "monthly"),
-            ("6-Month Plan", "semiannual"),
-            ("Annual Plan", "annual"),
+            (_("Monthly Plan"), "monthly"),
+            (_("6-Month Plan"), "semiannual"),
+            (_("Annual Plan"), "annual"),
         ):
             price_val = p[key]
             price_str = f"{price_val:.2f}" if isinstance(price_val, float) else f"{price_val}"
-            # basit shippingDetails (örnek) -- ülke bazlı olabiliyor
-            shipping = {
-                "@type": "OfferShippingDetails",
-                "shippingDestination": {
-                    "@type": "DefinedRegion",
-                    "addressCountry": cc
-                },
-                "shippingRate": {
-                    "@type": "MonetaryAmount",
-                    "value": "0",
-                    "currency": p["currency"]
-                }
-            }
-            merchant_return = {
-                "@type": "MerchantReturnPolicy",
-                # Kısa/manifest bir kategori koyuyoruz; gerekirse detaylandır.
-                "returnPolicyCategory": "https://schema.org/MerchantReturnUnspecified"
-            }
 
-            offers.append({
+            offer = {
                 "@type": "Offer",
                 "name": plan_name,
                 "priceCurrency": p["currency"],
                 "price": price_str,
                 "availability": "https://schema.org/InStock",
                 "eligibleRegion": cc,
-                "url": _abs_localized_url(request, "pricing"),
-                "shippingDetails": shipping,
-                "hasMerchantReturnPolicy": merchant_return
-            })
+                "url": request.build_absolute_uri(reverse("pricing")),
+                "shippingDetails": make_shipping_details(cc, p["currency"]),
+                "hasMerchantReturnPolicy": make_return_policy(cc),
+            }
+            offers.append(offer)
+
     return json.dumps(offers, ensure_ascii=False)

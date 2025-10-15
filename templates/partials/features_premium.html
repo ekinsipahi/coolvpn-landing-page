@@ -189,7 +189,7 @@
           </span>
           <span class="text-sm text-gray-700 dark:text-gray-300">{% trans "Exclusive benefits on annual plans" %}</span>
         </div>
-        <a href="{% url 'pricing' %}?term=annual"
+        <a href="{% url 'pricing' %}"
            class="hidden sm:inline-flex items-center gap-2 text-sm font-medium
                   text-emerald-700 hover:text-emerald-600 dark:text-emerald-300 dark:hover:text-emerald-200">
           {% trans "See Annual pricing" %}
@@ -223,7 +223,7 @@
       </div>
 
       <div class="mt-8 text-center">
-        <a href="{% url 'pricing' %}?plan=annual"
+        <a href="{% url 'pricing' %}"
            class="inline-flex items-center justify-center rounded-xl px-5 py-3 text-white
                   bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 transition shadow-lg shadow-emerald-600/20">
           {% trans "Upgrade to Annual" %}

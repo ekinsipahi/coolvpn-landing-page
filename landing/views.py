@@ -64,7 +64,7 @@ def home(request):
         "audienceType": "Consumers",
         "suggestedMinAge": 18,
         "suggestedMaxAge": 60,
-        "suggestedGender": "Any"
+        "suggestedGender": "Unisex"
     }
     
     # temel ctx
