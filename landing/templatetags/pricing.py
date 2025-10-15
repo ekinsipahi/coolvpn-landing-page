@@ -2,6 +2,9 @@
 import json
 from django.urls import reverse
 from django.utils.translation import gettext as _
+from django.utils import timezone
+from landing.models import Subscription
+
 
 PRICING_BY_COUNTRY = {
     # Tier A
@@ -206,3 +209,19 @@ def build_all_offers_json(pricing_by_country: dict, request) -> str:
             offers.append(offer)
 
     return json.dumps(offers, ensure_ascii=False)
+
+
+def _get_active_subscription(user):
+    now = timezone.now()
+    return (Subscription.objects
+            .filter(user=user, ends_at__gte=now)
+            .order_by("-ends_at")
+            .first())
+
+def _entitlement_payload(user):
+    sub = _get_active_subscription(user)
+    return {
+        "premium": bool(sub is not None),
+        "expires_at": sub.ends_at.isoformat() if sub else None,
+        "plan": sub.plan_key if sub else None,
+    }

@@ -1004,3 +1004,43 @@ def device_revoke(request):
     messages.success(request, "Cihaz iptal edildi.")
     return redirect("dashboard")
 
+
+
+def _active_sub(user):
+    return (Subscription.objects
+            .filter(user=user, ends_at__gte=timezone.now())
+            .order_by("-ends_at")
+            .first())
+
+@csrf_exempt
+@login_required
+def extension_handshake(request):
+    """
+    POST body (JSON): {"client_uuid": "<optional>"}
+    Returns: {"device_uuid": "...", "premium": true/false}
+    """
+    if request.method != "POST":
+        return HttpResponseBadRequest("POST only")
+
+    try:
+        data = json.loads(request.body.decode("utf-8") or "{}")
+    except Exception:
+        data = {}
+
+    client_uuid = (data.get("client_uuid") or "").strip()
+
+    # device bul/oluştur (user + client_uuid unique)
+    dev = None
+    if client_uuid:
+        dev = Device.objects.filter(user=request.user, client_uuid=client_uuid).first()
+
+    if dev is None:
+        dev = Device.objects.create(user=request.user, client_uuid=client_uuid or "")
+
+    # premium kontrolü (sadece DB)
+    premium = _active_sub(request.user) is not None
+
+    return JsonResponse({
+        "device_uuid": str(dev.uuid),
+        "premium": premium,
+    })
