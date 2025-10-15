@@ -30,6 +30,8 @@ urlpatterns = [
     path("api/payment/nowpay/reconcile/", views.nowpay_reconcile, name="nowpay_reconcile"),
     path("payment/success/", views.payment_success, name="payment_success"),
     path("api/payment/nowpayments/ipn/", views.nowpayments_ipn, name="nowpayments_ipn"),
+    
+    path("api/extension/handshake/", views.extension_handshake, name="extension_handshake"),
 ]
 
 
