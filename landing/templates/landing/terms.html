@@ -33,22 +33,24 @@
       "@type": "BreadcrumbList",
       "itemListElement": [
         { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://coolvpn.app/" },
-        { "@type": "ListItem", "position": 2, "name": "Privacy Policy", "item": "https://coolvpn.app/privacy-policy/" }
+        { "@type": "ListItem", "position": 2, "name": "Terms of Service", "item": "https://coolvpn.app/terms/" }
       ]
     },
     {
-      "@type": "PrivacyPolicy",
-      "name": "CoolVPN Privacy Policy",
+      "@type": "TermsOfService",
+      "name": "CoolVPN Terms of Service",
       "inLanguage": "en",
-      "url": "https://coolvpn.app/privacy-policy/",
-      "dateModified": "2025-10-15",
+      "url": "https://coolvpn.app/terms/",
+      "dateModified": "{{ today_iso }}",
       "publisher": { "@type": "Organization", "name": "Sipahi Software Ltd.", "url": "https://coolvpn.app" },
       "isPartOf": { "@type": "WebSite", "url": "https://coolvpn.app", "name": "CoolVPN" },
-      "about": { "@type": "Product", "name": "CoolVPN", "url": "https://coolvpn.app" }
+      "mainEntityOfPage": { "@type": "WebPage", "@id": "https://coolvpn.app/terms/" }
+      /* not: burada "about": Product/Service eklemedik ki product zengin sonucu tetiklemesin */
     }
   ]
 }
 </script>
+
 </head>
 <body class="h-full bg-white text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-100">
   <main class="mx-auto max-w-3xl px-4 py-10 sm:py-14">
