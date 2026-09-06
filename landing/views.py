@@ -44,7 +44,7 @@ from landing.templatetags.pricing import (
     detect_country,
     get_pricing_for_request
 )
-from .models import Device, Order, Subscription
+from .models import Device, ExtensionLink, Order, Subscription
 
 
 # -----------------------------
@@ -1159,6 +1159,367 @@ def _resolve_premium_by_client_uuid(client_uuid: str):
 
 
 @csrf_exempt
+# ---- Eklenti: nonce ile cihaz bağlama (account.js sözleşmesi) ----
+
+def _mint_account_token(user, device_id: str, tier: str, exp_ts: int):
+    """İmzalı hesap token'ı: base64url(payload).base64url(HMAC_SHA256(secret, payload_b64))"""
+    import base64
+
+    secret = (getattr(settings, "EXTENSION_SHARED_SECRET", "") or "").encode()
+    payload = {
+        "v": 1,
+        "user_id": user.id,
+        "device_id": device_id or "",
+        "tier": tier,
+        "iat": int(time.time()),
+        "exp": int(exp_ts),
+        "iss": "vpnsterr.com",
+    }
+    payload_b64 = base64.urlsafe_b64encode(
+        json.dumps(payload, separators=(",", ":")).encode()
+    ).rstrip(b"=")
+    sig = base64.urlsafe_b64encode(
+        hmac.new(secret, payload_b64, hashlib.sha256).digest()
+    ).rstrip(b"=")
+    return (payload_b64 + b"." + sig).decode()
+
+
+def _verify_account_token(token: str):
+    """Payload dict döner; imza/format bozuksa None. exp kontrolü çağırana ait."""
+    import base64
+
+    try:
+        secret = (getattr(settings, "EXTENSION_SHARED_SECRET", "") or "").encode()
+        payload_b64, sig_b64 = token.encode().split(b".", 1)
+        want = base64.urlsafe_b64encode(
+            hmac.new(secret, payload_b64, hashlib.sha256).digest()
+        ).rstrip(b"=")
+        if not hmac.compare_digest(want, sig_b64.rstrip(b"=")):
+            return None
+        pad = b"=" * (-len(payload_b64) % 4)
+        return json.loads(base64.urlsafe_b64decode(payload_b64 + pad))
+    except Exception:
+        return None
+
+
+def _user_tier_and_exp(user):
+    """(tier, exp_ts): premium ise exp = abonelik bitişi; free ise 365 gün."""
+    sub = (
+        Subscription.objects
+        .filter(user=user, ends_at__gte=now())
+        .order_by("-ends_at")
+        .first()
+    )
+    if sub:
+        return "premium", int(sub.ends_at.timestamp()), sub
+    return "free", int(time.time()) + 365 * 86400, None
+
+
+@login_required
+def extension_link(request):
+    """
+    GET  /extension/link?nonce=..&device_id=..  -> onay sayfası (login zorunlu)
+    POST                                        -> nonce'u hesaba bağlar
+    """
+    nonce = (request.GET.get("nonce") or request.POST.get("nonce") or "").strip()
+    device_id = (request.GET.get("device_id") or request.POST.get("device_id") or "").strip()[:64]
+
+    if not (16 <= len(nonce) <= 64):
+        return render(request, "landing/extension_link.html", {"error": "bad_nonce"})
+
+    if request.method == "POST":
+        link, _created = ExtensionLink.objects.get_or_create(nonce=nonce)
+        if link.claimed:
+            return render(request, "landing/extension_link.html", {"error": "already_used"})
+        link.user = request.user
+        link.device_id = device_id or link.device_id
+        link.linked_at = now()
+        link.save(update_fields=["user", "device_id", "linked_at"])
+
+        # Cihazı hesapta göster (kapasite dolgunsa cihaz kaydını atla; token yine verilir)
+        dev_id = link.device_id
+        if dev_id:
+            device = Device.objects.filter(user=request.user, client_uuid=dev_id).first()
+            tier, _exp, sub = _user_tier_and_exp(request.user)
+            if device is None:
+                cap = plan_device_limit(sub.plan_key if sub else None)
+                used = Device.objects.filter(user=request.user, is_active=True).count()
+                if used < cap:
+                    Device.objects.create(
+                        user=request.user, client_uuid=dev_id, platform="browser",
+                        name="Browser extension", is_active=True, last_subscription=sub,
+                    )
+            else:
+                device.is_active = True
+                device.last_seen = now()
+                device.last_subscription = sub or device.last_subscription
+                device.save(update_fields=["is_active", "last_seen", "last_subscription"])
+
+        return render(request, "landing/extension_link.html", {"linked": True})
+
+    return render(request, "landing/extension_link.html", {"nonce": nonce, "device_id": device_id})
+
+
+@csrf_exempt
+@require_POST
+def extension_link_claim(request):
+    """
+    POST /api/extension/link/claim  {nonce}
+      - bağlanmadıysa 425 (eklenti yoklamaya devam eder)
+      - bağlandıysa TEK SEFERLİK imzalı hesap token'ı: {token, email, plan}
+    """
+    if not getattr(settings, "EXTENSION_SHARED_SECRET", ""):
+        return JsonResponse({"ok": False, "error": "server_not_configured"}, status=500)
+    try:
+        data = json.loads(request.body.decode("utf-8") or "{}")
+    except Exception:
+        data = {}
+    nonce = (data.get("nonce") or "").strip()
+    link = ExtensionLink.objects.filter(nonce=nonce).select_related("user").first()
+    if not link or not link.user_id:
+        return JsonResponse({"ok": False, "error": "pending"}, status=425)
+    if link.claimed:
+        return JsonResponse({"ok": False, "error": "already_claimed"}, status=409)
+
+    tier, exp_ts, _sub = _user_tier_and_exp(link.user)
+    token = _mint_account_token(link.user, link.device_id, tier, exp_ts)
+    link.claimed = True
+    link.save(update_fields=["claimed"])
+    return JsonResponse({
+        "ok": True,
+        "token": token,
+        "email": link.user.email or "",
+        "plan": tier,
+    })
+
+
+@csrf_exempt
+@require_POST
+def extension_link_refresh(request):
+    """
+    POST /api/extension/link/refresh   (Authorization: Bearer <eski token>)
+    Süresi geçmiş olsa bile imzası geçerli token'ı alır, tier'ı DB'den yeniden
+    çözer ve TAZE token döner. Abonelik yenilenince premium'a dönüş yolu budur.
+    """
+    auth = request.headers.get("Authorization", "")
+    token = auth[7:].strip() if auth.startswith("Bearer ") else ""
+    payload = _verify_account_token(token)
+    if not payload:
+        return JsonResponse({"ok": False, "error": "invalid_token"}, status=401)
+    user = User.objects.filter(id=payload.get("user_id")).first()
+    if not user:
+        return JsonResponse({"ok": False, "error": "no_user"}, status=401)
+    tier, exp_ts, _sub = _user_tier_and_exp(user)
+    fresh = _mint_account_token(user, payload.get("device_id") or "", tier, exp_ts)
+    return JsonResponse({"ok": True, "token": fresh, "email": user.email or "", "plan": tier})
+
+
+@csrf_exempt
+@require_POST
+def extension_link_revoke(request):
+    """POST /api/extension/link/revoke (Bearer token) — cihazı pasifleştirir."""
+    auth = request.headers.get("Authorization", "")
+    token = auth[7:].strip() if auth.startswith("Bearer ") else ""
+    payload = _verify_account_token(token)
+    if not payload:
+        return JsonResponse({"ok": True})  # best-effort: eklenti zaten yerelde sildi
+    Device.objects.filter(
+        user_id=payload.get("user_id"),
+        client_uuid=payload.get("device_id") or "__none__",
+    ).update(is_active=False)
+    return JsonResponse({"ok": True})
+
+
+# ---- Eklenti: JSON login/logout (CSRF-muaf; popup'taki Login/Register ekranı için) ----
+
+@csrf_exempt
+@require_POST
+def extension_login(request):
+    """
+    POST /api/extension/login/   Body (JSON): {email, password, mode?}
+      mode: "login"    -> hesap yoksa hata (no_account)
+            "register" -> hesap varsa ve parola yanlışsa hata; yoksa oluştur
+            "auto"     -> (varsayılan) varsa giriş, yoksa kayıt (upsert)
+    Başarıda Django session cookie set edilir; eklenti sonrasında
+    /api/extension/auth-token/ çağırarak imzalı premium token'ını alır.
+    """
+    try:
+        data = json.loads(request.body.decode("utf-8") or "{}")
+    except Exception:
+        data = {}
+
+    email = (data.get("email") or "").strip().lower()
+    password = data.get("password") or ""
+    mode = (data.get("mode") or "auto").strip().lower()
+
+    if not email:
+        return JsonResponse({"ok": False, "error": "missing_email"}, status=400)
+    try:
+        validate_email(email)
+    except ValidationError:
+        return JsonResponse({"ok": False, "error": "invalid_email"}, status=400)
+    if len(password) < 6:
+        return JsonResponse({"ok": False, "error": "weak_password"}, status=400)
+
+    user = User.objects.filter(email__iexact=email).first()
+    backend_path = pick_backend()
+
+    if user:
+        if user.has_usable_password():
+            u = authenticate(request, username=user.username, password=password)
+            if not u:
+                return JsonResponse({"ok": False, "error": "invalid_credentials"}, status=400)
+            auth_login(request, u, backend=backend_path)
+            return JsonResponse({"ok": True, "email": email, "created": False})
+        # Google ile açılmış hesap: parola belirle + login
+        user.set_password(password)
+        user.save(update_fields=["password"])
+        auth_login(request, user, backend=backend_path)
+        return JsonResponse({"ok": True, "email": email, "created": False})
+
+    if mode == "login":
+        return JsonResponse({"ok": False, "error": "no_account"}, status=404)
+
+    base_username = email.split("@")[0][:150]
+    username = base_username
+    i = 1
+    while User.objects.filter(username=username).exclude(email__iexact=email).exists():
+        suffix = f"-{i}"
+        username = f"{base_username[:150-len(suffix)]}{suffix}"
+        i += 1
+    user = User.objects.create(username=username, email=email)
+    user.set_password(password)
+    user.save()
+    auth_login(request, user, backend=backend_path)
+    return JsonResponse({"ok": True, "email": email, "created": True})
+
+
+@csrf_exempt
+@require_POST
+def extension_logout(request):
+    from django.contrib.auth import logout as _logout
+    _logout(request)
+    return JsonResponse({"ok": True})
+
+
+# ---- Eklenti: imzalı yetki token'ı (site = imza otoritesi, havuz = doğrulayıcı) ----
+
+def _mint_extension_token(device_id: str, tier: str, user_id):
+    """
+    Kompakt HMAC token: base64url(payload_json) + "." + base64url(HMAC_SHA256(secret, payload_b64))
+    Havuz aynı EXTENSION_SHARED_SECRET ile doğrular; payload.tier'a güvenir.
+    """
+    import base64
+
+    secret = (getattr(settings, "EXTENSION_SHARED_SECRET", "") or "").encode()
+    ttl = int(getattr(settings, "EXTENSION_TOKEN_TTL_SECONDS", 3600))
+    iat = int(time.time())
+    payload = {
+        "device_id": device_id,
+        "tier": tier,
+        "user_id": user_id,
+        "iat": iat,
+        "exp": iat + ttl,
+        "iss": "vpnsterr.com",
+    }
+    payload_b64 = base64.urlsafe_b64encode(
+        json.dumps(payload, separators=(",", ":")).encode()
+    ).rstrip(b"=")
+    sig = hmac.new(secret, payload_b64, hashlib.sha256).digest()
+    sig_b64 = base64.urlsafe_b64encode(sig).rstrip(b"=")
+    return (payload_b64 + b"." + sig_b64).decode(), ttl
+
+
+@csrf_exempt
+def extension_auth_token(request):
+    """
+    POST /api/extension/auth-token/   (eklenti, credentials: 'include' ile çağırır)
+    Body: {"device_id": "<uuid>", "device_name": "...", "platform": "..."}
+
+    Kullanıcı bu tarayıcıda vpnsterr.com'a giriş yaptıysa session cookie gelir:
+      - cihaz hesaba bağlanır/aktifleştirilir (kapasite kontrollü)
+      - aktif abonelik varsa tier=premium, yoksa free
+      - siteden İMZALI token döner; eklenti bunu havuzun session ucuna verir.
+    Giriş yoksa 401 {error:"login_required"} → eklenti Login/Register ekranını gösterir.
+    """
+    if request.method != "POST":
+        return HttpResponseBadRequest("POST only")
+
+    if not request.user.is_authenticated:
+        return JsonResponse({"ok": False, "error": "login_required"}, status=401)
+
+    if not getattr(settings, "EXTENSION_SHARED_SECRET", ""):
+        return JsonResponse({"ok": False, "error": "server_not_configured"}, status=500)
+
+    try:
+        data = json.loads(request.body.decode("utf-8") or "{}")
+    except Exception:
+        data = {}
+
+    device_id = (data.get("device_id") or "").strip()
+    if not (8 <= len(device_id) <= 64):
+        return JsonResponse({"ok": False, "error": "bad_device_id"}, status=400)
+
+    device_name = (data.get("device_name") or "").strip()[:80] or "Browser extension"
+    platform = (data.get("platform") or "browser").strip()[:24] or "browser"
+
+    _now = now()
+    active_sub = (
+        Subscription.objects
+        .filter(user=request.user, ends_at__gte=_now)
+        .order_by("-ends_at")
+        .first()
+    )
+
+    # Cihazı bağla / aktifleştir (kapasite kontrolü yeni cihaz için)
+    device = Device.objects.filter(user=request.user, client_uuid=device_id).first()
+    if device is None:
+        cap = plan_device_limit(active_sub.plan_key if active_sub else None)
+        used = Device.objects.filter(user=request.user, is_active=True).count()
+        if used >= cap:
+            return JsonResponse({"ok": False, "error": "device_limit",
+                                 "used": used, "cap": cap}, status=409)
+        device = Device.objects.create(
+            user=request.user, client_uuid=device_id,
+            platform=platform, name=device_name,
+            is_active=True, last_subscription=active_sub,
+        )
+    else:
+        device.is_active = True
+        device.last_seen = _now
+        device.name = device_name or device.name
+        device.platform = platform or device.platform
+        device.last_subscription = active_sub or device.last_subscription
+        device.save(update_fields=["is_active", "last_seen", "name", "platform", "last_subscription"])
+
+    tier = "premium" if active_sub else "free"
+    token, ttl = _mint_extension_token(device_id, tier, request.user.id)
+
+    return JsonResponse({
+        "ok": True,
+        "token": token,
+        "tier": tier,
+        "premium": tier == "premium",
+        "expires_in": ttl,
+        "device_uuid": str(device.uuid),
+        "email": request.user.email or "",
+    })
+
+
+@login_required
+@require_POST
+def account_delete(request):
+    """Hesabı kalıcı sil (mağaza zorunluluğu + GDPR). Cascade: cihazlar/abonelikler."""
+    if request.POST.get("confirm") != "yes":
+        messages.error(request, "Please confirm account deletion.")
+        return redirect("dashboard")
+    user = request.user
+    from django.contrib.auth import logout as auth_logout
+    auth_logout(request)
+    user.delete()
+    return redirect("home")
+
+
 def extension_handshake(request):
     """
     POST JSON: {"client_uuid": "<required>"}

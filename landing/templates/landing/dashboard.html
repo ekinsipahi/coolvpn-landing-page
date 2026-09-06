@@ -226,29 +226,49 @@
           {% endif %}
         </div>
 
-        <!-- Cihaz ekle -->
+        <!-- Premium'u cihazda aktifleştirme (yeni akış: giriş = otomatik bağlanma) -->
         <div class="vs-card !p-6 md:!p-7">
-          <h3 class="text-sm font-bold uppercase tracking-wider" style="color:var(--vs-text-2)">{% trans "Add device by UUID" %}</h3>
+          <h3 class="text-sm font-bold uppercase tracking-wider" style="color:var(--vs-text-2)">{% trans "Activate Premium on a device" %}</h3>
           <p class="mt-1.5 text-xs" style="color:var(--vs-text-2)">
-            {% trans "Find the UUID inside the app or extension: Settings → Device ID. Paste it here to link the device to your account." %}
+            {% trans "No codes, no UUIDs. Sign in once and the device links itself to your account." %}
           </p>
-          <form method="post" id="form-add-device" class="mt-3 flex flex-col sm:flex-row gap-3 items-stretch sm:items-end">
+          <div class="mt-4 grid gap-3 sm:grid-cols-3">
+            <div class="rounded-xl p-4" style="background:var(--vs-card); border:1px solid var(--vs-line)">
+              <span class="grid h-7 w-7 place-content-center rounded-full text-xs font-bold text-white" style="background:linear-gradient(135deg, var(--vs-500), var(--vs-700))">1</span>
+              <p class="mt-2 text-xs font-semibold" style="color:var(--vs-text)">{% trans "Install the extension" %}</p>
+              <p class="mt-0.5 text-[11px]" style="color:var(--vs-text-2)">{% trans "Chrome, Edge, Brave or Opera" %}</p>
+            </div>
+            <div class="rounded-xl p-4" style="background:var(--vs-card); border:1px solid var(--vs-line)">
+              <span class="grid h-7 w-7 place-content-center rounded-full text-xs font-bold text-white" style="background:linear-gradient(135deg, var(--vs-500), var(--vs-700))">2</span>
+              <p class="mt-2 text-xs font-semibold" style="color:var(--vs-text)">{% trans "Sign in from the extension" %}</p>
+              <p class="mt-0.5 text-[11px]" style="color:var(--vs-text-2)">{% trans "Same email as this account" %}</p>
+            </div>
+            <div class="rounded-xl p-4" style="background:var(--vs-card); border:1px solid var(--vs-line)">
+              <span class="grid h-7 w-7 place-content-center rounded-full text-xs font-bold text-white" style="background:linear-gradient(135deg, var(--vs-500), var(--vs-700))">3</span>
+              <p class="mt-2 text-xs font-semibold" style="color:var(--vs-text)">{% trans "Premium unlocks instantly" %}</p>
+              <p class="mt-0.5 text-[11px]" style="color:var(--vs-text-2)">{% trans "The device appears in the list above — revoke it here any time" %}</p>
+            </div>
+          </div>
+          <div class="mt-4 flex flex-wrap gap-2">
+            <a href="{% url 'vpn_extension' %}" class="vs-btn vs-btn-ghost !px-4 !py-2 !text-xs">{% trans "Get the extension" %}</a>
+          </div>
+        </div>
+
+        <!-- Tehlikeli bölge: hesap silme (mağaza zorunluluğu + GDPR) -->
+        <div class="vs-card !p-6 md:!p-7" style="border-color:rgba(225,29,72,.25)">
+          <h3 class="text-sm font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400">{% trans "Danger zone" %}</h3>
+          <p class="mt-1.5 text-xs" style="color:var(--vs-text-2)">
+            {% trans "Deleting your account removes your subscription, devices and all account data permanently. This cannot be undone." %}
+          </p>
+          <form method="post" action="{% url 'account_delete' %}" class="mt-4"
+                onsubmit="return confirm('{% trans "Delete your account permanently? This cannot be undone." %}');">
             {% csrf_token %}
-            <div class="flex-1">
-              <input id="add-device-uuid" name="add_device_uuid" type="text" placeholder="{% trans 'paste device UUID here' %}"
-                     class="w-full rounded-xl px-3.5 py-2.5 text-sm font-mono outline-none transition focus:ring-2"
-                     style="background:var(--vs-card-2); border:1px solid var(--vs-line-2); color:var(--vs-text); --tw-ring-color:color-mix(in srgb, var(--vs-500) 45%, transparent)"
-                     required maxlength="64" />
-              {% if remaining is not None %}
-                <p class="text-[11px] mt-2" style="color:var(--vs-text-2)">{% trans "Remaining device slots:" %} <strong style="color:var(--vs-text)">{{ remaining }}</strong></p>
-              {% endif %}
-            </div>
-            <div class="flex flex-col items-stretch sm:items-end gap-2">
-              <button type="submit" id="btn-add-device" class="vs-btn vs-btn-primary !py-2.5">
-                {% trans "Add device" %}
-              </button>
-              <button id="btn-generate-qr" type="button" class="text-xs underline" style="color:var(--vs-text-2)">{% trans "QR help" %}</button>
-            </div>
+            <input type="hidden" name="confirm" value="yes">
+            <button type="submit"
+                    class="vs-btn !py-2 !text-xs text-rose-600 dark:text-rose-400"
+                    style="background:rgba(225,29,72,.06); border:1px solid rgba(225,29,72,.3)">
+              {% trans "Delete my account" %}
+            </button>
           </form>
         </div>
       </div>

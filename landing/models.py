@@ -92,3 +92,20 @@ class Device(models.Model):
     def __str__(self):
         label = self.name or self.platform
         return f"{label} ({self.user})"
+
+
+class ExtensionLink(models.Model):
+    """
+    Eklenti cihaz bağlama akışı (nonce pairing):
+      startLink() -> /extension/link?nonce=X&device_id=Y (kullanıcı onaylar)
+      claim       -> nonce karşılığı imzalı hesap token'ı döner (tek kullanımlık)
+    """
+    nonce = models.CharField(max_length=64, unique=True, db_index=True)
+    device_id = models.CharField(max_length=64, blank=True, default="")
+    user = models.ForeignKey("auth.User", null=True, blank=True, on_delete=models.CASCADE)
+    linked_at = models.DateTimeField(null=True, blank=True)
+    claimed = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"link:{self.nonce[:8]}… user={self.user_id} claimed={self.claimed}"

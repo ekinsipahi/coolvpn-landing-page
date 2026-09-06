@@ -1,5 +1,6 @@
 # landing/urls.py
-from django.urls import path
+from django.urls import path, reverse_lazy
+from django.contrib.auth import views as auth_views
 from . import views
 from django.views.generic import TemplateView
 
@@ -41,7 +42,33 @@ urlpatterns = [
     path("api/payment/nowpayments/ipn/", views.nowpayments_ipn, name="nowpayments_ipn"),
     
     path("api/extension/handshake/", views.extension_handshake, name="extension_handshake"),
+    path("api/extension/auth-token/", views.extension_auth_token, name="extension_auth_token"),
+    path("api/extension/login/", views.extension_login, name="extension_login"),
+    path("extension/link", views.extension_link, name="extension_link"),
+    path("api/extension/link/claim", views.extension_link_claim, name="extension_link_claim"),
+    path("api/extension/link/refresh", views.extension_link_refresh, name="extension_link_refresh"),
+    path("api/extension/link/revoke", views.extension_link_revoke, name="extension_link_revoke"),
+    path("api/extension/logout/", views.extension_logout, name="extension_logout"),
+    path("account/delete/", views.account_delete, name="account_delete"),
     
+    # Şifre sıfırlama (login sayfasındaki "Forgot password?" buraya gelir)
+    path("password-reset/", auth_views.PasswordResetView.as_view(
+        template_name="registration/password_reset_form.html",
+        email_template_name="registration/password_reset_email.txt",
+        subject_template_name="registration/password_reset_subject.txt",
+        success_url=reverse_lazy("password_reset_done"),
+    ), name="password_reset"),
+    path("password-reset/done/", auth_views.PasswordResetDoneView.as_view(
+        template_name="registration/password_reset_done.html",
+    ), name="password_reset_done"),
+    path("password-reset/<uidb64>/<token>/", auth_views.PasswordResetConfirmView.as_view(
+        template_name="registration/password_reset_confirm.html",
+        success_url=reverse_lazy("password_reset_complete"),
+    ), name="password_reset_confirm"),
+    path("password-reset/complete/", auth_views.PasswordResetCompleteView.as_view(
+        template_name="registration/password_reset_complete.html",
+    ), name="password_reset_complete"),
+
     path("privacy-policy/", views.privacy_policy, name="privacy_policy"),
     path("terms/", views.terms_of_service, name="terms_of_service"),
     path("refund-policy/", views.refund_policy, name="refund_policy"),

@@ -34,7 +34,16 @@ SUPPORT_EMAIL = "support@vpnsterr.com"
 CHROME_STORE_URL = ""
 
 # ---- Site URL (dev/prod’a göre ayarla)
-SITE_URL = os.environ.get("SITE_URL", "http://127.0.0.1:8000")  # prod .env'de: https://vpnsterr.com
+SITE_URL = os.environ.get("SITE_URL", "http://127.0.0.1:8000")
+
+# Domain taşıma: eski hostlar 301 ile buraya yönlenir
+CANONICAL_HOST = os.environ.get("CANONICAL_HOST", "vpnsterr.com")
+OLD_HOSTS = [h for h in os.environ.get("OLD_HOSTS", "coolvpn.app,www.coolvpn.app,www.vpnsterr.com").split(",") if h.strip()]
+
+# Eklenti/havuz köprüsü: siteyi token-imzalayan otorite yapan paylaşılan sır.
+# Havuz (pool.vpnsterr.com) AYNI değeri kullanıp sadece doğrular.
+EXTENSION_SHARED_SECRET = os.environ.get("EXTENSION_SHARED_SECRET", "")
+EXTENSION_TOKEN_TTL_SECONDS = int(os.environ.get("EXTENSION_TOKEN_TTL_SECONDS", "3600"))  # prod .env'de: https://vpnsterr.com
 
 # ------------ Apps
 INSTALLED_APPS = [
@@ -87,6 +96,7 @@ ACCOUNT_DEFAULT_HTTP_PROTOCOL = "http"
 # ------------ Middleware
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "core.middleware.DomainRedirectMiddleware",  # coolvpn.app -> vpnsterr.com 301
     "whitenoise.middleware.WhiteNoiseMiddleware",  # static dev/prod rahatlığı
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
@@ -163,6 +173,15 @@ DATABASES = {
     }
 }
 
+
+# ------------ E-posta (şifre sıfırlama vb.) — dev: console, prod: SMTP (.env)
+EMAIL_BACKEND = os.environ.get("EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")
+EMAIL_HOST = os.environ.get("EMAIL_HOST", "")
+EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
+EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "1") == "1"
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "VPNsterr <support@vpnsterr.com>")
 
 # ------------ Static
 STATIC_URL = "/static/"
