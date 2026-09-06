@@ -4,9 +4,27 @@ import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = "django-insecure-og-03q*s7tt+!f@*4f%!-th8&1#prrb3$ad*9vkc7_+an#j&j*"
-DEBUG = True
-ALLOWED_HOSTS = ["*"]
+
+# ---- .env yükleyici (bağımlılıksız): BASE_DIR/.env varsa okur,
+#      mevcut ortam değişkenlerini ezmez. Hassas değerlerin TEK kaynağı .env'dir.
+def _load_env(path):
+    try:
+        with open(path, encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith("#") or "=" not in line:
+                    continue
+                k, _, v = line.partition("=")
+                os.environ.setdefault(k.strip(), v.strip().strip('"').strip("'"))
+    except FileNotFoundError:
+        pass
+
+
+_load_env(BASE_DIR / ".env")
+
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "dev-only-insecure-change-me")
+DEBUG = os.environ.get("DJANGO_DEBUG", "1") == "1"
+ALLOWED_HOSTS = [h.strip() for h in os.environ.get("DJANGO_ALLOWED_HOSTS", "*").split(",") if h.strip()]
 
 # ---- Site kimliği
 SITE_NAME = "VPNsterr"
@@ -16,7 +34,7 @@ SUPPORT_EMAIL = "support@vpnsterr.com"
 CHROME_STORE_URL = ""
 
 # ---- Site URL (dev/prod’a göre ayarla)
-SITE_URL = "http://127.0.0.1:8000"  # prod'da: "https://vpnsterr.com"
+SITE_URL = os.environ.get("SITE_URL", "http://127.0.0.1:8000")  # prod .env'de: https://vpnsterr.com
 
 # ------------ Apps
 INSTALLED_APPS = [
@@ -60,8 +78,8 @@ ACCOUNT_LOGIN_ATTEMPTS_TIMEOUT = 300
 ACCOUNT_PASSWORD_MIN_LENGTH = 5
 
 # ------------ Allauth / Google (hardcode)
-GOOGLE_CLIENT_ID = "990410161189-3aceuojrmhnc73h85f8porlmmj1ab3ia.apps.googleusercontent.com"
-GOOGLE_CLIENT_SECRET = "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"
+GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "")
+GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", "")
 
 # Dev’de http çalışıyorsun:
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = "http"
@@ -135,13 +153,13 @@ WSGI_APPLICATION = "core.wsgi.application"
 
 # ------------ DB
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'postgres.hsgwbsdhtxbhinulzfbg',
-        'PASSWORD': '27J43*12_!Z12a',
-        'HOST': 'aws-1-us-east-1.pooler.supabase.com',
-        'PORT': '5432',  # DOĞRUDAN bağlantı
+    "default": {
+        "ENGINE": os.environ.get("DB_ENGINE", "django.db.backends.postgresql"),
+        "NAME": os.environ.get("DB_NAME", "postgres"),
+        "USER": os.environ.get("DB_USER", ""),
+        "PASSWORD": os.environ.get("DB_PASSWORD", ""),
+        "HOST": os.environ.get("DB_HOST", ""),
+        "PORT": os.environ.get("DB_PORT", "5432"),
     }
 }
 
@@ -154,6 +172,13 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # ============================================================
+# Stripe — anahtarlar .env'den gelir
+# ============================================================
+STRIPE_PUBLISHABLE_KEY = os.environ.get("STRIPE_PUBLISHABLE_KEY", "")
+STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "")
+STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET", "")
+
+# ============================================================
 # NOWPayments (TRX sabit)
 # ============================================================
 NOWPAYMENTS = {
@@ -162,9 +187,9 @@ NOWPAYMENTS = {
     "SUCCESS_URL": f"{SITE_URL}/payment/success/",
     "CANCEL_URL":  f"{SITE_URL}/payment/cancel/",
     "IPN_URL":     f"{SITE_URL}/api/payment/nowpayments/ipn/",
-    # Güvenlik & auth (KULLANICI VERDİĞİN)
-    "API_KEY":    "9D9WWG0-YWC4QMJ-G6DQKZ9-AGQBFDZ",
-    "IPN_SECRET": "DM1GV5TdP0uhre2IVmEAoTyatw/4/1jv",
+    # Güvenlik & auth — .env'den gelir
+    "API_KEY":    os.environ.get("NOWPAYMENTS_API_KEY", ""),
+    "IPN_SECRET": os.environ.get("NOWPAYMENTS_IPN_SECRET", ""),
     # Ücreti kim öder? True → müşteri (NOWPayments fee)
     "FEE_PAID_BY_USER": True,
 }
