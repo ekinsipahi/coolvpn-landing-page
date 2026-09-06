@@ -104,6 +104,32 @@
                  style="width: {{ progress_pct }}%; background:linear-gradient(90deg, var(--vs-400), var(--vs-600))"></div>
           </div>
         </div>
+
+        <!-- Abonelik yönetimi -->
+        {% if active_sub.source == "stripe" %}
+          <form method="post" action="{% url 'stripe_billing_portal' %}" class="mt-5">
+            {% csrf_token %}
+            <button type="submit" class="vs-btn vs-btn-ghost w-full !py-2.5 !text-xs">
+              {% trans "Manage / cancel subscription" %}
+            </button>
+          </form>
+          <p class="mt-1.5 text-center text-[11px]" style="color:var(--vs-text-2)">
+            {% trans "Renews automatically · manage card, invoices & cancellation in the secure portal" %}
+          </p>
+        {% else %}
+          <div class="mt-5 grid grid-cols-2 gap-2">
+            <a href="{% url 'payment' %}?plan={{ plan_key|default:'annual' }}" class="vs-btn vs-btn-ghost !py-2.5 !text-xs">
+              {% trans "Extend (crypto)" %}
+            </a>
+            <button type="button" id="btn-switch-card" data-plan="{{ plan_key|default:'annual' }}"
+                    class="vs-btn vs-btn-primary !py-2.5 !text-xs">
+              {% trans "Switch to card" %}
+            </button>
+          </div>
+          <p class="mt-1.5 text-center text-[11px]" style="color:var(--vs-text-2)">
+            {% trans "Extending stacks on top of your current end date. Card billing starts only after your paid time runs out." %}
+          </p>
+        {% endif %}
         {% else %}
         <div class="mt-5 rounded-xl p-5 text-center"
              style="background:linear-gradient(135deg, color-mix(in srgb, var(--vs-500) 10%, transparent), color-mix(in srgb, var(--vs-fuchsia) 8%, transparent)); border:1px solid var(--vs-line)">
@@ -311,6 +337,26 @@
 {% block scripts %}
 {{ block.super }}
 <script>
+  // ---- Kriptodan karta geçiş: Stripe Checkout (trial = mevcut bitiş) ----
+  (function(){
+    const btn = document.getElementById('btn-switch-card');
+    if(!btn) return;
+    btn.addEventListener('click', () => {
+      btn.disabled = true;
+      fetch('/api/checkout/stripe/', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json',
+                  'X-CSRFToken': (document.cookie.match(/csrftoken=([^;]+)/)||[])[1]||''},
+        body: JSON.stringify({ plan: btn.dataset.plan || 'annual' }),
+        credentials: 'same-origin'
+      }).then(r=>r.json()).then(d=>{
+        if (d?.redirect_url) { location.href = d.redirect_url; return; }
+        btn.disabled = false;
+        alert(d?.error || 'Could not start card checkout.');
+      }).catch(()=>{ btn.disabled = false; alert('Network error.'); });
+    });
+  })();
+
   // ---- Hesap silme: iki aşamalı onay ----
   (function(){
     const openBtn  = document.getElementById('btn-delete-open');

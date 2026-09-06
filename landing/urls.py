@@ -39,6 +39,10 @@ urlpatterns = [
     path("api/payment/crypto-gateways/", views.crypto_gateways, name="crypto_gateways"),
     path("api/payment/nowpay/reconcile/", views.nowpay_reconcile, name="nowpay_reconcile"),
     path("payment/success/", views.payment_success, name="payment_success"),
+    path("api/checkout/stripe/", views.stripe_checkout_create, name="stripe_checkout_create"),
+    path("payment/stripe/success/", views.stripe_success, name="stripe_success"),
+    path("api/payment/stripe/webhook/", views.stripe_webhook, name="stripe_webhook"),
+    path("api/billing/portal/", views.stripe_billing_portal, name="stripe_billing_portal"),
     path("api/payment/nowpayments/ipn/", views.nowpayments_ipn, name="nowpayments_ipn"),
     
     path("api/extension/handshake/", views.extension_handshake, name="extension_handshake"),

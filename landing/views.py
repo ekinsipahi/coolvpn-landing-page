@@ -263,9 +263,11 @@ def payment(request):
     plan_map = build_plan_map(region, ctx_ui["ui_currency_symbol"])
     plan = plan_map.get(initial_plan, plan_map["monthly"])
 
+    from landing.helpers.stripe_gw import stripe_enabled as _se
     checkout_config = {
         "initial_plan": initial_plan,
         "is_auth": bool(request.user.is_authenticated),
+        "stripe_enabled": _se(),
         "ui_currency": ctx_ui["ui_currency"],
         "messages": {
             "enter_email": _("Please enter a valid email address."),
@@ -1167,7 +1169,197 @@ def _resolve_premium_by_client_uuid(client_uuid: str):
     return (True, resolved_user_id, device_uuid)
 
 
+# ============================================================
+# Stripe — kartla abonelik (checkout, success, webhook, portal)
+# ============================================================
+from landing.helpers.stripe_gw import stripe_enabled, ensure_price, get_or_create_customer, _api as _stripe
+
+
+def _grant_stripe_subscription(user, plan_key, stripe_sub):
+    """Stripe aboneliğini yerel Subscription'a yazar/günceller (idempotent)."""
+    from datetime import datetime, timezone as dt_tz
+
+    period_end = getattr(stripe_sub, "current_period_end", None) or stripe_sub.get("current_period_end")
+    period_start = getattr(stripe_sub, "current_period_start", None) or stripe_sub.get("current_period_start")
+    customer = getattr(stripe_sub, "customer", None) or stripe_sub.get("customer")
+    sub_id = getattr(stripe_sub, "id", None) or stripe_sub.get("id")
+
+    ends_at = datetime.fromtimestamp(int(period_end), tz=dt_tz.utc)
+    starts_at = datetime.fromtimestamp(int(period_start), tz=dt_tz.utc)
+
+    local = Subscription.objects.filter(stripe_subscription_id=sub_id).first()
+    if local:
+        if local.ends_at != ends_at:
+            local.ends_at = ends_at
+            local.save(update_fields=["ends_at"])
+        return local
+
+    # Kriptodan kalan süre varsa Stripe trial zaten onu bekletiyor; yerel kayıt
+    # Stripe periyoduna birebir bağlanır.
+    return Subscription.objects.create(
+        user=user, plan_key=plan_key,
+        starts_at=starts_at, ends_at=ends_at,
+        source="stripe",
+        stripe_customer_id=str(customer or ""),
+        stripe_subscription_id=str(sub_id or ""),
+    )
+
+
 @csrf_exempt
+@require_POST
+def stripe_checkout_create(request):
+    """
+    POST /api/checkout/stripe/  {plan}
+    Stripe Checkout (mode=subscription) oturumu açar, redirect_url döner.
+    Kriptodan kalan aktif süre varsa abonelik o süre bitince faturalandırmaya
+    başlar (trial_end = mevcut bitiş) — gün kaybı yok.
+    """
+    if not stripe_enabled():
+        return JsonResponse({"ok": False, "error": "stripe_disabled"}, status=503)
+    if not request.user.is_authenticated:
+        return JsonResponse({"ok": False, "error": "login_required"}, status=401)
+
+    try:
+        data = json.loads(request.body.decode("utf-8") or "{}")
+    except Exception:
+        data = {}
+    plan_key = normalize_plan_slug(data.get("plan") or "monthly")
+
+    try:
+        price_id = ensure_price(plan_key)
+        customer_id = get_or_create_customer(request.user)
+
+        sub_data = {"metadata": {"user_id": str(request.user.id), "plan_key": plan_key}}
+        # Kripto/manuel aktif abonelik varsa: kart aboneliği o bitişte başlasın
+        current = (
+            Subscription.objects
+            .filter(user=request.user, ends_at__gte=now())
+            .exclude(source="stripe")
+            .order_by("-ends_at")
+            .first()
+        )
+        if current and (current.ends_at - now()).total_seconds() > 3600:
+            sub_data["trial_end"] = int(current.ends_at.timestamp())
+
+        base = settings.SITE_URL.rstrip("/")
+        session = _stripe().checkout.Session.create(
+            mode="subscription",
+            customer=customer_id,
+            line_items=[{"price": price_id, "quantity": 1}],
+            subscription_data=sub_data,
+            allow_promotion_codes=True,
+            success_url=f"{base}/payment/stripe/success/?session_id={{CHECKOUT_SESSION_ID}}",
+            cancel_url=f"{base}/payment/?plan={plan_key}",
+            metadata={"user_id": str(request.user.id), "plan_key": plan_key},
+        )
+        return JsonResponse({"ok": True, "redirect_url": session.url})
+    except Exception as e:
+        return JsonResponse({"ok": False, "error": f"stripe_error: {str(e)[:200]}"}, status=502)
+
+
+def stripe_success(request):
+    """GET /payment/stripe/success/?session_id=... — webhook'suz da aktive eder."""
+    session_id = (request.GET.get("session_id") or "").strip()
+    if not (stripe_enabled() and session_id and request.user.is_authenticated):
+        return redirect("dashboard")
+    try:
+        sess = _stripe().checkout.Session.retrieve(session_id, expand=["subscription"])
+        if sess.get("payment_status") in ("paid", "no_payment_required") and sess.get("subscription"):
+            plan_key = (sess.get("metadata") or {}).get("plan_key") or "monthly"
+            _grant_stripe_subscription(request.user, plan_key, sess["subscription"])
+            messages.success(request, "Payment confirmed — Premium is active. Welcome aboard!")
+    except Exception:
+        messages.info(request, "Payment received — activation may take a minute.")
+    return redirect("dashboard")
+
+
+@csrf_exempt
+def stripe_webhook(request):
+    """
+    POST /api/payment/stripe/webhook/
+    STRIPE_WEBHOOK_SECRET .env'de tanımlıysa imza doğrulanır. (Secret,
+    Stripe Dashboard > Developers > Webhooks'ta endpoint eklenince verilir.)
+    """
+    if not stripe_enabled():
+        return HttpResponse(status=503)
+    secret = getattr(settings, "STRIPE_WEBHOOK_SECRET", "")
+    payload = request.body
+    try:
+        if secret:
+            event = _stripe().Webhook.construct_event(
+                payload, request.headers.get("Stripe-Signature", ""), secret
+            )
+        else:
+            # Secret yokken imzasız event'e GÜVENME: id'yi Stripe'tan geri oku.
+            raw = json.loads(payload.decode("utf-8") or "{}")
+            event = _stripe().Event.retrieve(raw.get("id"))
+    except Exception:
+        return HttpResponse(status=400)
+
+    etype = event["type"]
+    obj = event["data"]["object"]
+
+    if etype == "checkout.session.completed" and obj.get("subscription"):
+        user = User.objects.filter(id=(obj.get("metadata") or {}).get("user_id")).first()
+        if user:
+            sub = _stripe().Subscription.retrieve(obj["subscription"])
+            _grant_stripe_subscription(user, (obj.get("metadata") or {}).get("plan_key") or "monthly", sub)
+
+    elif etype in ("invoice.paid", "invoice.payment_succeeded"):
+        sub_id = obj.get("subscription")
+        if sub_id:
+            local = Subscription.objects.filter(stripe_subscription_id=sub_id).select_related("user").first()
+            if local:
+                sub = _stripe().Subscription.retrieve(sub_id)
+                _grant_stripe_subscription(local.user, local.plan_key, sub)
+
+    elif etype == "customer.subscription.deleted":
+        # İptal: dönem sonuna kadar erişim kalır; ends_at zaten period_end.
+        pass
+
+    return HttpResponse(status=200)
+
+
+@login_required
+@require_POST
+def stripe_billing_portal(request):
+    """POST /api/billing/portal/ — Stripe portalına yönlendirir (iptal/kart/fatura)."""
+    if not stripe_enabled():
+        messages.error(request, "Card billing is not available right now.")
+        return redirect("dashboard")
+    cust_id = (
+        Subscription.objects
+        .filter(user=request.user)
+        .exclude(stripe_customer_id="")
+        .order_by("-created_at")
+        .values_list("stripe_customer_id", flat=True)
+        .first()
+    )
+    if not cust_id:
+        messages.info(request, "No card subscription found on this account.")
+        return redirect("dashboard")
+    api = _stripe()
+    base = settings.SITE_URL.rstrip("/")
+    try:
+        portal = api.billing_portal.Session.create(customer=cust_id, return_url=f"{base}/dashboard/")
+    except Exception:
+        # Portal konfigürasyonu hiç yoksa varsayılanı oluştur ve tekrar dene
+        try:
+            api.billing_portal.Configuration.create(
+                features={
+                    "subscription_cancel": {"enabled": True, "mode": "at_period_end"},
+                    "payment_method_update": {"enabled": True},
+                    "invoice_history": {"enabled": True},
+                },
+                business_profile={"headline": "VPNsterr subscription"},
+            )
+            portal = api.billing_portal.Session.create(customer=cust_id, return_url=f"{base}/dashboard/")
+        except Exception as e:
+            messages.error(request, f"Could not open billing portal: {str(e)[:120]}")
+            return redirect("dashboard")
+    return redirect(portal.url)
+
+
 # ---- Eklenti: nonce ile cihaz bağlama (account.js sözleşmesi) ----
 
 def _mint_account_token(user, device_id: str, tier: str, exp_ts: int):
@@ -1529,6 +1721,7 @@ def account_delete(request):
     return redirect("home")
 
 
+@csrf_exempt
 def extension_handshake(request):
     """
     POST JSON: {"client_uuid": "<required>"}

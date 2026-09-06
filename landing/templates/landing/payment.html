@@ -244,10 +244,10 @@
     </div>
   </div>
 </section>
-{% endblock %}
 
 {{ plan_map|json_script:"plan-map" }}
 {{ checkout_config|json_script:"checkout-config" }}
+{% endblock %}
 
 {% block scripts %}
 {{ block.super }}
@@ -361,8 +361,40 @@
 
     box.appendChild(card);
 
-    // İlk yükte seçili olsun (istersen kapat)
-    card.click();
+    // --- Stripe: kartla öde (aktifse) ---
+    let stripeCard = null;
+    if (CFG.stripe_enabled) {
+      stripeCard = document.createElement('button');
+      stripeCard.type = 'button';
+      stripeCard.className = 'gw-card w-full text-left';
+      stripeCard.dataset.gw = 'stripe';
+      stripeCard.innerHTML = `
+        <div class="gw-head">
+          <div class="h-10 w-10 rounded-xl flex items-center justify-center" style="background:var(--vs-card); border:1px solid var(--vs-line)">
+            <svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:#635bff">
+              <rect width="20" height="14" x="2" y="5" rx="2"/><path d="M2 10h20"/>
+            </svg>
+          </div>
+          <div>
+            <div class="gw-title">{% trans "Pay by card" %}</div>
+            <div class="gw-note">Visa · Mastercard · {% trans "auto-renews, cancel anytime" %}</div>
+          </div>
+          <div class="gw-right">
+            <span class="hidden sm:inline">Stripe</span>
+            <span class="tick">✔</span>
+          </div>
+        </div>
+      `;
+      stripeCard.addEventListener('click', ()=>{
+        qsa('.gw-card').forEach(c=>c.classList.remove('is-selected'));
+        stripeCard.classList.add('is-selected');
+        selectedGW = 'stripe';
+      });
+      box.appendChild(stripeCard);
+    }
+
+    // Varsayılan: kart (dönüşüm daha yüksek), yoksa kripto
+    (stripeCard || card).click();
     }
 
   /* ---------- Coupon ---------- */
@@ -464,7 +496,25 @@
       }
     }
 
-    // Ödemeyi başlat
+    // Stripe seçiliyse: Checkout oturumu aç ve yönlendir
+    if (selectedGW === 'stripe') {
+      fetch('/api/checkout/stripe/', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken')||''},
+        body: JSON.stringify({ plan: (p&&p.key)||'{{ plan.key }}' }),
+        credentials: 'same-origin'
+      }).then(r=>r.json()).then(d=>{
+        if (d?.redirect_url) { location.href = d.redirect_url; return; }
+        if (d?.error === 'login_required') {
+          showBanner(MSG.must_login_with_password || 'Please sign in first (email above or Google).', false);
+          return;
+        }
+        showBanner(d?.error || (MSG.pay_fail || 'Unable to start the payment. Try again.'));
+      }).catch(()=> showBanner(MSG.generic_err || 'Something went wrong. Please try again.'));
+      return;
+    }
+
+    // Ödemeyi başlat (kripto / NOWPayments)
     fetch('/api/checkout/create/',{
       method:'POST',
       headers:{'Content-Type':'application/json','X-CSRFToken':getCookie('csrftoken')||''},

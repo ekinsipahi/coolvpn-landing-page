@@ -41,6 +41,10 @@ class Subscription(models.Model):
     starts_at = models.DateTimeField()
     ends_at   = models.DateTimeField()
     order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name="subscription", null=True, blank=True)
+    # Ödeme kaynağı: crypto (NOWPayments) | stripe | manual
+    source = models.CharField(max_length=16, default="crypto")
+    stripe_customer_id = models.CharField(max_length=64, blank=True, default="")
+    stripe_subscription_id = models.CharField(max_length=64, blank=True, default="", db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
