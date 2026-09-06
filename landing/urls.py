@@ -42,6 +42,7 @@ urlpatterns = [
     path("api/checkout/stripe/", views.stripe_checkout_create, name="stripe_checkout_create"),
     path("payment/stripe/success/", views.stripe_success, name="stripe_success"),
     path("api/payment/stripe/webhook/", views.stripe_webhook, name="stripe_webhook"),
+    path("api/cron/reconcile/", views.cron_reconcile, name="cron_reconcile"),
     path("api/billing/portal/", views.stripe_billing_portal, name="stripe_billing_portal"),
     path("api/payment/nowpayments/ipn/", views.nowpayments_ipn, name="nowpayments_ipn"),
     

@@ -1174,6 +1174,25 @@ def _resolve_premium_by_client_uuid(client_uuid: str):
     return (True, resolved_user_id, device_uuid)
 
 
+# ---- HTTP cron tetikleyici (cron-job.org) ----
+
+@csrf_exempt
+def cron_reconcile(request):
+    """
+    GET/POST /api/cron/reconcile/
+    Auth: ?key=<CRON_SECRET>  veya  X-Cron-Key başlığı.
+    cron-job.org 5 dk'da bir çağırır; iş sınırlı olduğu için 30 sn'ye rahat sığar.
+    """
+    secret = getattr(settings, "CRON_SECRET", "")
+    given = (request.GET.get("key") or request.headers.get("X-Cron-Key") or "").strip()
+    if not secret or not hmac.compare_digest(given, secret):
+        return JsonResponse({"ok": False, "error": "forbidden"}, status=403)
+
+    from landing.helpers.reconcile import run_reconcile
+    stats = run_reconcile()
+    return JsonResponse({"ok": True, **stats})
+
+
 # ============================================================
 # Stripe — kartla abonelik (checkout, success, webhook, portal)
 # ============================================================
