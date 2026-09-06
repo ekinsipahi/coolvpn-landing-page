@@ -27,6 +27,15 @@ class Command(BaseCommand):
     def handle(self, *args, **opts):
         self.reconcile_nowpayments()
         self.sync_stripe()
+        self.cleanup_stale_links()
+
+    def cleanup_stale_links(self):
+        """24 saatten eski, hiç claim edilmemiş eklenti bağlama nonce'larını temizle."""
+        from landing.models import ExtensionLink
+        cutoff = timezone.now() - timedelta(hours=24)
+        n, _ = ExtensionLink.objects.filter(claimed=False, created_at__lt=cutoff).delete()
+        if n:
+            self.stdout.write(f"ExtensionLink: {n} bayat nonce silindi.")
 
     # ---------------- NOWPayments ----------------
     def reconcile_nowpayments(self):
