@@ -3,6 +3,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls.i18n import i18n_patterns
 from django.views.generic import TemplateView
+from django.views.generic.base import RedirectView
 from landing.views import google_finish
 
 Stub = TemplateView.as_view
@@ -10,84 +11,28 @@ Stub = TemplateView.as_view
 # --- namespaced stub grupları ---
 features_patterns = (
     [
-        path(
-            "webrtc/",
-            Stub(
-                template_name="stubs/simple.html",
-                extra_context={
-                    "title": "WebRTC Leak Block",
-                    "subtitle": "Prevent IP leaks in modern browsers",
-                },
-            ),
-            name="webrtc",
-        ),
-        path(
-            "split-tunneling/",
-            Stub(
-                template_name="stubs/simple.html",
-                extra_context={
-                    "title": "Split Tunneling / Whitelist",
-                    "subtitle": "Choose what routes through VPN",
-                },
-            ),
-            name="split_tunnel",
-        ),
+        # SEO: coolvpn.app doneminden indexli, artik silinmis sayfalar -> canli esdegerlere 301
+        path("stealth/", RedirectView.as_view(url="/features/no-logs/", permanent=True), name="stealth"),
+        path("dedicated-ip/", RedirectView.as_view(url="/pricing/", permanent=True), name="dedicated_ip"),
+        # Bu ikisinin gercek sayfalari landing'de /features/<slug>/ altinda yasiyor
+        path("webrtc/", RedirectView.as_view(url="/features/webrtc/", permanent=True), name="webrtc"),
+        path("split-tunneling/", RedirectView.as_view(url="/features/split-tunneling/", permanent=True), name="split_tunnel"),
     ],
     "features",
 )
 
 advantages_patterns = (
     [
-        path(
-            "no-logs/",
-            Stub(
-                template_name="stubs/simple.html",
-                extra_context={
-                    "title": "No-Logs by design",
-                    "subtitle": "We minimize data by architecture",
-                },
-            ),
-            name="no_logs",
-        ),
-        path(
-            "jurisdiction/",
-            Stub(
-                template_name="stubs/simple.html",
-                extra_context={
-                    "title": "Privacy-friendly jurisdiction",
-                    "subtitle": "Favorable legal base outside surveillance alliances",
-                },
-            ),
-            name="jurisdiction",
-        ),
-        path(
-            "speed/",
-            Stub(
-                template_name="stubs/simple.html",
-                extra_context={
-                    "title": "Unlimited bandwidth & high throughput",
-                    "subtitle": "Optimized network for speed",
-                },
-            ),
-            name="speed",
-        ),
+        path("no-logs/", RedirectView.as_view(url="/features/no-logs/", permanent=True), name="no_logs"),
+        path("jurisdiction/", RedirectView.as_view(url="/features/no-logs/", permanent=True), name="jurisdiction"),
+        path("speed/", RedirectView.as_view(url="/features/speed/", permanent=True), name="speed"),
     ],
     "advantages",
 )
 
 products_patterns = (
     [
-        path(
-            "extension/",
-            Stub(
-                template_name="stubs/simple.html",
-                extra_context={
-                    "title": "Browser Extension",
-                    "subtitle": "Lightweight, control per tab/app",
-                },
-            ),
-            name="extension",
-        ),
+        path("extension/", RedirectView.as_view(url="/vpn-extension/", permanent=True), name="extension"),
         path(
             "desktop/",
             Stub(

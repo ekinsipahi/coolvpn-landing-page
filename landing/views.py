@@ -190,9 +190,18 @@ def best_vpn(request):
     return render(request, "landing/best_vpn.html", ctx)
 
 
+# coolvpn.app döneminden indexli, kaldırılan feature URL'leri -> canlı hedefler (SEO 301)
+LEGACY_FEATURE_REDIRECTS = {
+    "stealth": "/features/no-logs/",
+    "dedicated-ip": "/pricing/",
+}
+
+
 def feature_detail(request, slug):
     """/features/<slug>/ — her feature'ın kendi içerik sayfası."""
-    from django.http import Http404
+    from django.http import Http404, HttpResponsePermanentRedirect
+    if slug in LEGACY_FEATURE_REDIRECTS:
+        return HttpResponsePermanentRedirect(LEGACY_FEATURE_REDIRECTS[slug])
     f = FEATURES.get(slug)
     if not f:
         raise Http404
