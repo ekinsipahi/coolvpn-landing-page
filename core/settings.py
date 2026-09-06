@@ -45,7 +45,11 @@ OLD_HOSTS = [h for h in os.environ.get("OLD_HOSTS", "coolvpn.app,www.coolvpn.app
 
 # Eklenti/havuz köprüsü: siteyi token-imzalayan otorite yapan paylaşılan sır.
 # Havuz (pool.vpnsterr.com) AYNI değeri kullanıp sadece doğrular.
-EXTENSION_SHARED_SECRET = os.environ.get("EXTENSION_SHARED_SECRET", "")
+# .strip() ve tırnak soyma ŞART: havuzun env.py'ı bunu yapıyor; site ham
+# okusaydı, panele yanlışlıkla tırnaklı/sonunda boşluklu girilen bir değer
+# site tarafında imzaya dahil olur, havuzda temizlenir, imza tutmaz ve HER
+# premium cihaz sessizce free'ye düşerdi. İki taraf artık aynı temizliği yapar.
+EXTENSION_SHARED_SECRET = os.environ.get("EXTENSION_SHARED_SECRET", "").strip().strip('"').strip("'").strip()
 EXTENSION_TOKEN_TTL_SECONDS = int(os.environ.get("EXTENSION_TOKEN_TTL_SECONDS", "3600"))  # prod .env'de: https://vpnsterr.com
 
 # ------------ Apps
