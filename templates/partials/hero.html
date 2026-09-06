@@ -1,357 +1,272 @@
 {% load static i18n %}
-<link rel="stylesheet" href="{% static 'css/kv-hero.css' %}">
-<link rel="stylesheet" href="{% static 'css/ui/buttons.css' %}">
-<link rel="stylesheet" href="{% static 'css/ui/plan-orbs.css' %}">
-<style>
-  #hero-video-play-overlay {
-  -webkit-tap-highlight-color: transparent;
-}
-#hero-video-play-overlay svg { filter: drop-shadow(0 2px 8px rgba(0,0,0,.45)); }
 
-</style>
-<section class="kv-hero mt-[-30px] relative overflow-hidden">
-  <!-- 🔹 Hafif: Arka plan video (lazy + poster + guardrails) -->
-  <div class="kv-video-layer pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden="true">
-  <video id="hero-video" muted loop playsinline webkit-playsinline preload="none" poster="{% static 'img/hero-poster.jpg' %}" class="w-full h-full object-cover">
-    <source data-src="{% static 'videos/hero-animation.webm' %}" type="video/webm">
-    <source data-src="{% static 'videos/hero-animation.mp4' %}" type="video/mp4">
-  </video>
+<section class="relative overflow-hidden" id="hero">
 
-    <!-- Kontrast için yumuşak overlay -->
-    <div class="absolute inset-0 bg-gradient-to-b
-                from-white/70 via-white/20 to-white/70
-                dark:from-neutral-950/80 dark:via-neutral-950/35 dark:to-neutral-950/85"></div>
-
-    <!-- JS kapalıysa poster gösterilsin -->
-    <noscript>
-      <img src="{% static 'img/hero-poster.jpg' %}" alt="" class="w-full h-full object-cover" />
-    </noscript>
+  <!-- Background video: lazy, GPU-friendly, hiçbir blur/backdrop-filter yok -->
+  <div class="vs-video-layer pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden="true">
+    <video id="hero-video" muted loop playsinline webkit-playsinline preload="none"
+           poster="{% static 'img/hero-poster.jpg' %}"
+           disablepictureinpicture disableremoteplayback
+           style="opacity:.45">
+      <source data-src="{% static 'videos/hero-animation.webm' %}" type="video/webm">
+      <source data-src="{% static 'videos/hero-animation.mp4' %}" type="video/mp4">
+    </video>
+    <!-- Tek, ucuz overlay: sayfa rengine karışan düz gradient (blur yok) -->
+    <div class="absolute inset-0"
+         style="background:
+           linear-gradient(180deg,
+             color-mix(in srgb, var(--vs-page) 55%, transparent) 0%,
+             color-mix(in srgb, var(--vs-page) 30%, transparent) 45%,
+             var(--vs-page) 100%)"></div>
   </div>
 
-  <div class="kv-bg" style="opacity: 0.8;"></div>
+  <div class="vs-shell">
+    <div class="grid items-center gap-14 py-16 md:py-24 lg:grid-cols-[1.1fr_.9fr]">
 
-  <!-- Orblar -->
-  <div class="kv-orbs" aria-hidden="true">
-    <span class="kv-orb kv-orb--tl"></span>
-    <span class="kv-orb kv-orb--br"></span>
-  </div>
+      <!-- Sol: copy -->
+      <div>
+        <span class="vs-badge">
+          {% trans "100% no-logs, anonymous VPN" %}
+        </span>
 
-  <div class="kv-content">
-    <!-- Sol -->
-    <div class="space-y-7 md:space-y-9">
-      <!-- logo -->
-      <div class="flex items-center gap-3">
-        <img src="{% static 'img/favicon.ico' %}" class="h-10 w-10 rounded-lg bg-black/5 dark:bg-white/10 p-1" alt="">
-      </div>
+        <h1 class="mt-6 text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight leading-[1.06]"
+            style="color:var(--vs-text)">
+          {% trans "Private." %}
+          {% trans "Fast." %}
+          <span style="background:linear-gradient(110deg, var(--vs-400), var(--vs-indigo) 55%, var(--vs-fuchsia)); -webkit-background-clip:text; background-clip:text; color:transparent">
+            {% trans "Yours." %}
+          </span>
+        </h1>
 
-      <!-- Başlık -->
-      <h1 class="kv-headline">
-        {% trans "Coolvpn is Private. Fast. & Yours." %}
-      </h1>
+        <p class="mt-5 max-w-xl text-lg md:text-xl leading-relaxed" style="color:var(--vs-text-2)">
+          {% trans "One tap and you're invisible — no logs, no limits, no slowdowns. VPNsterr protects every device you own." %}
+        </p>
 
-      <!-- Kısa tagline -->
-      <p class="kv-tagline max-w-xl">
-        {% trans "One-tap connect. No-logs. No limits. CoolVPN." %}
-      </p>
-
-      <!-- 🔥 Bu aya özel fiyat bandı -->
-      <div class="kv-deal mt-4 md:mt-6">
-        <div class="kv-pill">
-          <span class="kv-pill-hot">{% trans "This month only" %}</span>
-          <span class="kv-dot" aria-hidden="true"></span>
-          <span class="kv-pill-save">{% trans "Save 44%" %}</span>
+        <!-- Fiyat bandı -->
+        <div class="mt-8 inline-flex flex-wrap items-center gap-x-5 gap-y-3 rounded-2xl px-5 py-4"
+             style="background:var(--vs-card); border:1px solid var(--vs-line); box-shadow:var(--vs-shadow-sm)">
+          <span class="vs-badge-hot">{% trans "Save 33% with annual" %}</span>
+          <span class="flex items-baseline gap-1">
+            <span class="text-lg font-semibold" style="color:var(--vs-text-2)">{{ ui_currency_symbol }}</span>
+            <span class="text-4xl font-extrabold tracking-tight" style="color:var(--vs-text)">{{ ui_monthly }}</span>
+            <span class="text-sm font-medium" style="color:var(--vs-text-2)">/{% trans "mo" %}</span>
+          </span>
+          {% if old_monthly %}
+          <del class="text-sm" style="color:var(--vs-text-2)">{{ ui_currency_symbol }}{{ old_monthly }}</del>
+          {% endif %}
+          <span class="text-sm" style="color:var(--vs-text-2)">
+            {% blocktrans with sym=ui_currency_symbol yr=ui_annual %}or {{ sym }}{{ yr }}/year{% endblocktrans %}
+          </span>
         </div>
 
-        <div class="kv-price-row">
-          <div class="kv-price-main" aria-label="{% trans 'Current price' %}">
-            <span class="kv-currency">{{ ui_currency_symbol }}</span>
-            <span class="kv-amount">{{ui_monthly}}</span>
-            <span class="kv-unit">/mo</span>
-          </div>
-
-          <div class="kv-price-compare">
-            {% if old_monthly %}
-              <del class="kv-old">{{ ui_currency_symbol }}{{ old_monthly }}</del>
-            {% endif %}
-            <span class="kv-badge-yr">
-              {% blocktrans with sym=ui_currency_symbol yr=ui_annual %}or {{ sym }}{{ yr }}/year{% endblocktrans %}
-            </span>
-          </div>
-        </div>
-
-        <!-- CTA’lar -->
-        <div class="kv-deal-ctas sm:flex sm:items-center sm:justify-center">
-          <a href="{% url 'pricing' %}" class="button-64 text-white -lg sm:w-full" style="color:white; width: 33%;">
-            <span class="text">
-              {% trans "Get Started" %}
-              <svg style="color: white;" xmlns="http://www.w3.org/2000/svg" class="h-5 text-white w-5 ml-2 rtl:rotate-180" viewBox="0 0 24 24"
-                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                aria-hidden="true">
-                <path d="M5 12h14" />
-                <path d="M12 5l7 7-7 7" />
-              </svg>
-            </span>
+        <!-- CTA'lar -->
+        <div class="mt-7 flex flex-col sm:flex-row gap-3">
+          <a href="{% url 'pricing' %}" class="vs-btn vs-btn-primary vs-btn-lg">
+            {% trans "Get Started" %}
+            <svg class="h-5 w-5 rtl:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
           </a>
-
-          <a href="{% url 'features:stealth' %}" class="flex items-center kv-btn kv-btn--ghost w-full sm:w-auto dark:text-white">
+          <a href="{% url 'feature_detail' 'no-logs' %}" class="vs-btn vs-btn-ghost vs-btn-lg">
             {% trans "See How It Works" %}
           </a>
         </div>
 
-        <!-- mini güven satırı -->
-        <ul class="kv-deal-bullets" role="list">
-          <li>
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M9 16.2 4.8 12l-1.4 1.4L9 19l12-12-1.4-1.4z" />
-            </svg>
+        <p class="mt-4 text-sm" style="color:var(--vs-text-2)">
+          {% trans "Not ready to pay?" %}
+          <a href="{% url 'vpn_extension' %}" class="font-semibold underline" style="color:var(--vs-600)">
+            {% trans "Get the 100% free unlimited browser extension" %}
+          </a> — {% trans "no sign-up needed." %}
+        </p>
+
+        <!-- Güven satırı -->
+        <ul class="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2" role="list">
+          <li class="vs-check">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
             {% trans "No-logs policy" %}
           </li>
-          <li>
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M5 12h14M12 5l7 7-7 7" />
-            </svg>
-            {% trans "1-tap connect" %}
+          <li class="vs-check">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+            {% trans "One-tap connect" %}
           </li>
-          <li>
-            <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-              <circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2" />
-              <path d="M12 12 L17 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-              <circle cx="12" cy="12" r="1.6" fill="currentColor" />
-            </svg>
-            {% trans "Blazing speed" %}
+          <li class="vs-check">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+            {% trans "Up to 10 devices" %}
           </li>
         </ul>
       </div>
 
-      <!-- 2×2 Feature Grid (kısa) -->
-      <div class="pt-2 md:pt-4 grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-5">
-        <div class="flex items-center gap-3">
-          <div class="kv-cap">
-            <svg class="h-5 w-5 text-emerald-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M9 16.2 4.8 12l-1.4 1.4L9 19l12-12-1.4-1.4z" />
-            </svg>
-          </div>
-          <h3 class="kv-feature">{% trans "Ad & Tracker Blocking" %}</h3>
+      <!-- Sağ: katmanlı premium mockup -->
+      <div class="relative hidden lg:block" aria-hidden="true">
+
+        <!-- arka ışıma -->
+        <div class="absolute -inset-10 -z-10"
+             style="background:radial-gradient(26rem 22rem at 55% 45%, color-mix(in srgb, var(--vs-500) 20%, transparent), transparent 70%)"></div>
+
+        <!-- dönen dekoratif halkalar -->
+        <div class="absolute left-1/2 top-1/2 -z-10 h-[540px] w-[540px] -translate-x-1/2 -translate-y-1/2 rounded-full vs-spin-slower"
+             style="border:1.5px dashed color-mix(in srgb, var(--vs-500) 30%, transparent)"></div>
+        <div class="absolute left-1/2 top-1/2 -z-10 h-[440px] w-[440px] -translate-x-1/2 -translate-y-1/2 rounded-full"
+             style="border:1px solid color-mix(in srgb, var(--vs-500) 18%, transparent)">
+          <!-- halka üstünde parlayan nokta -->
+          <span class="absolute -top-[5px] left-1/2 h-2.5 w-2.5 -translate-x-1/2 rounded-full"
+                style="background:var(--vs-400); box-shadow:0 0 12px 2px color-mix(in srgb, var(--vs-400) 70%, transparent)"></span>
         </div>
 
-        <div class="flex items-center gap-3">
-          <div class="kv-cap">
-            <svg class="h-5 w-5 text-emerald-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M3 12h18v2H3zM3 7h18v2H3zM3 17h12v2H3z" />
-            </svg>
+        <!-- ana uygulama kartı -->
+        <div class="relative mx-auto max-w-sm rounded-[1.75rem] p-5"
+             style="background:var(--vs-card-2); border:1px solid var(--vs-line); box-shadow:var(--vs-shadow-lg)">
+
+          <!-- kuş animasyonu şeridi -->
+          <div class="relative h-24 overflow-hidden rounded-2xl" style="border:1px solid var(--vs-line)">
+            <video id="hero-ribbon" muted loop playsinline webkit-playsinline preload="none"
+                   poster="{% static 'img/ribbons/bird-1.jpg' %}"
+                   disablepictureinpicture disableremoteplayback
+                   class="h-full w-full object-cover">
+              <source data-src="{% static 'videos/ribbons/bird-1.webm' %}" type="video/webm">
+              <source data-src="{% static 'videos/ribbons/bird-1.mp4' %}" type="video/mp4">
+            </video>
+            <div class="absolute inset-0"
+                 style="background:linear-gradient(180deg, transparent 55%, color-mix(in srgb, var(--vs-card-2) 85%, transparent))"></div>
           </div>
-          <h3 class="kv-feature">{% trans "1000 Gbps Backbone" %}</h3>
+
+          <!-- app header -->
+          <div class="mt-4 flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <img src="{% static 'img/logo-mark.png' %}" class="h-8 w-8" alt="">
+              <span class="font-bold tracking-tight" style="color:var(--vs-text)">VPN<span style="color:var(--vs-500)">sterr</span></span>
+            </div>
+            <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold"
+                  style="color:#12b76a; background:rgba(18,183,106,.1); border:1px solid rgba(18,183,106,.25)">
+              <span class="h-1.5 w-1.5 rounded-full" style="background:#12b76a"></span>
+              {% trans "Connected" %}
+            </span>
+          </div>
+
+          <!-- kalkan toggle + pulse halkaları -->
+          <div class="mt-6 grid place-content-center">
+            <div class="relative grid h-32 w-32 place-content-center">
+              <span class="vs-pulse-ring absolute inset-0 rounded-full"
+                    style="background:color-mix(in srgb, var(--vs-500) 22%, transparent)"></span>
+              <span class="vs-pulse-ring absolute inset-0 rounded-full"
+                    style="background:color-mix(in srgb, var(--vs-500) 14%, transparent); animation-delay:1.3s"></span>
+              <div class="relative grid h-32 w-32 place-content-center rounded-full"
+                   style="background:linear-gradient(135deg, var(--vs-400), var(--vs-700)); box-shadow:var(--vs-glow), inset 0 1px 0 rgba(255,255,255,.25)">
+                <svg class="h-12 w-12 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>
+                  <path d="m9 12 2 2 4-4"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <p class="mt-4 text-center text-sm font-semibold" style="color:var(--vs-text)">
+            {% trans "Your IP is hidden" %}
+          </p>
+          <p class="mt-1 text-center font-mono text-xs tracking-wider" style="color:var(--vs-text-2)">
+            172.●●●.●●.24 → 45.86.●●.●●
+          </p>
+
+          <!-- sunucu satırı -->
+          <div class="mt-5 flex items-center justify-between rounded-xl px-3.5 py-2.5"
+               style="background:var(--vs-card); border:1px solid var(--vs-line)">
+            <div class="flex items-center gap-2.5">
+              <svg class="h-5 w-7 rounded-[3px] shrink-0" viewBox="0 0 21 15" aria-hidden="true"><rect width="21" height="5" y="0" fill="#262626"/><rect width="21" height="5" y="5" fill="#dd0000"/><rect width="21" height="5" y="10" fill="#ffce00"/></svg>
+              <div>
+                <div class="text-xs font-bold" style="color:var(--vs-text)">Frankfurt</div>
+                <div class="text-[10px]" style="color:var(--vs-text-2)">{% trans "Fastest server" %}</div>
+              </div>
+            </div>
+            <span class="text-[11px] font-semibold" style="color:var(--vs-600)">{% trans "Auto" %}</span>
+          </div>
+
+          <!-- istatistikler -->
+          <div class="mt-3 grid grid-cols-3 gap-2 text-center">
+            <div class="rounded-xl py-2.5" style="background:var(--vs-card); border:1px solid var(--vs-line)">
+              <div class="text-sm font-bold" style="color:var(--vs-text)">870<span class="text-[10px] font-medium" style="color:var(--vs-text-2)"> Mbps</span></div>
+              <div class="mt-0.5 text-[10px]" style="color:var(--vs-text-2)">{% trans "Download" %}</div>
+            </div>
+            <div class="rounded-xl py-2.5" style="background:var(--vs-card); border:1px solid var(--vs-line)">
+              <div class="text-sm font-bold" style="color:var(--vs-text)">12<span class="text-[10px] font-medium" style="color:var(--vs-text-2)"> ms</span></div>
+              <div class="mt-0.5 text-[10px]" style="color:var(--vs-text-2)">{% trans "Ping" %}</div>
+            </div>
+            <div class="rounded-xl py-2.5" style="background:var(--vs-card); border:1px solid var(--vs-line)">
+              <div class="text-sm font-bold" style="color:var(--vs-text)">0</div>
+              <div class="mt-0.5 text-[10px]" style="color:var(--vs-text-2)">{% trans "Logs kept" %}</div>
+            </div>
+          </div>
         </div>
 
-        <div class="flex items-center gap-3">
-          <div class="kv-cap">
-            <svg class="h-5 w-5 text-emerald-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M12 2 3 6v6c0 5 3.8 9.4 9 10 5.2-.6 9-5 9-10V6l-9-4Z" />
-            </svg>
+        <!-- yüzen kart: Kill Switch -->
+        <div class="vs-float absolute right-0 top-64 flex items-center gap-2.5 rounded-2xl px-4 py-3"
+             style="background:var(--vs-card-2); border:1px solid var(--vs-line); box-shadow:var(--vs-shadow)">
+          <span class="vs-icon !h-9 !w-9 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18.36 6.64A9 9 0 1 1 5.64 6.64"/><path d="M12 2v10"/></svg>
+          </span>
+          <div>
+            <div class="text-xs font-bold" style="color:var(--vs-text)">{% trans "Kill Switch" %}</div>
+            <div class="flex items-center gap-1 text-[10px] font-semibold" style="color:#12b76a">
+              <span class="h-1 w-1 rounded-full" style="background:#12b76a"></span>
+              {% trans "Active" %}
+            </div>
           </div>
-          <h3 class="kv-feature">{% trans "Zero-Logs. Anonymous." %}</h3>
         </div>
 
-        <div class="flex items-center gap-3">
-          <div class="kv-cap">
-            <svg class="h-5 w-5 text-emerald-400" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M12 2a1 1 0 0 1 1 1v1.06c1.39.2 2.5.86 3.28 1.81.37.43.32 1.09-.11 1.47a1 1 0 0 1-1.43-.1c-.5-.58-1.29-1.04-2.27-1.2v4.6c2.28.44 4 1.46 4 3.76 0 2.03-1.7 3.47-4 3.86V21a1 1 0 0 1-2 0v-1.14c-1.47-.18-2.79-.84-3.66-1.91a1 1 0 1 1 1.52-1.3c.63.73 1.61 1.22 2.64 1.38v-4.72c-2.34-.47-4-1.55-4-3.72 0-2 1.6-3.43 4-3.82V3a1 1 0 0 1 1-1Zm1 9.23V6.96c-1.38.27-2 .96-2 1.83 0 .84.62 1.4 2 1.88Zm-2 3.61v4.1c1.38-.27 2-.92 2-1.83 0-.9-.62-1.46-2-1.94Z"/>
-            </svg>
+        <!-- yüzen kart: AdBlock sayacı -->
+        <div class="vs-float-slow absolute left-0 -bottom-5 flex items-center gap-2.5 rounded-2xl px-4 py-3"
+             style="background:var(--vs-card-2); border:1px solid var(--vs-line); box-shadow:var(--vs-shadow)">
+          <span class="vs-icon !h-9 !w-9 bg-fuchsia-500/10 text-fuchsia-600 dark:text-fuchsia-400 border-fuchsia-500/20">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/></svg>
+          </span>
+          <div>
+            <div class="text-xs font-bold" style="color:var(--vs-text)">1,284 {% trans "ads blocked" %}</div>
+            <div class="text-[10px]" style="color:var(--vs-text-2)">{% trans "this week" %}</div>
           </div>
-          <h3 class="kv-feature">{% trans "Smart, Fair Pricing" %}</h3>
         </div>
       </div>
     </div>
-
-    <!-- Sağ: Görsel (kaldırıldı) -->
-    <!-- <figure class="kv-figure"> … </figure> -->
   </div>
 </section>
 
-<!-- Hafif video kontrolü (lazy-load, intersection, reduce-motion/data, tab visibility) -->
+<!-- Hero videoları: lazy-load + görünürlük/veri tasarrufu koruması -->
 <script>
-// hero-video.js (place in your static/js/ and include with defer)
-// Self-contained, IIFE, works with your existing .kv-video-layer and <video><source data-src="...">
-
 (function () {
   'use strict';
+  var videos = [document.getElementById('hero-video'), document.getElementById('hero-ribbon')].filter(Boolean);
+  if (!videos.length) return;
 
-  function getVideoElements() {
-    const wrapper = document.querySelector('.kv-video-layer');
-    const video = wrapper?.querySelector('video');
-    return { wrapper, video };
-  }
+  var conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var lowData = !!(conn && (conn.saveData || ['slow-2g', '2g'].indexOf(conn.effectiveType || '') !== -1));
+  if (reduced || lowData) return; // poster yeter
 
-  function isMobile() {
-    return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-  }
-
-  function createPlayOverlay(video) {
-    if (!video || document.getElementById('hero-video-play-overlay')) return null;
-
-    const overlay = document.createElement('button');
-    overlay.id = 'hero-video-play-overlay';
-    overlay.type = 'button';
-    overlay.setAttribute('aria-label', 'Play background video');
-    Object.assign(overlay.style, {
-      position: 'absolute',
-      inset: '0',
-      zIndex: 30,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      background: 'linear-gradient(0deg, rgba(0,0,0,0.18), rgba(0,0,0,0.0))',
-      border: 'none',
-      padding: 0,
-      cursor: 'pointer',
-    });
-
-    overlay.innerHTML = `<svg width="72" height="72" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <circle cx="12" cy="12" r="11" stroke="rgba(255,255,255,0.32)" stroke-width="1.5" fill="rgba(0,0,0,0.22)"/>
-      <path d="M10 8v8l6-4-6-4z" fill="white"/>
-    </svg>`;
-
-    overlay.addEventListener('click', async (ev) => {
-      ev.preventDefault();
-      overlay.style.pointerEvents = 'none';
-      try {
-        video.muted = true;
-        await injectSourcesOnce(video);
-        await video.play();
-        overlay.remove();
-      } catch (err) {
-        // restore interactivity if failed
-        overlay.style.pointerEvents = '';
-        console.warn('Manual play failed', err);
-      }
-    }, { once: true });
-
-    // attach to video's parent
-    const parent = video.parentElement || document.body;
-    parent.style.position = parent.style.position || 'relative';
-    parent.appendChild(overlay);
-    return overlay;
-  }
-
-  // source injector singleton - returns Promise (for awaiting in overlay click)
-  async function injectSourcesOnce(video) {
-    if (!video) return;
-    if (video._sourcesInjected) return;
-    video._sourcesInjected = true;
-    const sources = Array.from(video.querySelectorAll('source'));
-    sources.forEach(s => {
-      const ds = s.getAttribute('data-src');
+  function inject(v) {
+    if (v._injected) return;
+    v._injected = true;
+    try { v.playbackRate = 0.85; } catch (e) { }
+    v.querySelectorAll('source').forEach(function (s) {
+      var ds = s.getAttribute('data-src');
       if (ds) s.setAttribute('src', ds);
     });
-    try { video.load(); } catch (e) { /* ignore */ }
+    try { v.load(); } catch (e) { }
   }
+  function play(v) { v.play().catch(function () { }); }
 
-  async function tryAutoplay(video, lowBandwidthMode) {
-    if (!video) return false;
-    if (lowBandwidthMode) return false;
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (en) {
+      var v = en.target;
+      if (en.isIntersecting) { inject(v); play(v); }
+      else { try { v.pause(); } catch (e) { } }
+    });
+  }, { threshold: 0.15 });
+  videos.forEach(function (v) { io.observe(v); });
 
-    await injectSourcesOnce(video);
-
-    try {
-      // ensure attributes for mobile/iOS behavior
-      try { video.muted = true; } catch (e) {}
-      try { video.playsInline = true; } catch (e) {}
-      video.setAttribute?.('playsinline', '');
-      video.setAttribute?.('webkit-playsinline', '');
-
-      const p = video.play();
-      if (p instanceof Promise) await p;
-      return true;
-    } catch (err) {
-      return false;
-    }
-  }
-
-  // small util to check reduced data/motion & connection info
-  function getLowBandwidthBool(video) {
-    const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-    const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-    const saveData = connection?.saveData === true;
-    const effectiveType = (connection?.effectiveType || '').toLowerCase();
-    const lowNetwork = ['slow-2g', '2g'].includes(effectiveType);
-    const mobile = isMobile();
-    // also skip heavy video for small mobile screens optionally
-    return prefersReducedMotion || saveData || lowNetwork || (mobile && effectiveType === '3g');
-  }
-
-  // main entry - DOMContentLoaded safe if script included defer, but keep guard
-  function boot() {
-    const { wrapper, video } = getVideoElements();
-    if (!video) return;
-
-    const lowBandwidthMode = getLowBandwidthBool(video);
-
-    if (lowBandwidthMode) {
-      // do not load heavy sources, keep poster; ensure paused
-      try { video.pause(); } catch (e) {}
-      video.removeAttribute?.('autoplay');
-      return;
-    }
-
-    let playedOnce = false;
-    const io = new IntersectionObserver(async (entries, obs) => {
-      for (const entry of entries) {
-        if (!entry.isIntersecting) continue;
-        obs.unobserve(entry.target);
-
-        // try autoplay
-        const ok = await tryAutoplay(video, lowBandwidthMode);
-        playedOnce = !!ok;
-        if (!ok) {
-          // show overlay so user can tap to start playback
-          createPlayOverlay(video);
-        }
+  document.addEventListener('visibilitychange', function () {
+    videos.forEach(function (v) {
+      if (document.hidden) { try { v.pause(); } catch (e) { } }
+      else if (v._injected) {
+        var r = v.getBoundingClientRect();
+        if (r.bottom > 0 && r.top < window.innerHeight) play(v);
       }
-    }, { threshold: 0.12 });
-
-    io.observe(video);
-
-    // visibility handling: pause when hidden, resume if in-view when visible
-    document.addEventListener('visibilitychange', () => {
-      if (document.hidden) {
-        try { video.pause(); } catch (e) {}
-      } else {
-        // if we previously injected sources and in view, try to play
-        const rect = video.getBoundingClientRect();
-        const inView = rect.bottom > 0 && rect.top < (window.innerHeight || document.documentElement.clientHeight);
-        if (inView && video._sourcesInjected) {
-          video.muted = true;
-          video.play().catch(() => {
-            // if still blocked, ensure overlay present
-            createPlayOverlay(video);
-          });
-        }
-      }
-    }, { passive: true });
-
-    // watch for prefers-reduced-motion changes and pause if user turns on reduced-motion
-    try {
-      const rm = window.matchMedia('(prefers-reduced-motion: reduce)');
-      rm.addEventListener?.('change', e => {
-        if (e.matches) { try { video.pause(); } catch (e) {} }
-      });
-    } catch (e) { /* ignore */ }
-
-    // fallback timeout: if video not playing after X ms, show overlay
-    setTimeout(() => {
-      if (!playedOnce && (video.paused || video.readyState < 3)) {
-        createPlayOverlay(video);
-      }
-    }, 8000);
-  }
-
-  // If script loaded with defer, DOMContentLoaded might already have fired; safe guard:
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', boot, { once: true });
-  } else {
-    // DOM already ready
-    setTimeout(boot, 0);
-  }
+    });
+  }, { passive: true });
 })();
-
 </script>

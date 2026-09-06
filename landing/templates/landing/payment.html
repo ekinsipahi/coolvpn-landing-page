@@ -2,7 +2,7 @@
 {% load i18n static socialaccount %}
 
 {% block title %}{% trans "Checkout" %} — {{ site_name }}{% endblock %}
-{% block meta_description %}{% trans "Secure checkout. Sign in and complete your CoolVPN purchase." %}{% endblock %}
+{% block meta_description %}{% trans "Secure checkout. Sign in and complete your VPNsterr purchase." %}{% endblock %}
 {% block meta_robots %}noindex,nofollow{% endblock %}
 
 {% block header %}
@@ -16,262 +16,230 @@
 {% endblock %}
 
 {% block content %}
-<section class="relative isolate overflow-hidden bg-white dark:bg-neutral-950 py-10 md:py-14">
-  <div id="plan-bg"
-       class="pointer-events-none absolute inset-0 -z-10 opacity-15 bg-center bg-no-repeat bg-[length:720px_auto]"
-       style="background-image:url('{% static plan.poster %}')"></div>
+<section class="vs-section !pt-10 md:!pt-14">
+  <div class="vs-shell max-w-6xl">
 
-  <div class="pointer-events-none absolute inset-0 -z-10">
-    <div class="absolute -top-24 -left-24 h-72 w-72 rounded-full blur-3xl bg-rose-300/30 dark:bg-rose-400/20"></div>
-    <div class="absolute bottom-0 right-1/4 h-72 w-72 rounded-full blur-3xl bg-fuchsia-300/25 dark:bg-fuchsia-400/20"></div>
-    <div class="absolute top-1/3 left-1/2 -translate-x-1/2 h-64 w-64 rounded-full blur-3xl bg-indigo-300/20 dark:bg-indigo-400/15"></div>
-  </div>
+    <!-- Başlık -->
+    <div class="mb-8 flex flex-wrap items-end justify-between gap-4">
+      <div>
+        <span class="vs-eyebrow">{% trans "Checkout" %}</span>
+        <h1 class="vs-h2 !mt-3">{% trans "Secure Checkout" %}</h1>
+        <p class="mt-2 text-sm" style="color:var(--vs-text-2)">
+          {% trans "Finish sign-in, pick a payment method, and confirm your order." %}
+        </p>
+      </div>
+      <div class="inline-flex items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-semibold"
+           style="color:var(--vs-600); background:color-mix(in srgb, var(--vs-500) 8%, transparent); border:1px solid color-mix(in srgb, var(--vs-500) 22%, transparent)">
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        {% trans "256-bit encrypted checkout" %}
+      </div>
+    </div>
 
-  <div class="max-w-screen-xl mx-auto px-6">
-    <div class="rounded-3xl border border-black/10 dark:border-white/10 bg-white/60 dark:bg-white/[0.04] backdrop-blur-xl shadow-xl overflow-hidden relative group">
-      <div id="card-bg"
-           class="absolute inset-0 pointer-events-none opacity-10 bg-center bg-no-repeat bg-[length:520px_auto]"
-           style="background-image:url('{% static plan.poster %}')"></div>
+    <div class="grid gap-6 lg:grid-cols-[1fr_400px] items-start">
 
-      <div class="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-           style="background: radial-gradient(1200px 300px at 20% 0%, rgba(244,114,182,.12), transparent 60%), radial-gradient(800px 240px at 80% 100%, rgba(167,139,250,.10), transparent 60%);"></div>
+      <!-- SOL: adımlar -->
+      <div class="space-y-6">
 
-      <!-- HEADER STRIP -->
-      <div class="relative px-6 py-5 md:px-8 md:py-6 flex items-center justify-between gap-4">
-        <div class="flex items-center gap-3">
-          <div class="h-10 w-10 rounded-xl bg-gradient-to-br from-rose-500/80 to-fuchsia-500/80 shadow-md flex items-center justify-center">
-            <svg viewBox="0 0 24 24" class="h-6 w-6 text-emerald-400" fill="currentColor" aria-hidden="true">
-              <path d="M12 2.5L4.5 5v6.7c0 5 3.6 9.6 7.5 9.8c3.9-.2 7.5-4.8 7.5-9.8V5L12 2.5zM10.9 16.2l-3.1-3.1 1.4-1.4 1.7 1.7 4-4 1.4 1.4-5.4 5.4z" />
-            </svg>
+        <!-- 1) Hesap -->
+        <section class="vs-card !p-6 md:!p-7">
+          <div class="flex items-center gap-3">
+            <span class="grid h-8 w-8 place-content-center rounded-full text-sm font-bold text-white"
+                  style="background:linear-gradient(135deg, var(--vs-500), var(--vs-700))">1</span>
+            <h2 class="text-lg font-bold tracking-tight" style="color:var(--vs-text)">{% trans "Your account" %}</h2>
           </div>
-          <div>
-            <h1 class="text-xl md:text-2xl font-semibold tracking-tight text-gray-900 dark:text-gray-100">{% trans "Secure Checkout" %}</h1>
-            <p class="text-xs md:text-sm text-gray-600 dark:text-gray-300">{% trans "Finish sign-in, pick a gateway, and confirm your order." %}</p>
+
+          {% if user.is_authenticated %}
+            {% get_social_accounts user as accounts %}
+            <div class="mt-5 flex items-center gap-3 rounded-xl p-4"
+                 style="background:color-mix(in srgb, var(--vs-500) 6%, transparent); border:1px solid color-mix(in srgb, var(--vs-500) 18%, transparent)">
+              <span class="grid h-10 w-10 place-content-center rounded-full text-white"
+                    style="background:linear-gradient(135deg, var(--vs-500), var(--vs-700))">
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+              </span>
+              <div>
+                <div class="text-sm font-semibold" style="color:var(--vs-text)">
+                  {% if accounts.google %}{% trans "Signed in with Google" %}{% else %}{% trans "Signed in with email" %}{% endif %}
+                </div>
+                <div class="text-xs" style="color:var(--vs-text-2)">{{ user.email|default:user.get_username }}</div>
+              </div>
+            </div>
+          {% else %}
+            <p class="mt-2 text-sm" style="color:var(--vs-text-2)">
+              {% trans "We'll send your receipt and license details to this address." %}
+            </p>
+
+            <div class="mt-5">
+              <label for="email" class="block text-xs font-semibold uppercase tracking-wider mb-1.5" style="color:var(--vs-text-2)">{% trans "Email" %}</label>
+              <input id="email" type="email" autocomplete="email" inputmode="email"
+                     class="w-full rounded-xl px-3.5 py-2.5 text-sm outline-none transition focus:ring-2"
+                     style="background:var(--vs-card-2); border:1px solid var(--vs-line-2); color:var(--vs-text); --tw-ring-color:color-mix(in srgb, var(--vs-500) 45%, transparent)"
+                     placeholder="you@example.com">
+            </div>
+            <div id="email-alert" class="mt-2 text-xs text-rose-600 dark:text-rose-400" aria-live="polite"></div>
+
+            <!-- PASSWORD (gizli, email kontrolünden sonra açılır) -->
+            <div id="password-wrap" class="mt-3 hidden">
+              <label for="password" class="block text-xs font-semibold uppercase tracking-wider mb-1.5" style="color:var(--vs-text-2)">{% trans "Password" %}</label>
+              <div class="relative">
+                <input id="password" type="password" autocomplete="new-password"
+                       class="w-full pr-11 rounded-xl px-3.5 py-2.5 text-sm outline-none transition focus:ring-2"
+                       style="background:var(--vs-card-2); border:1px solid var(--vs-line-2); color:var(--vs-text); --tw-ring-color:color-mix(in srgb, var(--vs-500) 45%, transparent)"
+                       placeholder="{% trans 'Create a password' %}">
+                <button id="btn-toggle-pass" type="button"
+                        class="absolute inset-y-0 right-0 px-3.5 flex items-center transition-colors"
+                        style="color:var(--vs-text-2)"
+                        aria-label="{% trans 'Show password' %}">
+                  <svg id="icon-eye" viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                  <svg id="icon-eye-off" viewBox="0 0 24 24" class="h-5 w-5 hidden" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M3 3l18 18M10.6 10.6A3 3 0 0 0 12 15a3 3 0 0 0 2.4-4.4M4.5 7.5S8 5 12 5s7.5 2.5 7.5 2.5c1.2.9 2.5 2.1 3.5 4.5-1 2.4-2.3 3.6-3.5 4.5 0 0-3.5 2.5-7.5 2.5S4.5 17 4.5 17C3.3 16.1 2 14.9 1 12.5"/>
+                  </svg>
+                </button>
+              </div>
+              <p class="mt-1.5 text-[11px]" style="color:var(--vs-text-2)">
+                {% trans "We couldn't find an account. Create a password to continue." %}
+              </p>
+            </div>
+
+            <div class="relative my-5">
+              <div class="absolute inset-0 flex items-center"><div class="w-full" style="border-top:1px solid var(--vs-line)"></div></div>
+              <div class="relative flex justify-center">
+                <span class="px-3 text-[11px] uppercase tracking-widest" style="background:var(--vs-card-2); color:var(--vs-text-2)">{% trans "or" %}</span>
+              </div>
+            </div>
+
+            <!-- Google popup -->
+            <button id="btn-google-open" type="button"
+                    class="vs-btn vs-btn-ghost w-full !py-2.5">
+              <svg width="18" height="18" viewBox="0 0 48 48">
+                <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.5 32.7 29.1 36 24 36 16.8 36 11 30.2 11 23S16.8 10 24 10c3.4 0 6.5 1.3 8.8 3.5l5.7-5.7C34.7 4.1 29.7 2 24 2 15 2 7.6 6.7 3.7 14.7z"/>
+                <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.4 16 18.9 13 24 13c3.4 0 6.5 1.3 8.8 3.5l5.7-5.7C34.7 4.1 29.7 2 24 2 15 2 7.6 6.7 3.7 14.7z"/>
+                <path fill="#4CAF50" d="M24 46c5.1 0 10-1.9 13.6-5.2l-6.3-5.2C29 37.4 26.7 38 24 38c-5 0-9.3-3.2-10.9-7.7l-6.6 5.1C8.6 39.9 15.8 46 24 46z"/>
+                <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3C34.8 32 30.8 36 24 36c-5 0-9.3-3.2-10.9-7.7l-6.6 5.1C8.6 39.9 15.8 46 24 46c11 0 21-8 21-22 0-1.2-.1-2.3-.4-3.5z"/>
+              </svg>
+              {% trans "Continue with Google" %}
+            </button>
+
+            <div id="google-btn-slot-inline" class="hidden"></div>
+
+            <p class="mt-4 text-[11px]" style="color:var(--vs-text-2)">
+              {% blocktrans trimmed %}By continuing you accept our <a href="/terms/" class="underline">Terms</a> and <a href="/privacy-policy/" class="underline">Privacy Policy</a>.{% endblocktrans %}
+            </p>
+          {% endif %}
+        </section>
+
+        <!-- 2) Ödeme yöntemi -->
+        <section class="vs-card !p-6 md:!p-7">
+          <div class="flex items-center gap-3">
+            <span class="grid h-8 w-8 place-content-center rounded-full text-sm font-bold text-white"
+                  style="background:linear-gradient(135deg, var(--vs-500), var(--vs-700))">2</span>
+            <h2 class="text-lg font-bold tracking-tight" style="color:var(--vs-text)">{% trans "Payment method" %}</h2>
           </div>
+          <p class="mt-2 text-sm" style="color:var(--vs-text-2)">
+            {% trans "Pay with crypto via NOWPayments (150+ coins). Card payments are coming soon." %}
+          </p>
+
+          <div id="gw-list" class="mt-5 grid gap-3"></div>
+          <div id="checkout-alert" class="mt-3 text-sm text-rose-600 dark:text-rose-400" aria-live="polite"></div>
+        </section>
+
+        <!-- Her planda olanlar -->
+        <section class="vs-card !p-6 md:!p-7">
+          <h3 class="text-sm font-bold uppercase tracking-wider" style="color:var(--vs-text-2)">{% trans "Included in every plan" %}</h3>
+          <div class="mt-4 grid gap-x-6 gap-y-3 sm:grid-cols-2">
+            <span class="vs-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>{% trans "Kill Switch & leak protection" %}</span>
+            <span class="vs-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>{% trans "Ad & tracker blocking" %}</span>
+            <span class="vs-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>{% trans "Strict zero logs" %}</span>
+            <span class="vs-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>{% trans "1000 Gbps network core" %}</span>
+            <span class="vs-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>{% trans "Per-tab routing for Chrome" %}</span>
+            <span class="vs-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>{% trans "24/7 live support" %}</span>
+          </div>
+        </section>
+      </div>
+
+      <!-- SAĞ: sipariş özeti (sticky) -->
+      <aside class="vs-card !p-6 md:!p-7 lg:sticky lg:top-24">
+        <h2 class="text-lg font-bold tracking-tight" style="color:var(--vs-text)">{% trans "Order summary" %}</h2>
+
+        <!-- Plan -->
+        <div class="mt-4 flex items-center justify-between gap-3 rounded-xl p-4"
+             style="background:color-mix(in srgb, var(--vs-500) 6%, transparent); border:1px solid color-mix(in srgb, var(--vs-500) 18%, transparent)">
+          <div class="flex items-center gap-3">
+            <img src="{% static 'img/logo-mark.png' %}" class="h-10 w-10" alt="">
+            <div>
+              <div class="text-sm font-bold" style="color:var(--vs-text)"><span id="plan-name">{{ plan.name }}</span></div>
+              <div class="text-xs" style="color:var(--vs-text-2)"><span id="plan-devices">{{ plan.devices }}</span> {% trans "devices" %}</div>
+            </div>
+          </div>
+          <div class="text-right">
+            <div class="text-xl font-extrabold tracking-tight" style="color:var(--vs-text)">
+              <span class="align-top text-xs font-semibold" style="color:var(--vs-text-2)">{{ ui_currency_symbol }}</span><span id="plan-price">{{ plan.price }}</span>
+            </div>
+            <div class="text-[11px]" style="color:var(--vs-text-2)" id="plan-interval">{{ plan.interval }}</div>
+          </div>
+        </div>
+        <a href="{% url 'pricing' %}" class="mt-2 inline-block text-xs underline" style="color:var(--vs-text-2)">{% trans "Change plan" %}</a>
+
+        <!-- Kupon -->
+        <div class="mt-5">
+          <label for="coupon" class="block text-xs font-semibold uppercase tracking-wider mb-1.5" style="color:var(--vs-text-2)">{% trans "Have a coupon?" %}</label>
+          <div class="flex gap-2">
+            <input id="coupon" type="text"
+                   class="flex-1 min-w-0 rounded-xl px-3.5 py-2.5 text-sm outline-none transition focus:ring-2"
+                   style="background:var(--vs-card-2); border:1px solid var(--vs-line-2); color:var(--vs-text); --tw-ring-color:color-mix(in srgb, var(--vs-500) 45%, transparent)"
+                   placeholder="{% trans 'Enter code' %}">
+            <button id="btn-apply" class="vs-btn vs-btn-ghost !px-4 !py-2.5">{% trans "Apply" %}</button>
+          </div>
+          <div id="coupon-alert" class="mt-2 text-xs text-rose-600 dark:text-rose-400" aria-live="polite"></div>
+        </div>
+
+        <!-- Toplamlar -->
+        <dl class="mt-5 space-y-2 text-sm" style="color:var(--vs-text-2)">
+          <div class="flex justify-between">
+            <dt>{% trans "Subtotal" %}</dt>
+            <dd><span id="sum-sub">{{ ui_currency_symbol }}<span id="sum-sub-v">{{ plan.price }}</span></span></dd>
+          </div>
+          <div class="flex justify-between">
+            <dt>{% trans "Discount" %}</dt>
+            <dd style="color:var(--vs-600)">-{{ ui_currency_symbol }}<span id="sum-disc">0.00</span></dd>
+          </div>
+          <div class="flex justify-between">
+            <dt>{% trans "Fees" %}</dt>
+            <dd>{{ ui_currency_symbol }}<span id="sum-fee">0.00</span></dd>
+          </div>
+          <div class="flex justify-between pt-3 text-base font-bold" style="color:var(--vs-text); border-top:1px solid var(--vs-line)">
+            <dt>{% trans "Total" %}</dt>
+            <dd>{{ ui_currency_symbol }}<span id="sum-total">{{ plan.price }}</span></dd>
+          </div>
+        </dl>
+        <p class="mt-2 text-[11px]" style="color:var(--vs-text-2)">{% trans "VAT may apply at payment." %}</p>
+
+        <button id="btn-pay" class="vs-btn vs-btn-primary vs-btn-lg mt-5 w-full">
+          {% trans "Pay now" %}
+          <svg class="h-5 w-5 rtl:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </button>
+
+        <!-- Güven -->
+        <div class="mt-5 space-y-2">
+          <span class="vs-check !text-xs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>{% trans "24/7 live support" %}</span>
+          <span class="vs-check !text-xs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>{% trans "Refund available if unused" %}</span>
+          <span class="vs-check !text-xs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>{% trans "Zero logs — your data stays yours" %}</span>
         </div>
 
         {% if not user.is_authenticated %}
-        <button id="btn-google-open-top" type="button"
-                class="hidden md:inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium
-                       text-white bg-gradient-to-r from-rose-600 via-fuchsia-600 to-indigo-600
-                       hover:opacity-95 active:opacity-100 transition shadow-md">
-          <svg width="18" height="18" viewBox="0 0 48 48" class="opacity-95">
-            <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.5 32.7 29.1 36 24 36 16.8 36 11 30.2 11 23S16.8 10 24 10c3.4 0 6.5 1.3 8.8 3.5l5.7-5.7C34.7 4.1 29.7 2 24 2 15 2 7.6 6.7 3.7 14.7z"/>
-            <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.4 16 18.9 13 24 13c3.4 0 6.5 1.3 8.8 3.5l5.7-5.7C34.7 4.1 29.7 2 24 2 15 2 7.6 6.7 3.7 14.7z"/>
-            <path fill="#4CAF50" d="M24 46c5.1 0 10-1.9 13.6-5.2l-6.3-5.2C29 37.4 26.7 38 24 38c-5 0-9.3-3.2-10.9-7.7l-6.6 5.1C8.6 39.9 15.8 46 24 46z"/>
-            <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3C34.8 32 30.8 36 24 36c-5 0-9.3-3.2-10.9-7.7l-6.6 5.1C8.6 39.9 15.8 46 24 46c11 0 21-8 21-22 0-1.2-.1-2.3-.4-3.5z"/>
-          </svg>
-          <span>{% trans "Continue with Google" %}</span>
-        </button>
+        <button id="btn-google-open-top" type="button" class="hidden"></button>
         {% endif %}
-      </div>
+      </aside>
+    </div>
 
-      <div class="divide-y divide-black/10 dark:divide-white/10">
-        <!-- TOP: Plan ribbon -->
-        <div class="relative px-6 md:px-8 py-4">
-          <div class="flex items-center justify-between gap-4">
-            <div class="flex items-center gap-3">
-              <div class="h-12 w-28 md:w-40 overflow-hidden rounded-lg ring-1 ring-black/10 dark:ring-white/10">
-                <video id="plan-ribbon" class="h-full w-full object-cover opacity-95" playsinline muted loop preload="metadata"
-                       poster="{% static plan.poster %}">
-                  <source id="src-webm" src="{% static plan.webm %}" type="video/webm">
-                  <source id="src-mp4"  src="{% static plan.mp4  %}" type="video/mp4">
-                </video>
-              </div>
-              <div>
-                <div class="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                  <span id="plan-name">{{ plan.name }}</span>
-                </div>
-                <div class="text-xs text-gray-600 dark:text-gray-300">
-                  <span id="plan-devices">{{ plan.devices }}</span> {% trans "devices" %}
-                </div>
-              </div>
-            </div>
-            <div class="text-right">
-              <div class="text-2xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-gray-900 via-rose-600 to-gray-900 dark:from-white dark:via-rose-300 dark:to-white">
-                <span class="align-top text-sm">{{ ui_currency_symbol }}</span>
-                <span id="plan-price">{{ plan.price }}</span>
-              </div>
-              <div class="text-xs text-gray-600 dark:text-gray-300" id="plan-interval">{{ plan.interval }}</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- MIDDLE: Identity + Gateways + Coupon -->
-        <div class="grid gap-6 lg:grid-cols-3 px-6 md:px-8 py-6">
-          <!-- LEFT: Email / Signed-in state -->
-          <section class="rounded-2xl bg-white/60 dark:bg-white/[0.04] ring-1 ring-black/10 dark:ring-white/10 p-5 hover:shadow-lg transition-all duration-300">
-            {% if user.is_authenticated %}
-              {% get_social_accounts user as accounts %}
-              <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">{% trans "Already signed in" %}</h2>
-              {% if accounts.google %}
-                <p class="mt-1 text-xs text-gray-600 dark:text-gray-300">{% trans "Signed in with Google" %} — <strong>{{ user.email|default:user.get_username }}</strong></p>
-              {% else %}
-                <p class="mt-1 text-xs text-gray-600 dark:text-gray-300">{% trans "Signed in with email" %} — <strong>{{ user.email|default:user.get_username }}</strong></p>
-              {% endif %}
-            {% else %}
-              <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">{% trans "Your email" %}</h2>
-              <p class="mt-1 text-xs text-gray-600 dark:text-gray-300">{% trans "Premium’u tanımlayabilmemiz için gerekli. Faturanızı ve lisans bilgilerini buraya göndereceğiz." %}</p>
-
-              <div class="mt-3">
-                <input id="email" type="email" autocomplete="email" inputmode="email"
-                       class="w-full rounded-xl bg-white/90 dark:bg-white/[0.06] ring-1 ring-black/10 dark:ring-white/10 px-3 py-2 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-rose-400/60 transition"
-                       placeholder="you@example.com">
-              </div>
-              <div id="email-alert" class="mt-2 text-xs text-rose-600 dark:text-rose-400" aria-live="polite"></div>
-
-              <!-- PASSWORD (gizli, email yoksa açılacak) -->
-            <div id="password-wrap" class="mt-2 hidden">
-            <div class="relative">
-                <input id="password" type="password" autocomplete="new-password"
-                    class="w-full pr-10 rounded-xl bg-white/90 dark:bg-white/[0.06] ring-1 ring-black/10 dark:ring-white/10 px-3 py-2 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-rose-400/60 transition"
-                    placeholder="{% trans 'Create a password' %}">
-                <button id="btn-toggle-pass" type="button"
-                        class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
-                        aria-label="{% trans 'Show password' %}">
-                <!-- basit göz ikonu -->
-                <svg id="icon-eye" viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z"/>
-                    <circle cx="12" cy="12" r="3"/>
-                </svg>
-                <svg id="icon-eye-off" viewBox="0 0 24 24" class="h-5 w-5 hidden" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <path d="M3 3l18 18M10.6 10.6A3 3 0 0 0 12 15a3 3 0 0 0 2.4-4.4M4.5 7.5S8 5 12 5s7.5 2.5 7.5 2.5c1.2.9 2.5 2.1 3.5 4.5-1 2.4-2.3 3.6-3.5 4.5 0 0-3.5 2.5-7.5 2.5S4.5 17 4.5 17C3.3 16.1 2 14.9 1 12.5"/>
-                </svg>
-                </button>
-            </div>
-            <p class="mt-1 text-[11px] text-gray-600 dark:text-gray-400">
-                {% trans "We couldn't find an account. Create a password to continue." %}
-            </p>
-            </div>
-
-
-              <div class="relative my-4">
-                <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-black/10 dark:border-white/10"></div></div>
-                <div class="relative flex justify-center">
-                  <span class="bg-white/90 dark:bg-neutral-950 px-2 text-[11px] uppercase tracking-wide text-gray-500">{% trans "or" %}</span>
-                </div>
-              </div>
-
-              <!-- Google popup -->
-              <button id="btn-google-open" type="button"
-                      class="w-full inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-medium
-                             text-white bg-gradient-to-r from-rose-600 via-fuchsia-600 to-indigo-600
-                             hover:opacity-95 active:opacity-100 transition shadow-md">
-                <svg width="18" height="18" viewBox="0 0 48 48" class="opacity-95">
-                  <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.5 32.7 29.1 36 24 36 16.8 36 11 30.2 11 23S16.8 10 24 10c3.4 0 6.5 1.3 8.8 3.5l5.7-5.7C34.7 4.1 29.7 2 24 2 15 2 7.6 6.7 3.7 14.7z"/>
-                  <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.4 16 18.9 13 24 13c3.4 0 6.5 1.3 8.8 3.5l5.7-5.7C34.7 4.1 29.7 2 24 2 15 2 7.6 6.7 3.7 14.7z"/>
-                  <path fill="#4CAF50" d="M24 46c5.1 0 10-1.9 13.6-5.2l-6.3-5.2C29 37.4 26.7 38 24 38c-5 0-9.3-3.2-10.9-7.7l-6.6 5.1C8.6 39.9 15.8 46 24 46z"/>
-                  <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3C34.8 32 30.8 36 24 36c-5 0-9.3-3.2-10.9-7.7l-6.6 5.1C8.6 39.9 15.8 46 24 46c11 0 21-8 21-22 0-1.2-.1-2.3-.4-3.5z"/>
-                </svg>
-                {% trans "Continue with Google" %}
-              </button>
-
-              <div id="google-btn-slot-inline" class="hidden"></div>
-
-              <p class="mt-3 text-[11px] text-gray-600 dark:text-gray-400">
-                {% blocktrans trimmed %}Devam ederek <a href="/terms" class="underline">Şartlar</a> ve <a href="/privacy" class="underline">Gizlilik</a>’i kabul edersiniz.{% endblocktrans %}
-              </p>
-            {% endif %}
-          </section>
-
-        <!-- MIDDLE: Gateways -->
-        <section class="rounded-2xl bg-white/60 dark:bg-white/[0.04] ring-1 ring-black/10 dark:ring-white/10 p-5 hover:shadow-lg transition-all duration-300">
-        <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">{% trans "Payment method" %}</h2>
-        <p class="mt-1 text-xs text-gray-600 dark:text-gray-300">{% trans "Pay with crypto via NOWPayments (150+ coins)." %}</p>
-
-        <!-- Gateway Card -->
-        <div id="gw-list" class="mt-4 grid gap-3"></div>
-
-        <div id="checkout-alert" class="mt-3 text-sm text-rose-600 dark:text-rose-400" aria-live="polite"></div>
-        <button id="btn-pay" target="_blank" class="mt-4 w-full inline-flex items-center justify-center rounded-xl px-4 py-2
-                text-white bg-gray-900 hover:bg-gray-800 active:bg-black
-                dark:bg-white dark:text-black dark:hover:bg-white/90 transition">
-            {% trans "Pay now" %}
-        </button>
-        </section>
-
-
-          <!-- RIGHT: Coupon + Totals -->
-          <aside class="rounded-2xl bg-white/60 dark:bg-white/[0.04] ring-1 ring-black/10 dark:ring-white/10 p-5 hover:shadow-lg transition-all duration-300">
-            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">{% trans "Order summary" %}</h2>
-            <div class="mt-3">
-              <label for="coupon" class="block text-xs font-medium text-gray-900 dark:text-gray-100 mb-1">{% trans "Have a coupon?" %}</label>
-              <div class="flex gap-2">
-                <input id="coupon" type="text"
-                       class="flex-1 rounded-xl bg-white/90 dark:bg-white/[0.06] ring-1 ring-black/10 dark:ring-white/10 px-3 py-2 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400"
-                       placeholder="{% trans 'Enter code' %}">
-                <button id="btn-apply" class="rounded-xl px-3 py-2 text-sm ring-1 ring-black/10 dark:ring-white/10 bg-white hover:bg-gray-50 dark:bg-white/[0.06] dark:hover:bg-white/[0.1] transition">
-                  {% trans "Apply" %}
-                </button>
-              </div>
-              <div id="coupon-alert" class="mt-2 text-xs text-rose-600 dark:text-rose-400" aria-live="polite"></div>
-            </div>
-            <dl class="mt-4 space-y-1 text-sm text-gray-800 dark:text-gray-300">
-              <div class="flex justify-between">
-                <dt>{% trans "Subtotal" %}</dt>
-                <dd><span id="sum-sub">{{ ui_currency_symbol }}<span id="sum-sub-v">{{ plan.price }}</span></span></dd>
-              </div>
-              <div class="flex justify-between">
-                <dt>{% trans "Discount" %}</dt>
-                <dd class="text-emerald-600 dark:text-emerald-400">-{{ ui_currency_symbol }}<span id="sum-disc">0.00</span></dd>
-              </div>
-              <div class="flex justify-between">
-                <dt>{% trans "Fees" %}</dt>
-                <dd>{{ ui_currency_symbol }}<span id="sum-fee">0.00</span></dd>
-              </div>
-              <div class="flex justify-between font-semibold text-gray-900 dark:text-gray-100 pt-2 border-t border-black/10 dark:border-white/10">
-                <dt>{% trans "Total" %}</dt>
-                <dd>{{ ui_currency_symbol }}<span id="sum-total">{{ plan.price }}</span></dd>
-              </div>
-              <p class="mt-2 text-[11px] text-gray-600 dark:text-gray-400">{% trans "VAT may apply at payment." %}</p>
-              <a href="{% url 'pricing' %}" class="mt-2 inline-block text-xs underline text-gray-600 dark:text-gray-300">{% trans "Change plan" %}</a>
-            </dl>
-          </aside>
-        </div>
-
-        <!-- INCLUDED FEATURES + TRUST -->
-        <div class="px-6 md:px-8 py-6">
-          <div class="rounded-2xl ring-1 ring-black/10 dark:ring-white/10 bg-white/60 dark:bg-white/[0.04] p-6">
-            <div class="flex items-center justify-between gap-4">
-              <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">{% trans "Included in all plans" %}</h3>
-              <div class="flex items-center gap-2 text-xs text-gray-700 dark:text-gray-300">
-                <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full ring-1 ring-black/10 dark:ring-white/10 bg-white/80 dark:bg-white/[0.06]">💬 {% trans "24/7 Live Support" %}</span>
-                <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full ring-1 ring-black/10 dark:ring-white/10 bg-white/80 dark:bg-white/[0.06]">↩️ {% trans "30-day Money-Back" %}</span>
-                <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full ring-1 ring-black/10 dark:ring-white/10 bg-white/80 dark:bg-white/[0.06]">🛑 {% trans "Zero logs" %}</span>
-              </div>
-            </div>
-
-            <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm text-gray-800 dark:text-gray-300">
-              <div class="flex items-start gap-2"><span>🟢</span><div><strong>{% trans "Always-on protection" %}</strong><br>{% trans "Launches with your device and reconnects automatically." %}</div></div>
-              <div class="flex items-start gap-2"><span>🪓</span><div><strong>{% trans "Kill Switch" %}</strong><br>{% trans "If the VPN drops, traffic is cut instantly — no leaks." %}</div></div>
-              <div class="flex items-start gap-2"><span>🚫</span><div><strong>{% trans "Built-in Ad & Tracker Blocker" %}</strong><br>{% trans "Cleaner pages, fewer trackers — no extra extensions." %}</div></div>
-              <div class="flex items-start gap-2"><span>🧾</span><div><strong>{% trans "Zero logs" %}</strong><br>{% trans "We don’t track the sites you visit or what you do online." %}</div></div>
-              <div class="flex items-start gap-2"><span>🕶️</span><div><strong>{% trans "100% anonymous" %}</strong><br>{% trans "Shared exit nodes and masked IP keep identity separate from activity." %}</div></div>
-              <div class="flex items-start gap-2"><span>⚡</span><div><strong>{% trans "1000 Gbps network core" %}</strong><br>{% trans "Backbone capacity for peak throughput and low jitter." %}</div></div>
-              <div class="flex items-start gap-2"><span>🪟</span><div><strong>{% trans "Per-tab routing for Chrome" %}</strong><br>{% trans "Send one tab through VPN and keep another on your regular connection." %}</div></div>
-              <div class="flex items-start gap-2"><span>🫥</span><div><strong>{% trans "DPI inspection bypass" %}</strong><br>{% trans "Stealth obfuscation to evade deep packet inspection and port blocks." %}</div></div>
-            </div>
-
-            <div class="mt-5 rounded-xl p-4 ring-1 ring-rose-300/40 dark:ring-rose-400/30 bg-gradient-to-br from-rose-50 to-fuchsia-50 dark:from-rose-900/10 dark:to-fuchsia-900/10">
-              <div class="flex items-start gap-3">
-                <div class="h-8 w-8 rounded-lg bg-rose-500/90 text-white flex items-center justify-center">★</div>
-                <div class="text-sm">
-                  <div class="font-semibold text-gray-900 dark:text-gray-100">{% trans "Dedicated private server" %} — <span class="uppercase tracking-wide text-rose-600 dark:text-rose-400">{% trans "Annual only" %}</span></div>
-                  <div class="text-gray-700 dark:text-gray-300">{% trans "Single-tenant performance, consistent IP, lower latency — your own VPN server." %}</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- FOOT BANNER -->
-        <div id="checkout-banner" class="hidden px-6 md:px-8 py-3 text-sm bg-rose-50 text-rose-700 dark:bg-rose-900/20 dark:text-rose-300" role="alert" aria-live="polite">
-          <div class="flex items-start gap-2">
-            <strong class="font-medium">{% trans "Heads up" %}:</strong>
-            <span id="checkout-banner-text">{% trans "Something went wrong. Please try again." %}</span>
-            <button type="button" class="ml-auto opacity-70 hover:opacity-100" onclick="this.closest('#checkout-banner').classList.add('hidden')">✕</button>
-          </div>
-        </div>
+    <!-- FOOT BANNER -->
+    <div id="checkout-banner" class="hidden mt-6 rounded-xl px-5 py-3.5 text-sm bg-rose-50 text-rose-700 dark:bg-rose-900/20 dark:text-rose-300" role="alert" aria-live="polite">
+      <div class="flex items-start gap-2">
+        <strong class="font-semibold">{% trans "Heads up" %}:</strong>
+        <span id="checkout-banner-text">{% trans "Something went wrong. Please try again." %}</span>
+        <button type="button" class="ml-auto opacity-70 hover:opacity-100" onclick="this.closest('#checkout-banner').classList.add('hidden')">✕</button>
       </div>
     </div>
   </div>
@@ -286,36 +254,33 @@
 <style>
   .gw-card{
     border-radius: 14px;
-    background: rgba(255,255,255,.7);
-    border: 1px solid rgba(0,0,0,.1);
-    padding: 12px;
+    background: var(--vs-card-2);
+    border: 1px solid var(--vs-line-2);
+    padding: 14px;
     transition: box-shadow .2s, transform .2s, border-color .2s, background .2s;
   }
-  .dark .gw-card{ background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.1); }
-  .gw-card:hover{ transform: translateY(-1px); box-shadow: 0 8px 28px rgba(0,0,0,.08); }
-  .gw-card.is-selected{ box-shadow: 0 0 0 3px rgba(52,211,153,.45); border-color: rgba(16,185,129,.5); }
+  .gw-card:hover{ transform: translateY(-1px); box-shadow: var(--vs-shadow); }
+  .gw-card.is-selected{
+    border-color: var(--vs-500);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--vs-500) 25%, transparent);
+  }
 
-  .gw-head{ display:flex; align-items:center; gap:10px; }
-  .gw-title{ font-weight:600; color:#111827; }
-  .dark .gw-title{ color:#f3f4f6; }
-  .gw-note{ font-size:12px; color:#6b7280; }
-  .dark .gw-note{ color:#d1d5db; }
+  .gw-head{ display:flex; align-items:center; gap:12px; }
+  .gw-title{ font-weight:600; color:var(--vs-text); }
+  .gw-note{ font-size:12px; color:var(--vs-text-2); }
 
   .coin-row{ display:flex; align-items:center; gap:8px; margin-top:10px; opacity:.95; flex-wrap:wrap; }
   .coin-badge{
     height:28px; width:auto; padding:0 8px; border-radius:999px; display:inline-flex; gap:6px;
-    align-items:center; border:1px solid rgba(0,0,0,.08); background: #fff;
+    align-items:center; border:1px solid var(--vs-line); background: var(--vs-card-2);
   }
-  .dark .coin-badge{ background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.1); }
   .coin-badge svg{ height:14px; width:14px; display:block; }
   .gw-right{
     margin-left:auto; display:flex; align-items:center; gap:8px;
-    font-size:12px; color:#6b7280;
+    font-size:12px; color:var(--vs-text-2);
   }
-  .dark .gw-right{ color:#d1d5db; }
   .tick{ display:none; }
-  .is-selected .tick{ display:inline-flex; color:#10b981; }
-
+  .is-selected .tick{ display:inline-flex; color:var(--vs-500); }
 </style>
 
 <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -350,7 +315,7 @@
     const ICONS = {
         nowpay: `
         <svg viewBox="0 0 64 64" class="h-6 w-6" aria-hidden="true">
-            <defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#ec4899"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient></defs>
+            <defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#1090c0"/><stop offset="1" stop-color="#095d86"/></linearGradient></defs>
             <rect x="4" y="4" rx="14" ry="14" width="56" height="56" fill="url(#g)"/>
             <text x="32" y="38" text-anchor="middle" font-size="18" font-family="ui-sans-serif,system-ui" fill="white" font-weight="700">NP</text>
         </svg>`,
@@ -369,7 +334,7 @@
     card.dataset.gw = 'nowpay_any';
     card.innerHTML = `
         <div class="gw-head">
-        <div class="h-10 w-10 rounded-xl ring-1 ring-black/10 dark:ring-white/10 bg-white dark:bg-white/[0.06] flex items-center justify-center">
+        <div class="h-10 w-10 rounded-xl flex items-center justify-center" style="background:var(--vs-card); border:1px solid var(--vs-line)">
             ${ICONS.nowpay}
         </div>
         <div>
@@ -382,6 +347,10 @@
         </div>
         </div>
         <div class="coin-row">
+        <span class="coin-badge">${ICONS.btc}<span style="font-size:11px;color:var(--vs-text-2)">BTC</span></span>
+        <span class="coin-badge">${ICONS.eth}<span style="font-size:11px;color:var(--vs-text-2)">ETH</span></span>
+        <span class="coin-badge">${ICONS.usdt}<span style="font-size:11px;color:var(--vs-text-2)">USDT</span></span>
+        <span style="font-size:11px;color:var(--vs-text-2)">+147 more</span>
         </div>
     `;
     card.addEventListener('click', ()=>{
@@ -656,15 +625,6 @@
     qs('#btn-google-open')?.addEventListener('click', tryGooglePopup);
     qs('#btn-google-open-top')?.addEventListener('click', tryGooglePopup);
     let tries=0; const iv=setInterval(()=>{ tries++; if(initGIS()) clearInterval(iv); if(tries>30) clearInterval(iv); }, 100);
-
-    // Video görünürlük kontrolü
-    try{
-      const v=qs('#plan-ribbon');
-      if(window.IntersectionObserver && v){
-        const io=new IntersectionObserver(es=>es.forEach(({isIntersecting,target})=> isIntersecting?target.play?.():target.pause?.()),{threshold:.25});
-        io.observe(v);
-      }
-    }catch(_){}
 
     // Gateways
     try{

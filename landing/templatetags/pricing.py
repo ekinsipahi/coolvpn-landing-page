@@ -8,7 +8,7 @@ from landing.models import Subscription
 
 PRICING_BY_COUNTRY = {
     # Tier A
-    "US": {"currency": "USD", "monthly": 4.99,  "annual": 39.99,  "semiannual": 25.80},
+    "US": {"currency": "USD", "monthly": 4.99,  "annual": 39.99,  "semiannual": 24.99},
     "GB": {"currency": "GBP", "monthly": 3.99,  "annual": 31.99,  "semiannual": 20.63},
     "DE": {"currency": "EUR", "monthly": 4.59,  "annual": 36.99,  "semiannual": 23.75},
     "FR": {"currency": "EUR", "monthly": 4.59,  "annual": 36.99,  "semiannual": 23.75},
@@ -59,6 +59,10 @@ def currency_symbol(code: str) -> str:
     return CURRENCY_SYMBOLS.get(code, code)
 
 def detect_country(request) -> str:
+    # GEÇİCİ: Stripe entegrasyonuna kadar tüm dünyada USD gösteriyoruz.
+    # Bölgesel fiyatlandırmayı geri açmak için bu satırı kaldır.
+    return DEFAULT_COUNTRY
+
     cf = request.META.get("HTTP_CF_IPCOUNTRY")
     if cf and len(cf) == 2:
         return cf.upper()
@@ -84,6 +88,8 @@ def build_all_offers_json(pricing_by_country: dict, request) -> str:
     """
     Product.offers için TÜM ülkeler (monthly + 6-month + annual)
     """
+    # GEÇİCİ: USD-only dönemi — JSON-LD'de sadece US/USD fiyatları yayınla.
+    pricing_by_country = {"US": pricing_by_country["US"]}
     offers = []
     for cc, p in pricing_by_country.items():
         for plan_name, key in (
@@ -133,6 +139,9 @@ def build_all_offers_json(pricing_by_country: dict, request) -> str:
            * US+EU (Tier A + AT/CH) -> 30 gün iade (Finite)
            * Diğer ülkeler -> iade yok (NotPermitted)
     """
+    # GEÇİCİ: USD-only dönemi — JSON-LD'de sadece US/USD fiyatları yayınla.
+    pricing_by_country = {"US": pricing_by_country["US"]}
+
     EU_OR_TIERA_ISO = ["US", "GB", "DE", "FR", "IT", "NL", "ES", "AT", "CH"]
 
     def make_shipping_details(cc: str, currency: str) -> dict:
@@ -168,7 +177,7 @@ def build_all_offers_json(pricing_by_country: dict, request) -> str:
                 "returnFees": "https://schema.org/FreeReturn",
                 "refundType": "https://schema.org/FullRefund",
                 "returnLabelSource": "https://schema.org/ReturnLabelCustomerResponsibility",
-                "returnPolicyUrl": request.build_absolute_uri("/return-policy/")
+                "returnPolicyUrl": request.build_absolute_uri("/refund-policy/")
             }
         else:
             # iade yok
@@ -182,7 +191,7 @@ def build_all_offers_json(pricing_by_country: dict, request) -> str:
                 "returnFees": "https://schema.org/FreeReturn",
                 "refundType": "https://schema.org/FullRefund",
                 "returnLabelSource": "https://schema.org/ReturnLabelCustomerResponsibility",
-                "returnPolicyUrl": request.build_absolute_uri("/return-policy/")
+                "returnPolicyUrl": request.build_absolute_uri("/refund-policy/")
             }
 
     offers = []

@@ -9,69 +9,85 @@
 {% endblock %}
 
 {% block content %}
-<section  class="relative flex h-auto md:h-[100vh] min-h-screen items-start md:items-center justify-center isolate overflow-auto bg-white dark:bg-neutral-950 py-10 md:py-14">
-  <!-- soft glows -->
-  <div class="pointer-events-none absolute inset-0 -z-10">
-    <div class="absolute -top-24 -left-24 h-72 w-72 rounded-full blur-3xl bg-rose-300/30 dark:bg-rose-400/20"></div>
-    <div class="absolute bottom-0 right-1/4 h-72 w-72 rounded-full blur-3xl bg-fuchsia-300/25 dark:bg-fuchsia-400/20"></div>
-    <div class="absolute top-1/3 left-1/2 -translate-x-1/2 h-64 w-64 rounded-full blur-3xl bg-indigo-300/20 dark:bg-indigo-400/15"></div>
-  </div>
+<section class="vs-section !pt-10 md:!pt-14">
+  <div class="vs-shell">
 
-  <div class="max-w-screen-xl mx-auto px-6">
-    <div class="grid gap-6 lg:grid-cols-3">
-      <!-- LEFT: STATUS / SUBSCRIPTION -->
-      <div class="lg:col-span-1 rounded-3xl border border-black/10 dark:border-white/10 bg-white/60 dark:bg-white/[0.04] backdrop-blur-xl shadow-xl p-6">
-        <div class="flex items-center gap-3">
-          <div class="relative">
-            <div class="h-10 w-10 rounded-xl bg-gradient-to-br from-rose-500/80 to-fuchsia-500/80 shadow-md flex items-center justify-center">
-              <svg viewBox="0 0 24 24" class="h-6 w-6 text-emerald-400" fill="currentColor" aria-hidden="true">
-                <path d="M12 2.5L4.5 5v6.7c0 5 3.6 9.6 7.5 9.8c3.9-.2 7.5-4.8 7.5-9.8V5L12 2.5zM10.9 16.2l-3.1-3.1 1.4-1.4 1.7 1.7 4-4 1.4 1.4-5.4 5.4z" />
-              </svg>
-            </div>
-            {% if active_sub %}
-            <!-- live green dot -->
-            <span class="absolute -right-1 -top-1 inline-flex h-3 w-3">
-              <span class="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-ping"></span>
-              <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+    <!-- Başlık -->
+    <div class="mb-8">
+      <span class="vs-eyebrow">{% trans "Dashboard" %}</span>
+      <h1 class="vs-h2 !mt-3">
+        {% trans "Welcome back" %}{% if user.first_name %}, {{ user.first_name }}{% endif %}
+      </h1>
+      <p class="mt-2 text-sm" style="color:var(--vs-text-2)">{{ user.email|default:user.get_username }}</p>
+    </div>
+
+    <!-- Hızlı aksiyonlar -->
+    <div class="mb-8 grid gap-3 sm:grid-cols-3">
+      <a href="{% url 'vpn_extension' %}" class="vs-card vs-card-hover !p-4 flex items-center gap-3">
+        <span class="vs-icon !h-10 !w-10 shrink-0 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><path d="M12 2v6"/></svg>
+        </span>
+        <span>
+          <span class="block text-sm font-bold" style="color:var(--vs-text)">{% trans "Browser extension" %}</span>
+          <span class="block text-xs" style="color:var(--vs-text-2)">{% trans "Free · add to Chrome" %}</span>
+        </span>
+      </a>
+      <a href="{% url 'pricing' %}" class="vs-card vs-card-hover !p-4 flex items-center gap-3">
+        <span class="vs-icon !h-10 !w-10 shrink-0 bg-fuchsia-500/10 text-fuchsia-600 dark:text-fuchsia-400 border-fuchsia-500/20">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        </span>
+        <span>
+          <span class="block text-sm font-bold" style="color:var(--vs-text)">{% if active_sub %}{% trans "Manage plan" %}{% else %}{% trans "Upgrade to Premium" %}{% endif %}</span>
+          <span class="block text-xs" style="color:var(--vs-text-2)">{% if active_sub %}{% trans "Renew or change term" %}{% else %}{% trans "Max speed, ad-free — from" %} {{ ui_currency_symbol|default:"$" }}4.99{% endif %}</span>
+        </span>
+      </a>
+      <a href="mailto:support@vpnsterr.com" class="vs-card vs-card-hover !p-4 flex items-center gap-3">
+        <span class="vs-icon !h-10 !w-10 shrink-0 bg-teal-500/10 text-teal-600 dark:text-teal-400 border-teal-500/20">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5Zm18 0h-3a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-5Z"/><path d="M21 11a9 9 0 0 0-18 0"/></svg>
+        </span>
+        <span>
+          <span class="block text-sm font-bold" style="color:var(--vs-text)">{% trans "24/7 support" %}</span>
+          <span class="block text-xs" style="color:var(--vs-text-2)">support@vpnsterr.com</span>
+        </span>
+      </a>
+    </div>
+
+    <div class="grid gap-6 lg:grid-cols-3 items-start">
+
+      <!-- SOL: hesap durumu -->
+      <div class="vs-card !p-6 md:!p-7 lg:sticky lg:top-24">
+        <div class="flex items-center justify-between gap-3">
+          <h2 class="text-lg font-bold tracking-tight" style="color:var(--vs-text)">{% trans "Account status" %}</h2>
+          {% if active_sub %}
+            <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold text-white"
+                  style="background:linear-gradient(135deg, var(--vs-500), var(--vs-700))">
+              <span class="relative inline-flex h-2 w-2">
+                <span class="absolute inline-flex h-full w-full rounded-full bg-white opacity-60 animate-ping"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+              </span>
+              {% trans "Premium" %}
             </span>
-            {% endif %}
-          </div>
-          <div>
-            <h2 class="text-sm font-semibold text-gray-900 dark:text-gray-100">{% trans "Account status" %}</h2>
-            <p class="text-xs text-gray-600 dark:text-gray-300">
-              {% if active_sub %}
-                <span class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
-                  ● {% trans "Premium" %}
-                </span>
-                <span class="ml-1">{{ plan_key|title }}</span>
-              {% else %}
-                <span class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium bg-gray-100 text-gray-700 dark:bg-white/10 dark:text-gray-200">
-                  ● {% trans "Free" %}
-                </span>
-              {% endif %}
-            </p>
-          </div>
+          {% else %}
+            <span class="vs-badge">{% trans "Free" %}</span>
+          {% endif %}
         </div>
-
         {% if active_sub %}
-        <!-- Circular progress ring -->
-        <div class="mt-6 flex items-center justify-center">
-          <div
-            id="sub-ring"
-            class="relative h-44 w-44 rounded-full"
-            style="
-              --pct: {{ progress_pct|default:0 }};
-              background:
-                conic-gradient(#10b981 calc(var(--pct)*1%), rgba(16,185,129,.15) 0);
-            ">
-            <div class="absolute inset-2 rounded-full bg-white/70 dark:bg-neutral-900/60 backdrop-blur"></div>
+        <p class="mt-1 text-sm" style="color:var(--vs-text-2)">{{ plan_key|title }} {% trans "plan" %}</p>
+
+        <!-- Kalan süre halkası -->
+        <div class="mt-7 flex items-center justify-center">
+          <div id="sub-ring"
+               class="relative h-44 w-44 rounded-full"
+               style="--pct: {{ progress_pct|default:0 }};
+                      background: conic-gradient(#1090c0 calc(var(--pct)*1%), rgba(16,144,192,.14) 0);">
+            <div class="absolute inset-2 rounded-full" style="background:var(--vs-card-2)"></div>
             <div class="absolute inset-0 grid place-items-center">
               <div class="text-center">
-                <div class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">{% trans "Time left" %}</div>
-                <div id="countdown" class="mt-1 text-2xl font-bold text-gray-900 dark:text-gray-100">
+                <div class="text-[11px] uppercase tracking-widest font-semibold" style="color:var(--vs-text-2)">{% trans "Time left" %}</div>
+                <div id="countdown" class="mt-1 text-2xl font-extrabold tracking-tight" style="color:var(--vs-text)">
                   {{ days_left }}d {{ hours_left }}h
                 </div>
-                <div class="mt-2 text-[11px] text-gray-600 dark:text-gray-400">
+                <div class="mt-1.5 text-[11px]" style="color:var(--vs-text-2)">
                   {% trans "Ends" %} {{ ends_at|date:"Y-m-d H:i" }}
                 </div>
               </div>
@@ -79,31 +95,37 @@
           </div>
         </div>
 
-        <!-- linear fallback bar + dates -->
-        <div class="mt-5 space-y-2 text-sm text-gray-800 dark:text-gray-300">
-          <div class="flex justify-between"><span>{% trans "Started" %}</span><span>{{ starts_at|date:"Y-m-d H:i" }}</span></div>
-          <div class="flex justify-between"><span>{% trans "Ends" %}</span><span>{{ ends_at|date:"Y-m-d H:i" }}</span></div>
-          <div class="mt-2 h-2 rounded-full bg-gray-200 dark:bg-white/10 overflow-hidden">
-            <div id="bar-progress" class="h-full bg-gradient-to-r from-emerald-500 via-teal-500 to-indigo-500 transition-[width] duration-500" style="width: {{ progress_pct }}%"></div>
+        <!-- tarihler + bar -->
+        <div class="mt-6 space-y-2 text-sm" style="color:var(--vs-text-2)">
+          <div class="flex justify-between"><span>{% trans "Started" %}</span><span class="font-medium" style="color:var(--vs-text)">{{ starts_at|date:"Y-m-d H:i" }}</span></div>
+          <div class="flex justify-between"><span>{% trans "Ends" %}</span><span class="font-medium" style="color:var(--vs-text)">{{ ends_at|date:"Y-m-d H:i" }}</span></div>
+          <div class="mt-3 h-2 rounded-full overflow-hidden" style="background:color-mix(in srgb, var(--vs-500) 12%, transparent)">
+            <div id="bar-progress" class="h-full transition-[width] duration-500"
+                 style="width: {{ progress_pct }}%; background:linear-gradient(90deg, var(--vs-400), var(--vs-600))"></div>
           </div>
         </div>
         {% else %}
-        <div class="mt-5 text-sm text-gray-800 dark:text-gray-300">
-          <p class="text-sm">{% trans "Upgrade to unlock Premium features and higher device limits." %}</p>
-          <a href="{% url 'pricing' %}" class="mt-3 inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-medium text-white bg-gray-900 hover:bg-gray-800 dark:bg-white dark:text-black">
-            {% trans "View plans" %}
-          </a>
+        <div class="mt-5 rounded-xl p-5 text-center"
+             style="background:linear-gradient(135deg, color-mix(in srgb, var(--vs-500) 10%, transparent), color-mix(in srgb, var(--vs-fuchsia) 8%, transparent)); border:1px solid var(--vs-line)">
+          <div class="text-2xl font-extrabold tracking-tight" style="color:var(--vs-text)">
+            $4.99<span class="text-sm font-medium" style="color:var(--vs-text-2)">/{% trans "mo" %}</span>
+          </div>
+          <p class="mt-1 text-xs" style="color:var(--vs-text-2)">
+            {% trans "or" %} $39.99/{% trans "yr" %} <del>$59.88</del> — {% trans "max speed, premium servers, zero ads" %}
+          </p>
+          <a href="{% url 'pricing' %}" class="vs-btn vs-btn-primary mt-4 w-full">{% trans "Upgrade to Premium" %}</a>
+          <p class="mt-2 text-[11px]" style="color:var(--vs-text-2)">{% trans "Refund if unused · Cancel anytime" %}</p>
         </div>
         {% endif %}
 
-        <!-- Device limit -->
-        <div class="mt-6 text-sm text-gray-800 dark:text-gray-300">
-          <div class="flex items-center justify-between">
-            <span>{% trans "Device limit" %}</span>
-            <span class="font-semibold">{{ used_count }}/{{ device_cap }}</span>
+        <!-- Cihaz limiti -->
+        <div class="mt-7 rounded-xl p-4" style="background:color-mix(in srgb, var(--vs-500) 6%, transparent); border:1px solid color-mix(in srgb, var(--vs-500) 18%, transparent)">
+          <div class="flex items-center justify-between text-sm">
+            <span style="color:var(--vs-text-2)">{% trans "Device limit" %}</span>
+            <span class="font-bold" style="color:var(--vs-text)">{{ used_count }}/{{ device_cap }}</span>
           </div>
           {% if remaining > 0 %}
-            <p class="text-[11px] text-gray-600 dark:text-gray-400 mt-1">
+            <p class="text-[11px] mt-1" style="color:var(--vs-text-2)">
               {% blocktrans %}You can add {{ remaining }} more device{{ remaining|pluralize }}.{% endblocktrans %}
             </p>
           {% else %}
@@ -112,111 +134,123 @@
         </div>
       </div>
 
-      <!-- RIGHT: DEVICES -->
-      <div class="lg:col-span-2 rounded-3xl border border-black/10 dark:border-white/10 bg-white/60 dark:bg-white/[0.04] backdrop-blur-xl shadow-xl p-6">
-        <div class="flex items-center justify-between">
-          <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">{% trans "Your devices" %}</h3>
-          <a href="/apps" class="text-xs underline text-gray-600 dark:text-gray-300">{% trans "Get the app" %}</a>
-        </div>
+      <!-- SAĞ: cihazlar -->
+      <div class="lg:col-span-2 space-y-6">
+        <div class="vs-card !p-6 md:!p-7">
+          <div class="flex items-center justify-between gap-3">
+            <h2 class="text-lg font-bold tracking-tight flex items-center gap-2" style="color:var(--vs-text)">
+              {% trans "Your devices" %}
+              <span class="vs-badge !text-[11px]">{{ used_count }}/{{ device_cap }}</span>
+            </h2>
+            <a href="/apps" class="vs-btn vs-btn-ghost !px-4 !py-2 !text-xs">{% trans "Get the app" %}</a>
+          </div>
 
-        <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {% for d in devices %}
-          <div class="rounded-xl ring-1 ring-black/10 dark:ring-white/10 p-3 bg-white/80 dark:bg-white/[0.05] {% if not d.is_active %}opacity-60{% endif %}">
-            <div class="flex items-start gap-3">
-              <div class="h-9 w-9 rounded-lg bg-white dark:bg-white/10 ring-1 ring-black/10 dark:ring-white/10 grid place-items-center">
-                {% if d.platform == 'windows' %}
-                  <svg viewBox="0 0 24 24" class="h-5 w-5"><path fill="currentColor" d="M3 5.5l8-1.4v7H3zm9 5.6h9v-9l-9 1.6zm-9 1.3h8v7l-8-1.4zm9 0v7l9 1.6v-9z"/></svg>
-                {% elif d.platform == 'mac' or d.platform == 'macos' %}
-                  <svg viewBox="0 0 24 24" class="h-5 w-5"><path fill="currentColor" d="M17 2c-.9.6-2 .9-3.1.9C12.4 3 11 4.4 11 6c0 .3 0 .6.1.9c-2-.1-3.8-1.1-5-2.7C5.5 5 .8 9.6 3.4 14c1.1 1.8 2.8 3 4.8 3c1.2 0 2.3-.4 3.2-1.1c.7.8 1.7 1.1 2.6 1.1c1 0 2-.4 2.9-1.2c-.7-.5-1.5-1.4-1.5-2.7c0-1.5 1.2-2.2 1.9-2.6c-.9-1.3-2.2-2-3.6-2.1c.2-.4.3-.9.3-1.4C14 4.3 15.3 3 17 2z"/></svg>
-                {% elif d.platform == 'linux' %}
-                  <svg viewBox="0 0 24 24" class="h-5 w-5"><path fill="currentColor" d="M12 2c-1.7 0-3 1.3-3 3v2.2C7.4 8 6 10.2 6 12.8C6 16.8 8.7 20 12 20s6-3.2 6-7.2c0-2.6-1.4-4.8-3-5.6V5c0-1.7-1.3-3-3-3z"/></svg>
-                {% elif d.platform == 'android' %}
-                  <svg viewBox="0 0 24 24" class="h-5 w-5"><path fill="currentColor" d="M17.6 9H6.4c-.8 0-1.4.6-1.4 1.4V18c0 .8.6 1.4 1.4 1.4h11.2c.8 0 1.4-.6 1.4-1.4v-7.6c0-.8-.6-1.4-1.4-1.4zM8 4l1.2 1.8m6.8-1.8L14.8 6"/></svg>
-                {% elif d.platform == 'ios' or d.platform == 'iphone' %}
-                  <svg viewBox="0 0 24 24" class="h-5 w-5"><rect x="7" y="2" width="10" height="20" rx="3" ry="3" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
-                {% elif d.platform == 'browser' %}
-                  <svg viewBox="0 0 24 24" class="h-5 w-5"><path fill="currentColor" d="M3 5h18v14H3zm0 2v2h18V7z"/></svg>
+          <div class="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {% for d in devices %}
+            <div class="rounded-2xl p-4 transition-all {% if not d.is_active %}opacity-60{% endif %}"
+                 style="background:var(--vs-card-2); border:1px solid var(--vs-line)">
+              <div class="flex items-start gap-3">
+                <span class="vs-icon !h-10 !w-10 shrink-0">
+                  {% if d.platform == 'windows' %}
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 5.1 10.6 4v7.6H3V5.1zm0 13.8 7.6 1.1v-7.5H3v6.4zM11.4 20l10.1 1.5v-9H11.4V20zm0-15.9v7.5h10.1V2.5L11.4 4.1z"/></svg>
+                  {% elif d.platform == 'mac' or d.platform == 'macos' %}
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="3" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>
+                  {% elif d.platform == 'linux' %}
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m7 8 3 3-3 3"/><path d="M13 14h4"/><rect width="18" height="18" x="3" y="3" rx="2"/></svg>
+                  {% elif d.platform == 'android' or d.platform == 'ios' or d.platform == 'iphone' %}
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2"/><path d="M12 18h.01"/></svg>
+                  {% elif d.platform == 'browser' %}
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><path d="M12 2v6"/></svg>
+                  {% else %}
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="3" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>
+                  {% endif %}
+                </span>
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-2">
+                    <span class="text-sm font-bold truncate" style="color:var(--vs-text)">
+                      {{ d.name|default:"Unnamed device" }}
+                    </span>
+                    {% if not d.is_active %}
+                      <span class="text-[10px] px-1.5 py-0.5 rounded-md font-semibold uppercase tracking-wide"
+                            style="background:var(--vs-card); color:var(--vs-text-2); border:1px solid var(--vs-line)">{% trans "revoked" %}</span>
+                    {% endif %}
+                  </div>
+                  <div class="text-xs truncate" style="color:var(--vs-text-2)">
+                    {{ d.platform|capfirst }}{% if d.os_version %} · {{ d.os_version }}{% endif %}
+                  </div>
+                  <div class="text-[11px] mt-0.5" style="color:var(--vs-text-2)">
+                    {% trans "Last seen" %}: {{ d.last_seen|date:"Y-m-d H:i" }}
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-3 space-y-2">
+                {% if d.client_uuid %}
+                <div class="flex items-center justify-between gap-2 rounded-lg px-2.5 py-1.5 text-[11px]"
+                     style="background:var(--vs-card); border:1px solid var(--vs-line)">
+                  <span class="truncate font-mono" style="color:var(--vs-text-2)">{{ d.client_uuid }}</span>
+                  <button type="button" class="shrink-0 font-semibold underline" style="color:var(--vs-600)"
+                          data-uuid="{{ d.client_uuid }}" onclick="copyToClipboard(this.dataset.uuid, this)">{% trans "Copy" %}</button>
+                </div>
+                {% endif %}
+                {% if d.is_active %}
+                  <form method="post" action="{% url 'device_revoke' %}" onsubmit="return revokeDevice('{{ d.client_uuid|default:d.uuid|escapejs }}', this);">
+                    {% csrf_token %}
+                    <button class="vs-btn vs-btn-ghost w-full !py-1.5 !text-xs">
+                      {% trans "Revoke" %}
+                    </button>
+                  </form>
                 {% else %}
-                  <svg viewBox="0 0 24 24" class="h-5 w-5"><path fill="currentColor" d="M6 4h12v16H6z"/></svg>
+                  <div class="text-[11px] text-rose-600 dark:text-rose-400">
+                    {% trans "This device cannot connect." %}
+                  </div>
                 {% endif %}
               </div>
-              <div class="flex-1 min-w-0">
-                <div class="flex items-center gap-2">
-                  <span class="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
-                    {{ d.name|default:"Unnamed device" }}
-                  </span>
-                  {% if not d.is_active %}
-                    <span class="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-300">revoked</span>
-                  {% endif %}
-                </div>
-                <div class="text-xs text-gray-600 dark:text-gray-400 truncate">
-                  {{ d.platform|capfirst }}{% if d.os_version %} • {{ d.os_version }}{% endif %}
-                </div>
-                <div class="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">
-                  {% trans "Last seen" %}: {{ d.last_seen|date:"Y-m-d H:i" }}
-                </div>
-              </div>
             </div>
+            {% empty %}
+            <div class="col-span-full rounded-xl p-8 text-center"
+                 style="background:var(--vs-card); border:1px dashed var(--vs-line-2)">
+              <div class="mx-auto mb-3 grid h-12 w-12 place-content-center rounded-full"
+                   style="background:color-mix(in srgb, var(--vs-500) 10%, transparent); color:var(--vs-600)">
+                <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2"/><path d="M12 18h.01"/></svg>
+              </div>
+              <p class="text-sm font-semibold" style="color:var(--vs-text)">{% trans "No devices linked yet" %}</p>
+              <p class="mt-1 text-xs" style="color:var(--vs-text-2)">{% trans "Install the extension or app, sign in, and your first device links automatically." %}</p>
+              <a href="{% url 'vpn_extension' %}" class="vs-btn vs-btn-primary mt-4 !px-5 !py-2 !text-xs">{% trans "Get the free extension" %}</a>
+            </div>
+            {% endfor %}
+          </div>
 
-            <div class="mt-3 space-y-2">
-              <!-- display client_uuid + copy -->
-              {% if d.client_uuid %}
-              <div class="flex items-center justify-between text-[11px]">
-                <div class="truncate text-gray-800 dark:text-gray-200">
-                  <span class="font-medium">Client UUID:</span>
-                  <span class="ml-2 font-mono text-sm {% if d.is_active %}text-gray-900 dark:text-white{% else %}text-gray-600 dark:text-gray-400{% endif %}">{{ d.client_uuid }}</span>
-                </div>
-                <div class="flex items-center gap-2">
-                  <button type="button" class="text-xs underline text-gray-600 dark:text-gray-300" data-uuid="{{ d.client_uuid }}" onclick="copyToClipboard(this.dataset.uuid)">Copy</button>
-                </div>
-              </div>
-              {% endif %}
-              <!-- revoke / cannot connect -->
-              {% if d.is_active %}
-                <form method="post" action="{% url 'device_revoke' %}" onsubmit="return revokeDevice('{{ d.client_uuid|default:d.uuid|escapejs }}', this);">
-                  {% csrf_token %}
-                  <button class="w-full text-xs rounded-lg px-3 py-1.5 ring-1 ring-black/10 dark:ring-white/10 hover:bg-gray-50 dark:hover:bg-white/10 transition text-gray-900 dark:text-white">
-                    {% trans "Revoke" %}
-                  </button>
-                </form>
-              {% else %}
-                <div class="text-[11px] text-rose-600 dark:text-rose-400">
-                  {% trans "This device cannot connect." %}
-                </div>
-              {% endif %}
-            </div>
-          </div>
-          {% empty %}
-          <div class="col-span-full text-sm text-gray-700 dark:text-gray-300">
-            {% trans "No devices yet. Install the app and sign in to link your first device." %}
-          </div>
-          {% endfor %}
+          {% if remaining <= 0 %}
+            <div class="mt-4 text-[11px] text-rose-600 dark:text-rose-400">{% trans "You’ve reached your device limit." %}</div>
+          {% endif %}
         </div>
 
-        {% if remaining <= 0 %}
-          <div class="mt-4 text-[11px] text-rose-600 dark:text-rose-400">{% trans "You’ve reached your device limit." %}</div>
-        {% endif %}
-      </div>
-      <div class="mt-6 rounded-xl p-4 ring-1 ring-black/5 dark:ring-white/5 bg-white/80 dark:bg-white/[0.02]">
-        <form method="post" id="form-add-device" class="flex gap-3 items-start">
-          {% csrf_token %}
-          <div class="flex-1">
-            <label for="add-device-uuid" class="text-xs text-gray-500 dark:text-gray-400">Add device by UUID</label>
-            <input id="add-device-uuid" name="add_device_uuid" type="text" placeholder="paste device UUID here"
-              class="mt-1 w-full px-3 py-2 rounded-lg bg-white/80 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 focus:outline-none"
-              required maxlength="64" />
-            {% if remaining is not None %}
-              <p class="text-[11px] mt-2 text-gray-600 dark:text-gray-400">Remaining device slots: <strong>{{ remaining }}</strong></p>
-            {% endif %}
-          </div>
-
-          <div class="flex flex-col items-end">
-            <button type="submit" id="btn-add-device" class="inline-flex items-center px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm hover:bg-emerald-700">
-              Add device
-            </button>
-            <button id="btn-generate-qr" type="button" class="mt-2 text-xs text-gray-500 dark:text-gray-300">QR help</button>
-          </div>
-        </form>
+        <!-- Cihaz ekle -->
+        <div class="vs-card !p-6 md:!p-7">
+          <h3 class="text-sm font-bold uppercase tracking-wider" style="color:var(--vs-text-2)">{% trans "Add device by UUID" %}</h3>
+          <p class="mt-1.5 text-xs" style="color:var(--vs-text-2)">
+            {% trans "Find the UUID inside the app or extension: Settings → Device ID. Paste it here to link the device to your account." %}
+          </p>
+          <form method="post" id="form-add-device" class="mt-3 flex flex-col sm:flex-row gap-3 items-stretch sm:items-end">
+            {% csrf_token %}
+            <div class="flex-1">
+              <input id="add-device-uuid" name="add_device_uuid" type="text" placeholder="{% trans 'paste device UUID here' %}"
+                     class="w-full rounded-xl px-3.5 py-2.5 text-sm font-mono outline-none transition focus:ring-2"
+                     style="background:var(--vs-card-2); border:1px solid var(--vs-line-2); color:var(--vs-text); --tw-ring-color:color-mix(in srgb, var(--vs-500) 45%, transparent)"
+                     required maxlength="64" />
+              {% if remaining is not None %}
+                <p class="text-[11px] mt-2" style="color:var(--vs-text-2)">{% trans "Remaining device slots:" %} <strong style="color:var(--vs-text)">{{ remaining }}</strong></p>
+              {% endif %}
+            </div>
+            <div class="flex flex-col items-stretch sm:items-end gap-2">
+              <button type="submit" id="btn-add-device" class="vs-btn vs-btn-primary !py-2.5">
+                {% trans "Add device" %}
+              </button>
+              <button id="btn-generate-qr" type="button" class="text-xs underline" style="color:var(--vs-text-2)">{% trans "QR help" %}</button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   </div>
@@ -227,14 +261,18 @@
 {{ block.super }}
 <script>
     // Copy helper
-  function copyToClipboard(text){
+  function copyToClipboard(text, btn){
     if(!text) return;
+    function flash(){
+      if(!btn) return;
+      const prev = btn.textContent;
+      btn.textContent = "✓ {% trans 'Copied' %}";
+      btn.style.color = "#12b76a";
+      setTimeout(()=>{ btn.textContent = prev; btn.style.color = ""; }, 1500);
+    }
     if(navigator.clipboard && navigator.clipboard.writeText){
-      navigator.clipboard.writeText(text).then(()=> {
-        // küçük bildirim: console; istersen toast koy
-        console.log("Copied", text);
-      }).catch(()=> { fallbackCopy(text); });
-    } else { fallbackCopy(text); }
+      navigator.clipboard.writeText(text).then(()=> { flash(); }).catch(()=> { fallbackCopy(text); flash(); });
+    } else { fallbackCopy(text); flash(); }
 
     function fallbackCopy(val){
       const ta = document.createElement('textarea');
@@ -249,14 +287,12 @@
     }
   }
 
-  // Revoke helper
-  // Revoke helper (güncellendi)
+  // Revoke helper (AJAX)
   async function revokeDevice(uuid, formEl){
     if(!uuid) {
       alert("No UUID provided");
       return false;
     }
-    // hidden input olarak form ile gönderilecek token zaten var, ama biz AJAX kullanıyoruz:
     const token = formEl.querySelector('input[name="csrfmiddlewaretoken"]')?.value || '';
     const body = new URLSearchParams({ uuid: uuid });
 
@@ -276,7 +312,6 @@
       try { data = await r.json(); } catch(e) { data = null; }
 
       if (r.ok && data && data.ok) {
-        // başarılı ise sayfayı yenile (veya DOM'dan kartı kaldırabilirsin)
         location.reload();
         return false;
       }
@@ -320,7 +355,7 @@
 
       // ring
       if($ring){
-        $ring.style.background = `conic-gradient(#10b981 ${pctLeft}%, rgba(16,185,129,.15) 0)`;
+        $ring.style.background = `conic-gradient(#1090c0 ${pctLeft}%, rgba(16,144,192,.14) 0)`;
       }
       if($bar){
         $bar.style.width = `${pctLeft}%`;

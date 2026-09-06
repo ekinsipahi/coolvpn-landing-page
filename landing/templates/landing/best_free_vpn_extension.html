@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{{ seo_title }}{% endblock %}
+{% block meta_description %}{{ seo_description }}{% endblock %}
+
+{% block header %}
+  {% include "partials/navbar.html" %}
+{% endblock %}
+
+{% block schema_jsonld %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": "Best Free VPN Extensions for Chrome 2026 — Top 10",
+  "inLanguage": "{{ LANGUAGE_CODE|default:'en' }}",
+  "itemListOrder": "https://schema.org/ItemListOrderAscending",
+  "numberOfItems": 10,
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "VPNsterr Free VPN Extension", "url": "{{ request.scheme }}://{{ request.get_host }}{% url 'vpn_extension' %}" },
+    { "@type": "ListItem", "position": 2, "name": "Proton VPN Extension" },
+    { "@type": "ListItem", "position": 3, "name": "Windscribe" },
+    { "@type": "ListItem", "position": 4, "name": "Browsec" },
+    { "@type": "ListItem", "position": 5, "name": "Urban VPN" },
+    { "@type": "ListItem", "position": 6, "name": "Hola VPN" },
+    { "@type": "ListItem", "position": 7, "name": "ZenMate" },
+    { "@type": "ListItem", "position": 8, "name": "VeePN" },
+    { "@type": "ListItem", "position": 9, "name": "Turbo VPN Extension" },
+    { "@type": "ListItem", "position": 10, "name": "1ClickVPN" }
+  ]
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<section class="vs-section !pt-12 md:!pt-16">
+  <div class="vs-shell">
+    <div class="max-w-3xl">
+      <span class="vs-eyebrow">{% trans "Free extensions · Tested 2026" %}</span>
+      <h1 class="vs-h2 !text-4xl md:!text-5xl">{% trans "The 10 Best Free VPN Extensions for Chrome (2026)" %}</h1>
+      <p class="vs-sub">
+        {% trans "\"Free\" usually hides a catch: a data cap, a sign-up wall, throttled speed — or worse, your browsing data being sold. We compared 10 free VPN extensions on the three questions that matter: Is it really unlimited? Does it need an account? Does it keep logs?" %}
+      </p>
+    </div>
+
+    <!-- HIZLI TABLO -->
+    <div class="mt-12 overflow-hidden rounded-2xl vs-reveal"
+         style="background:var(--vs-card-2); border:1px solid var(--vs-line); box-shadow:var(--vs-shadow-sm)">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm min-w-[640px]">
+          <thead>
+            <tr style="border-bottom:1px solid var(--vs-line)">
+              <th class="px-4 py-4 text-left font-semibold" style="color:var(--vs-text-2)">{% trans "Extension" %}</th>
+              <th class="px-4 py-4 text-center font-semibold" style="color:var(--vs-text-2)">{% trans "Truly unlimited" %}</th>
+              <th class="px-4 py-4 text-center font-semibold" style="color:var(--vs-text-2)">{% trans "No sign-up" %}</th>
+              <th class="px-4 py-4 text-center font-semibold" style="color:var(--vs-text-2)">{% trans "Zero logs" %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom:1px solid var(--vs-line); background:color-mix(in srgb, var(--vs-500) 5%, transparent)">
+              <td class="px-4 py-3.5"><span class="inline-flex items-center gap-2 font-extrabold" style="color:var(--vs-600)"><img src="{% static 'img/logo-mark.png' %}" class="h-5 w-5" alt="">VPNsterr <span class="vs-badge-hot !text-[10px]">#1</span></span></td>
+              <td class="px-4 py-3.5 text-center" style="color:#12b76a">✓</td>
+              <td class="px-4 py-3.5 text-center" style="color:#12b76a">✓</td>
+              <td class="px-4 py-3.5 text-center" style="color:#12b76a">✓</td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--vs-line)">
+              <td class="px-4 py-3.5 font-medium" style="color:var(--vs-text)">Proton VPN</td>
+              <td class="px-4 py-3.5 text-center" style="color:var(--vs-text-2)">{% trans "Speed-limited" %}</td>
+              <td class="px-4 py-3.5 text-center" style="color:var(--vs-text-2)">✗</td>
+              <td class="px-4 py-3.5 text-center" style="color:#12b76a">✓</td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--vs-line)">
+              <td class="px-4 py-3.5 font-medium" style="color:var(--vs-text)">Windscribe</td>
+              <td class="px-4 py-3.5 text-center" style="color:var(--vs-text-2)">{% trans "10GB/month" %}</td>
+              <td class="px-4 py-3.5 text-center" style="color:var(--vs-text-2)">✗</td>
+              <td class="px-4 py-3.5 text-center" style="color:#12b76a">✓</td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--vs-line)">
+              <td class="px-4 py-3.5 font-medium" style="color:var(--vs-text)">Browsec</td>
+              <td class="px-4 py-3.5 text-center" style="color:var(--vs-text-2)">{% trans "Heavily throttled" %}</td>
+              <td class="px-4 py-3.5 text-center" style="color:#12b76a">✓</td>
+              <td class="px-4 py-3.5 text-center" style="color:var(--vs-text-2)">{% trans "Partial" %}</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-3.5 font-medium" style="color:var(--vs-text)">Urban / Hola / {% trans "others" %}</td>
+              <td class="px-4 py-3.5 text-center" style="color:var(--vs-text-2)">{% trans "Varies" %}</td>
+              <td class="px-4 py-3.5 text-center" style="color:var(--vs-text-2)">{% trans "Varies" %}</td>
+              <td class="px-4 py-3.5 text-center text-rose-500">{% trans "Data concerns" %}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- LİSTE -->
+    <div class="mt-14 max-w-3xl space-y-5">
+
+      <!-- 1 -->
+      <div class="vs-plan-featured rounded-2xl p-6 vs-reveal">
+        <div class="flex items-start gap-4">
+          <span class="grid h-10 w-10 shrink-0 place-content-center rounded-full text-base font-extrabold text-white" style="background:var(--vs-grad-hot)">1</span>
+          <div>
+            <div class="flex flex-wrap items-center gap-2">
+              <h2 class="text-lg font-extrabold tracking-tight" style="color:var(--vs-text)">VPNsterr — {% trans "the only truly unlimited free extension" %}</h2>
+            </div>
+            <p class="mt-2 text-sm leading-6" style="color:var(--vs-text-2)">
+              {% trans "Unlimited bandwidth with no data cap, no sign-up, no email — and a strict zero-logs policy, so your browsing can't be stored or sold. One-click connect, per-tab routing, ad & tracker blocking built in. The free tier is ad-supported at standard speed; Premium ($4.99/mo) adds maximum speed, premium servers and removes ads. That's the whole business model — your data isn't part of it." %}
+            </p>
+            <div class="mt-3">
+              <a href="{% url 'vpn_extension' %}" class="vs-btn vs-btn-primary !px-4 !py-2 !text-xs">{% trans "Add the free extension" %}</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="vs-card vs-reveal"><div class="flex items-start gap-4">
+        <span class="grid h-9 w-9 shrink-0 place-content-center rounded-full text-sm font-bold" style="background:color-mix(in srgb, var(--vs-500) 10%, transparent); color:var(--vs-600)">2</span>
+        <div><h2 class="font-bold tracking-tight" style="color:var(--vs-text)">Proton VPN Extension</h2>
+        <p class="mt-1.5 text-sm leading-6" style="color:var(--vs-text-2)">{% trans "Trustworthy free tier with no data cap — but speeds are limited on free, only a few locations are available, and you must create an account first." %}</p></div>
+      </div></div>
+
+      <div class="vs-card vs-reveal"><div class="flex items-start gap-4">
+        <span class="grid h-9 w-9 shrink-0 place-content-center rounded-full text-sm font-bold" style="background:color-mix(in srgb, var(--vs-500) 10%, transparent); color:var(--vs-600)">3</span>
+        <div><h2 class="font-bold tracking-tight" style="color:var(--vs-text)">Windscribe</h2>
+        <p class="mt-1.5 text-sm leading-6" style="color:var(--vs-text-2)">{% trans "One of the fairest free plans around — but it's capped at 10GB/month and requires sign-up. Great until the cap hits mid-month." %}</p></div>
+      </div></div>
+
+      <div class="vs-card vs-reveal"><div class="flex items-start gap-4">
+        <span class="grid h-9 w-9 shrink-0 place-content-center rounded-full text-sm font-bold" style="background:color-mix(in srgb, var(--vs-500) 10%, transparent); color:var(--vs-600)">4</span>
+        <div><h2 class="font-bold tracking-tight" style="color:var(--vs-text)">Browsec</h2>
+        <p class="mt-1.5 text-sm leading-6" style="color:var(--vs-text-2)">{% trans "Popular and easy, no sign-up needed — but free speeds are heavily throttled and the privacy policy is lighter on specifics than we'd like." %}</p></div>
+      </div></div>
+
+      <div class="vs-card vs-reveal"><div class="flex items-start gap-4">
+        <span class="grid h-9 w-9 shrink-0 place-content-center rounded-full text-sm font-bold" style="background:color-mix(in srgb, var(--vs-500) 10%, transparent); color:var(--vs-600)">5</span>
+        <div><h2 class="font-bold tracking-tight" style="color:var(--vs-text)">Urban VPN</h2>
+        <p class="mt-1.5 text-sm leading-6" style="color:var(--vs-text-2)">{% trans "Unlimited and free with many locations — but read the privacy policy: it's a data-supported network, which is exactly what a VPN should protect you from." %}</p></div>
+      </div></div>
+
+      <div class="vs-card vs-reveal"><div class="flex items-start gap-4">
+        <span class="grid h-9 w-9 shrink-0 place-content-center rounded-full text-sm font-bold" style="background:color-mix(in srgb, var(--vs-500) 10%, transparent); color:var(--vs-600)">6</span>
+        <div><h2 class="font-bold tracking-tight" style="color:var(--vs-text)">Hola VPN</h2>
+        <p class="mt-1.5 text-sm leading-6" style="color:var(--vs-text-2)">{% trans "The household name of free VPNs — powered historically by peer-to-peer routing, meaning others' traffic could exit through your connection. Convenient, but know the trade." %}</p></div>
+      </div></div>
+
+      <div class="vs-card vs-reveal"><div class="flex items-start gap-4">
+        <span class="grid h-9 w-9 shrink-0 place-content-center rounded-full text-sm font-bold" style="background:color-mix(in srgb, var(--vs-500) 10%, transparent); color:var(--vs-600)">7</span>
+        <div><h2 class="font-bold tracking-tight" style="color:var(--vs-text)">ZenMate</h2>
+        <p class="mt-1.5 text-sm leading-6" style="color:var(--vs-text-2)">{% trans "A long-running favorite for Chrome — now folded into CyberGhost, with the free tier limited in speed and locations." %}</p></div>
+      </div></div>
+
+      <div class="vs-card vs-reveal"><div class="flex items-start gap-4">
+        <span class="grid h-9 w-9 shrink-0 place-content-center rounded-full text-sm font-bold" style="background:color-mix(in srgb, var(--vs-500) 10%, transparent); color:var(--vs-600)">8</span>
+        <div><h2 class="font-bold tracking-tight" style="color:var(--vs-text)">VeePN</h2>
+        <p class="mt-1.5 text-sm leading-6" style="color:var(--vs-text-2)">{% trans "Slick extension with a usable free mode — location choice and speed are gated behind the paid plan." %}</p></div>
+      </div></div>
+
+      <div class="vs-card vs-reveal"><div class="flex items-start gap-4">
+        <span class="grid h-9 w-9 shrink-0 place-content-center rounded-full text-sm font-bold" style="background:color-mix(in srgb, var(--vs-500) 10%, transparent); color:var(--vs-600)">9</span>
+        <div><h2 class="font-bold tracking-tight" style="color:var(--vs-text)">Turbo VPN Extension</h2>
+        <p class="mt-1.5 text-sm leading-6" style="color:var(--vs-text-2)">{% trans "Simple one-tap design carried over from mobile; free servers are crowded and the ownership structure is opaque." %}</p></div>
+      </div></div>
+
+      <div class="vs-card vs-reveal"><div class="flex items-start gap-4">
+        <span class="grid h-9 w-9 shrink-0 place-content-center rounded-full text-sm font-bold" style="background:color-mix(in srgb, var(--vs-500) 10%, transparent); color:var(--vs-600)">10</span>
+        <div><h2 class="font-bold tracking-tight" style="color:var(--vs-text)">1ClickVPN</h2>
+        <p class="mt-1.5 text-sm leading-6" style="color:var(--vs-text-2)">{% trans "Lives up to the name — one click, no settings. Fine for a quick location switch; limited transparency about who runs the servers." %}</p></div>
+      </div></div>
+    </div>
+
+    <!-- CTA -->
+    <div class="mt-16 rounded-3xl p-8 md:p-10 text-center vs-reveal"
+         style="background:linear-gradient(135deg, color-mix(in srgb, var(--vs-500) 10%, transparent), color-mix(in srgb, var(--vs-fuchsia) 8%, transparent)); border:1px solid var(--vs-line)">
+      <h2 class="text-2xl md:text-3xl font-bold tracking-tight" style="color:var(--vs-text)">
+        {% trans "Free should mean free — not \"free until the cap\"" %}
+      </h2>
+      <p class="vs-sub mx-auto !mt-3">
+        {% trans "No data limits, no sign-up wall, no logs to sell. Add VPNsterr to your browser and see for yourself — it takes about ten seconds." %}
+      </p>
+      <div class="mt-7">
+        <a href="{% url 'vpn_extension' %}" class="vs-btn vs-btn-primary vs-btn-lg">
+          {% trans "Get the #1 Free VPN Extension" %}
+          <svg class="h-5 w-5 rtl:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block footer %}
+  {% include "partials/footer.html" %}
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{% trans "Refund Policy" %} — {{ site_name }}{% endblock %}
+{% block meta_description %}{% trans "VPNsterr refund policy: full refunds are available for unused Premium subscriptions. The free extension never needs one — it's free forever." %}{% endblock %}
+
+{% block header %}
+  {% include "partials/navbar.html" %}
+{% endblock %}
+
+{% block content %}
+<section class="vs-section !pt-12">
+  <div class="vs-shell max-w-3xl">
+    <span class="vs-eyebrow">{% trans "Legal" %}</span>
+    <h1 class="vs-h2">{% trans "Refund Policy" %}</h1>
+    <p class="mt-2 text-sm" style="color:var(--vs-text-2)">{% trans "Last updated:" %} {% now "Y-m-d" %}</p>
+
+    <div class="mt-8 space-y-8 text-[15px] leading-7" style="color:var(--vs-text-2)">
+      <div>
+        <h2 class="text-lg font-bold tracking-tight mb-2" style="color:var(--vs-text)">{% trans "1) The free extension" %}</h2>
+        <p>{% trans "The VPNsterr browser extension is 100% free with unlimited use. No payment is ever collected for it, so no refund is ever needed." %}</p>
+      </div>
+
+      <div>
+        <h2 class="text-lg font-bold tracking-tight mb-2" style="color:var(--vs-text)">{% trans "2) Premium subscriptions — refunds for unused service" %}</h2>
+        <p>{% trans "We offer a full refund on any Premium subscription that has not been used. \"Unused\" means no VPN connection was established with your Premium account after the purchase." %}</p>
+        <ul class="mt-3 space-y-2 list-disc ps-5">
+          <li>{% trans "Eligible: you purchased Premium but never connected — contact support any time within 14 days of purchase for a 100% refund." %}</li>
+          <li>{% trans "Not eligible: once the service has been used (a Premium connection was made), the purchase is final and the subscription runs to the end of its term." %}</li>
+        </ul>
+      </div>
+
+      <div>
+        <h2 class="text-lg font-bold tracking-tight mb-2" style="color:var(--vs-text)">{% trans "3) How to request a refund" %}</h2>
+        <p>{% blocktrans trimmed %}Email <a href="mailto:support@vpnsterr.com" class="underline">support@vpnsterr.com</a> from the address on the account, with your order ID. Eligible refunds are confirmed within 2 business days and returned via the original payment method. Crypto refunds are sent to a wallet address you provide, in the same currency and network as the original payment.{% endblocktrans %}</p>
+      </div>
+
+      <div>
+        <h2 class="text-lg font-bold tracking-tight mb-2" style="color:var(--vs-text)">{% trans "4) Renewals & cancellation" %}</h2>
+        <p>{% trans "You can cancel auto-renewal at any time from your dashboard; access continues until the end of the paid period. A renewal charge that has not been used follows the same unused-service refund rule above." %}</p>
+      </div>
+
+      <div>
+        <h2 class="text-lg font-bold tracking-tight mb-2" style="color:var(--vs-text)">{% trans "5) Statutory rights" %}</h2>
+        <p>{% trans "Nothing in this policy limits any non-waivable rights you hold under the consumer-protection law of your country of residence." %}</p>
+      </div>
+    </div>
+
+    <div class="mt-10 flex flex-wrap gap-3">
+      <a href="{% url 'pricing' %}" class="vs-btn vs-btn-primary">{% trans "View plans" %}</a>
+      <a href="{% url 'terms_of_service' %}" class="vs-btn vs-btn-ghost">{% trans "Terms of Service" %}</a>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block footer %}
+  {% include "partials/footer.html" %}
+{% endblock %}

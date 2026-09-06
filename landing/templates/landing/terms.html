@@ -1,141 +1,134 @@
-{% load static i18n %}
+{% extends "base.html" %}
+{% load i18n static %}
 {% now "Y-m-d" as today_iso %}
 
-<!doctype html>
-<html lang="en" class="h-full">
-<head>
-  <meta charset="utf-8">
-  <title>Terms of Service · CoolVPN</title>
-  <meta name="description" content="CoolVPN Terms of Service — acceptable use, payments, renewals, limitations, and legal notices.">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="{% static 'css/tailwind.css' %}" rel="stylesheet">
-  <link rel="icon" href="{% static 'img/favicon.ico' %}">
+{% block title %}{% trans "Terms of Service" %} — {{ site_name }}{% endblock %}
+{% block meta_description %}{% trans "VPNsterr Terms of Service — acceptable use, the free extension, payments, renewals, refunds and legal notices." %}{% endblock %}
+
+{% block header %}
+  {% include "partials/navbar.html" %}
+{% endblock %}
+
+{% block schema_jsonld %}
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@graph": [
     {
-      "@type": "Organization",
-      "name": "Sipahi Software Ltd.",
-      "url": "https://coolvpn.app",
-      "logo": {
-        "@type": "ImageObject",
-        "url": "https://coolvpn.app{% static 'img/COOLVPN-LOGO.png' %}"
-      },
-      "contactPoint": {
-        "@type": "ContactPoint",
-        "contactType": "customer support",
-        "email": "support@coolvpn.app",
-        "availableLanguage": ["en","tr"]
-      }
-    },
-    {
       "@type": "BreadcrumbList",
       "itemListElement": [
-        { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://coolvpn.app/" },
-        { "@type": "ListItem", "position": 2, "name": "Terms of Service", "item": "https://coolvpn.app/terms/" }
+        { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://vpnsterr.com/" },
+        { "@type": "ListItem", "position": 2, "name": "Terms of Service", "item": "https://vpnsterr.com/terms/" }
       ]
     },
     {
       "@type": "TermsOfService",
-      "name": "CoolVPN Terms of Service",
-      "inLanguage": "en",
-      "url": "https://coolvpn.app/terms/",
+      "name": "VPNsterr Terms of Service",
+      "inLanguage": "{{ LANGUAGE_CODE|default:'en' }}",
+      "url": "https://vpnsterr.com/terms/",
       "dateModified": "{{ today_iso }}",
-      "publisher": { "@type": "Organization", "name": "Sipahi Software Ltd.", "url": "https://coolvpn.app" },
-      "isPartOf": { "@type": "WebSite", "url": "https://coolvpn.app", "name": "CoolVPN" },
-      "mainEntityOfPage": { "@type": "WebPage", "@id": "https://coolvpn.app/terms/" }
-      /* not: burada "about": Product/Service eklemedik ki product zengin sonucu tetiklemesin */
+      "publisher": { "@type": "Organization", "name": "Sterr Technologies", "url": "https://vpnsterr.com" },
+      "isPartOf": { "@type": "WebSite", "url": "https://vpnsterr.com", "name": "VPNsterr" }
     }
   ]
 }
 </script>
+{% endblock %}
 
-</head>
-<body class="h-full bg-white text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-100">
-  <main class="mx-auto max-w-3xl px-4 py-10 sm:py-14">
-    <nav class="mb-6 text-sm text-zinc-500 dark:text-zinc-400">
-      <a href="{% url 'home' %}" class="hover:text-zinc-800 dark:hover:text-zinc-200">Home</a>
-      <span class="mx-2">/</span>
-      <span>Terms of Service</span>
-    </nav>
+{% block content %}
+<section class="vs-section !pt-12">
+  <div class="vs-shell max-w-3xl">
+    <span class="vs-eyebrow">{% trans "Legal" %}</span>
+    <h1 class="vs-h2">{% trans "Terms of Service" %}</h1>
+    <p class="mt-2 text-sm" style="color:var(--vs-text-2)">{% trans "Last updated:" %} {{ today_iso }}</p>
 
-    <header class="mb-8">
-      <h1 class="text-3xl font-extrabold tracking-tight sm:text-4xl">Terms of Service</h1>
-      <p class="mt-2 text-zinc-600 dark:text-zinc-400">
-        Last updated: {{ today_iso }}
-      </p>
-    </header>
+    <div class="mt-10 space-y-9 text-[15px] leading-7" style="color:var(--vs-text-2)">
 
-    <article class="prose prose-zinc max-w-none dark:prose-invert">
-      <p>These Terms govern your use of <strong>CoolVPN</strong>, operated by
-         <strong>{{ COMPANY_NAME|default:"Sipahi Software Ltd." }}</strong>. By using the Service, you agree to these Terms.</p>
+      <p>{% blocktrans trimmed %}These Terms govern your use of <strong>VPNsterr</strong>, operated by <strong>Sterr Technologies</strong>. By using the Service — including the free browser extension — you agree to these Terms.{% endblocktrans %}</p>
 
-      <h2>1) Account & Eligibility</h2>
-      <ul>
-        <li>You must be legally capable to contract in your jurisdiction.</li>
-        <li>Keep credentials confidential; you’re responsible for account activity.</li>
-      </ul>
+      <div>
+        <h2 class="text-lg font-bold tracking-tight mb-2" style="color:var(--vs-text)">{% trans "1) Account & eligibility" %}</h2>
+        <ul class="space-y-1.5 list-disc ps-5">
+          <li>{% trans "You must be legally capable to contract in your jurisdiction." %}</li>
+          <li>{% trans "Keep credentials confidential; you're responsible for account activity." %}</li>
+          <li>{% trans "The free extension requires no account; these Terms still apply to its use." %}</li>
+        </ul>
+      </div>
 
-      <h2>2) License</h2>
-      <p>We grant a limited, revocable, non-transferable license to use the Service in accordance with these Terms.</p>
+      <div>
+        <h2 class="text-lg font-bold tracking-tight mb-2" style="color:var(--vs-text)">{% trans "2) License" %}</h2>
+        <p>{% trans "We grant a limited, revocable, non-transferable license to use the Service in accordance with these Terms." %}</p>
+      </div>
 
-      <h2>3) Acceptable Use</h2>
-      <p>Do not use the Service for illegal activities, infringement, spam/DDoS, malware, or to bypass limits/abuse the network.
-         We may suspend/terminate for violations.</p>
+      <div>
+        <h2 class="text-lg font-bold tracking-tight mb-2" style="color:var(--vs-text)">{% trans "3) Acceptable use" %}</h2>
+        <p>{% blocktrans trimmed %}Do not use the Service for illegal activities, infringement, spam/DDoS, malware, or to bypass limits or abuse the network. The full rules are in our <a href="/acceptable-use/" class="underline">Acceptable Use Policy</a>, which forms part of these Terms. We may suspend or terminate accounts for violations.{% endblocktrans %}</p>
+      </div>
 
-      <h2>4) Privacy & No-Logs</h2>
-      <p>We operate with a no-activity-logs practice as described in our
-         <a href="{% url 'home' %}privacy-policy/" class="underline decoration-zinc-300 dark:decoration-zinc-600 hover:no-underline">Privacy Policy</a>.</p>
+      <div>
+        <h2 class="text-lg font-bold tracking-tight mb-2" style="color:var(--vs-text)">{% trans "4) Privacy & zero logs" %}</h2>
+        <p>{% blocktrans trimmed %}We operate a strict no-activity-logs practice as described in our <a href="/privacy-policy/" class="underline">Privacy Policy</a>. We never sell user data.{% endblocktrans %}</p>
+      </div>
 
-      <h2>5) Features & Fair Use</h2>
-      <p>All plans include always-on protection, auto-connect, Kill Switch, optional ad/tracker blocking, per-tab routing (Chrome),
-         DPI bypass/Stealth profiles, and access to our multi-Gbps backbone. Capacity varies by region and conditions; we may apply fair-use
-         to maintain stability.</p>
-      <p><strong>Annual+ (Dedicated server)</strong> on eligible annual plans: single-tenant node with consistent IP. Geography and provisioning times vary.</p>
+      <div>
+        <h2 class="text-lg font-bold tracking-tight mb-2" style="color:var(--vs-text)">{% trans "5) The free tier & Premium" %}</h2>
+        <ul class="space-y-1.5 list-disc ps-5">
+          <li>{% trans "The browser extension is free with unlimited bandwidth. It is ad-supported and runs on standard-speed servers." %}</li>
+          <li>{% trans "Premium adds maximum speed on our multi-Gbps backbone, premium server locations, an ad-free experience and higher device limits." %}</li>
+          <li>{% trans "All plans include always-on protection, auto-connect, Kill Switch, optional ad/tracker blocking and per-tab routing (Chrome). Capacity varies by region and conditions; we may apply fair-use to keep the network stable for everyone." %}</li>
+        </ul>
+      </div>
 
-      <h2>6) Availability & Changes</h2>
-      <p>Service is provided “as is” and “as available.” We may update features, clients, or discontinue legacy versions for security.</p>
+      <div>
+        <h2 class="text-lg font-bold tracking-tight mb-2" style="color:var(--vs-text)">{% trans "6) Availability & changes" %}</h2>
+        <p>{% trans "Service is provided \"as is\" and \"as available.\" We may update features, clients, or discontinue legacy versions for security." %}</p>
+      </div>
 
-      <h2>7) Payments, Renewals, Refunds</h2>
-      <ul>
-        <li>Subscriptions renew automatically unless canceled.</li>
-        <li>Prices/currencies/taxes depend on billing region.</li>
-        <li>Refunds follow our <a href="/refunds/" class="underline decoration-zinc-300 dark:decoration-zinc-600 hover:no-underline">Refund Policy</a>.</li>
-      </ul>
+      <div>
+        <h2 class="text-lg font-bold tracking-tight mb-2" style="color:var(--vs-text)">{% trans "7) Payments, renewals, refunds" %}</h2>
+        <ul class="space-y-1.5 list-disc ps-5">
+          <li>{% trans "Subscriptions renew automatically unless canceled." %}</li>
+          <li>{% trans "Prices, currencies and taxes depend on billing region." %}</li>
+          <li>{% blocktrans trimmed %}Refunds are available <strong>only for unused subscriptions</strong> — see the <a href="/refund-policy/" class="underline">Refund Policy</a>. Once the service has been used, the purchase is final.{% endblocktrans %}</li>
+        </ul>
+      </div>
 
-      <h2>8) Disclaimers</h2>
-      <p>No guarantee of access to every third-party platform; geo-unblocking can vary due to third-party countermeasures.</p>
+      <div>
+        <h2 class="text-lg font-bold tracking-tight mb-2" style="color:var(--vs-text)">{% trans "8) Disclaimers" %}</h2>
+        <p>{% trans "No guarantee of access to every third-party platform; geo-unblocking can vary due to third-party countermeasures." %}</p>
+      </div>
 
-      <h2>9) Limitation of Liability</h2>
-      <p>To the maximum extent permitted by law, we’re not liable for indirect/special/consequential damages or lost data/profits.
-         Aggregate liability is limited to fees paid in the 12 months preceding the claim.</p>
+      <div>
+        <h2 class="text-lg font-bold tracking-tight mb-2" style="color:var(--vs-text)">{% trans "9) Limitation of liability" %}</h2>
+        <p>{% trans "To the maximum extent permitted by law, we're not liable for indirect, special or consequential damages, or lost data/profits. Aggregate liability is limited to fees paid in the 12 months preceding the claim." %}</p>
+      </div>
 
-      <h2>10) Termination</h2>
-      <p>You may cancel anytime. We may suspend or terminate for breach, abuse, or non-payment. License ends upon termination.</p>
+      <div>
+        <h2 class="text-lg font-bold tracking-tight mb-2" style="color:var(--vs-text)">{% trans "10) Termination" %}</h2>
+        <p>{% trans "You may cancel anytime. We may suspend or terminate for breach, abuse, or non-payment. License ends upon termination." %}</p>
+      </div>
 
-      <h2>11) Governing Law & Disputes</h2>
-      <p>Governing law and venue: <strong>{{ GOVERNING_LAW|default:"England & Wales" }}</strong>;
-         courts of <strong>{{ VENUE|default:"London, UK" }}</strong> have exclusive jurisdiction (consumers retain non-waivable rights).</p>
+      <div>
+        <h2 class="text-lg font-bold tracking-tight mb-2" style="color:var(--vs-text)">{% trans "11) Governing law & disputes" %}</h2>
+        <p>{% blocktrans trimmed %}Governing law and venue: <strong>England & Wales</strong>; courts of <strong>London, UK</strong> have exclusive jurisdiction (consumers retain non-waivable rights).{% endblocktrans %}</p>
+      </div>
 
-      <h2>12) Contact</h2>
-      <p>
-        <strong>{{ COMPANY_NAME|default:"Sipahi Software Ltd." }}</strong><br>
-        Email: <a href="mailto:{{ SUPPORT_EMAIL|default:'support@coolvpn.app' }}">{{ SUPPORT_EMAIL|default:'support@coolvpn.app' }}</a>
-      </p>
-    </article>
+      <div>
+        <h2 class="text-lg font-bold tracking-tight mb-2" style="color:var(--vs-text)">{% trans "12) Contact" %}</h2>
+        <p><strong>Sterr Technologies</strong><br>
+        {% trans "Email:" %} <a href="mailto:support@vpnsterr.com" class="underline">support@vpnsterr.com</a></p>
+      </div>
+    </div>
 
     <div class="mt-10 flex flex-wrap gap-3">
-      <a href="{% url 'pricing' %}" class="inline-flex items-center rounded-lg px-4 py-2
-         bg-emerald-600 text-white font-medium shadow hover:bg-emerald-500">
-        View Plans
-      </a>
-      <a href="{% url 'home' %}" class="inline-flex items-center rounded-lg px-4 py-2
-         border border-zinc-200 text-zinc-700 hover:bg-zinc-50
-         dark:border-white/10 dark:text-zinc-200 dark:hover:bg-white/5">
-        Back to Home
-      </a>
+      <a href="{% url 'pricing' %}" class="vs-btn vs-btn-primary">{% trans "View Plans" %}</a>
+      <a href="{% url 'privacy_policy' %}" class="vs-btn vs-btn-ghost">{% trans "Privacy Policy" %}</a>
+      <a href="{% url 'acceptable_use' %}" class="vs-btn vs-btn-ghost">{% trans "Acceptable Use" %}</a>
     </div>
-  </main>
-</body>
-</html>
+  </div>
+</section>
+{% endblock %}
+
+{% block footer %}
+  {% include "partials/footer.html" %}
+{% endblock %}

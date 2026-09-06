@@ -2,58 +2,347 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ---- Brand renkleri (değerler senin verdiğin paletten) ---- */
-:root{
-  --deep-blue:#0B3D91;
-  --accent:#0099FF;
-  --accent-dark:#007ACC;
-  --sky:#7FD3FF;
-  --teal:#00B3A6;
-  --navy:#031A2D;
-  --soft:#F5F8FB;
+/* ============================================================
+   VPNsterr — Design System
+   Single source of truth: brand ramp sampled from the logo
+   (bird blue #1090c0 / #0060a0, ink #04101c, beak #e8862a).
+   Every component on the site uses these tokens — nothing else.
+   ============================================================ */
+
+:root {
+  /* Brand blues (logo bird) */
+  --vs-50:  #f0f7fc;
+  --vs-100: #dbeefa;
+  --vs-200: #b7ddf3;
+  --vs-300: #7fc5e8;
+  --vs-400: #3fa6d6;
+  --vs-500: #1090c0;
+  --vs-600: #0c74a4;
+  --vs-700: #095d86;
+  --vs-800: #0a4a6b;
+  --vs-900: #0b3a55;
+
+  /* Ink (logo outline) — dark surfaces */
+  --vs-ink:      #04101c;
+  --vs-ink-2:    #071a2b;
+  --vs-ink-3:    #0b2338;
+
+  /* Accent (beak) — reserved for “hot” moments only */
+  --vs-amber:     #e8862a;
+  --vs-amber-2:   #f59e3d;
+
+  /* Aurora ikilisi — pembemsi gradient havası (eski tasarımdan) */
+  --vs-indigo:    #6366f1;
+  --vs-fuchsia:   #d946ef;
+  --vs-rose:      #f43f5e;
+  --vs-grad-cta:  linear-gradient(135deg, var(--vs-500) 0%, var(--vs-indigo) 62%, var(--vs-fuchsia) 130%);
+  --vs-grad-hot:  linear-gradient(135deg, var(--vs-rose), var(--vs-fuchsia));
+
+  /* Light theme surfaces */
+  --vs-page:    #f6f9fc;
+  --vs-card:    rgba(255, 255, 255, .82);
+  --vs-card-2:  #ffffff;
+  --vs-line:    rgba(4, 26, 43, .08);
+  --vs-line-2:  rgba(4, 26, 43, .14);
+  --vs-text:    #0b2233;
+  --vs-text-2:  #3e586b;
+
+  --accent: var(--vs-600); /* legacy var used by older templates */
+
+  --vs-shadow-sm: 0 1px 2px rgba(4, 26, 43, .05);
+  --vs-shadow:    0 10px 30px -12px rgba(4, 26, 43, .16);
+  --vs-shadow-lg: 0 30px 70px -30px rgba(4, 26, 43, .35);
+  --vs-glow:      0 14px 38px -14px rgba(16, 144, 192, .5);
 }
 
-/* ---- Bileşen stilleri (Tailwind + ufak CSS) ---- */
+html.dark, [data-theme="dark"] {
+  --vs-page:   #050e17;
+  --vs-card:   rgba(255, 255, 255, .045);
+  --vs-card-2: rgba(13, 32, 48, .85);
+  --vs-line:   rgba(255, 255, 255, .08);
+  --vs-line-2: rgba(255, 255, 255, .14);
+  --vs-text:   #e8f1f7;
+  --vs-text-2: #9fb6c5;
+  --vs-shadow-sm: 0 1px 2px rgba(0, 0, 0, .35);
+  --vs-shadow:    0 10px 30px -12px rgba(0, 0, 0, .5);
+  --vs-shadow-lg: 0 30px 70px -30px rgba(0, 0, 0, .65);
+  --vs-glow:      0 14px 38px -12px rgba(16, 144, 192, .35);
+}
+
+/* ---------- Base ---------- */
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background-color: var(--vs-page);
+  color: var(--vs-text);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* One ambient page glow — sections stay transparent so the whole
+   page reads as a single canvas instead of clashing blocks. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(60rem 32rem at 85% -5%, rgba(16, 144, 192, .11), transparent 60%),
+    radial-gradient(46rem 30rem at -8% 28%, rgba(217, 70, 239, .07), transparent 60%),
+    radial-gradient(42rem 28rem at 75% 80%, rgba(99, 102, 241, .06), transparent 60%);
+}
+html.dark body::before {
+  background:
+    radial-gradient(60rem 32rem at 85% -5%, rgba(16, 144, 192, .15), transparent 60%),
+    radial-gradient(46rem 30rem at -8% 28%, rgba(217, 70, 239, .08), transparent 60%),
+    radial-gradient(42rem 28rem at 75% 80%, rgba(99, 102, 241, .08), transparent 60%);
+}
+
+::selection { background: var(--vs-500); color: #fff; }
+
 @layer components {
-  .nav-glass{
-    @apply sticky top-0 z-50 border-b backdrop-blur;
-    /* ışıkta hafif cam, karanlıkta navy cam */
-    background: linear-gradient(to bottom, rgba(255,255,255,.85), rgba(245,248,251,.78));
-    border-color: rgba(2,6,23,.06);
+
+  /* ---------- Layout rhythm ---------- */
+
+  .vs-shell   { @apply max-w-7xl mx-auto px-5 sm:px-8; }
+  .vs-section { padding-block: clamp(4.5rem, 9vw, 7.5rem); @apply relative; }
+  .vs-section-alt {
+    background:
+      radial-gradient(38rem 22rem at 12% 20%, rgba(217, 70, 239, .05), transparent 60%),
+      radial-gradient(38rem 22rem at 88% 80%, rgba(99, 102, 241, .05), transparent 60%),
+      linear-gradient(180deg, transparent, rgba(16, 144, 192, .045) 18%, rgba(16, 144, 192, .045) 82%, transparent);
   }
-  .dark .nav-glass{
-    background: linear-gradient(to bottom, rgba(3,26,45,.82), rgba(3,26,45,.72));
-    border-color: rgba(255,255,255,.06);
+  html.dark .vs-section-alt {
+    background:
+      radial-gradient(38rem 22rem at 12% 20%, rgba(217, 70, 239, .06), transparent 60%),
+      radial-gradient(38rem 22rem at 88% 80%, rgba(99, 102, 241, .06), transparent 60%),
+      linear-gradient(180deg, transparent, rgba(16, 144, 192, .06) 18%, rgba(16, 144, 192, .06) 82%, transparent);
   }
 
-  .nav-link{
-    @apply text-gray-700 dark:text-white/90 hover:no-underline transition;
+  /* Section header trio — identical everywhere */
+  .vs-eyebrow {
+    @apply inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-semibold uppercase tracking-[0.14em];
+    color: var(--vs-600);
+    background: color-mix(in srgb, var(--vs-500) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--vs-500) 25%, transparent);
   }
-  .nav-link:hover{ color: var(--accent); }
-  .dark .nav-link:hover{ color: var(--sky); }
-
-  .nav-cta{
-    @apply inline-flex items-center gap-2 rounded-lg px-4 py-2 font-medium text-white shadow-sm transition;
-    background: linear-gradient(135deg, var(--deep-blue), var(--accent));
-  }
-  .nav-cta:hover{ filter: brightness(1.05); }
-  .nav-cta:active{ transform: translateY(1px); }
-
-  .menu-card{
-    @apply rounded-xl border shadow-xl p-2 bg-white dark:bg-gray-900 transition;
-    border-color: rgba(2,6,23,.08);
-  }
-  .dark .menu-card{ border-color: rgba(255,255,255,.06); }
-
-  .menu-item{
-    @apply flex items-start gap-3 px-3 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition;
+  html.dark .vs-eyebrow { color: var(--vs-300); }
+  .vs-eyebrow::before {
+    content: "";
+    @apply h-1.5 w-1.5 rounded-full;
+    background: var(--vs-500);
   }
 
-  /* hover açılırken daha ipeksi his */
-  .fly{
-    @apply invisible opacity-0 pointer-events-none translate-y-1;
+  .vs-h2 {
+    @apply mt-5 text-3xl sm:text-4xl md:text-[2.75rem] font-bold tracking-tight;
+    color: var(--vs-text);
+    line-height: 1.12;
   }
-  .group:hover .fly{
-    @apply visible opacity-100 pointer-events-auto translate-y-0;
+  .vs-sub {
+    @apply mt-4 text-base md:text-lg leading-relaxed max-w-2xl;
+    color: var(--vs-text-2);
+  }
+
+  /* ---------- Buttons — the only two button styles on the site ---------- */
+
+  .vs-btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition-all duration-200 select-none;
+  }
+  .vs-btn-primary {
+    @apply text-white;
+    background: var(--vs-grad-cta);
+    box-shadow: 0 14px 38px -14px rgba(99, 102, 241, .55);
+  }
+  .vs-btn-primary:hover { filter: brightness(1.08); transform: translateY(-1px); }
+  .vs-btn-primary:active { transform: translateY(0); filter: brightness(.97); }
+
+  .vs-btn-ghost {
+    color: var(--vs-text);
+    background: var(--vs-card);
+    border: 1px solid var(--vs-line-2);
+    box-shadow: var(--vs-shadow-sm);
+  }
+  .vs-btn-ghost:hover {
+    border-color: color-mix(in srgb, var(--vs-500) 45%, transparent);
+    color: var(--vs-600);
+    transform: translateY(-1px);
+  }
+  html.dark .vs-btn-ghost:hover { color: var(--vs-300); }
+
+  .vs-btn-lg { @apply px-7 py-3.5 text-base rounded-2xl; }
+
+  /* ---------- Cards ---------- */
+
+  .vs-card {
+    @apply relative rounded-2xl p-6 transition-all duration-300;
+    background: var(--vs-card);
+    border: 1px solid var(--vs-line);
+    box-shadow: var(--vs-shadow-sm);
+  }
+  .vs-card-hover:hover {
+    transform: translateY(-4px);
+    border-color: color-mix(in srgb, var(--vs-500) 35%, transparent);
+    box-shadow: var(--vs-shadow);
+  }
+
+  /* Icon tile — single hue, consistent across every card */
+  .vs-icon {
+    @apply grid h-11 w-11 place-content-center rounded-xl;
+    color: var(--vs-600);
+    background: color-mix(in srgb, var(--vs-500) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--vs-500) 22%, transparent);
+  }
+  html.dark .vs-icon { color: var(--vs-300); }
+  .vs-icon svg { @apply h-5 w-5; }
+
+  /* Check bullet used in every feature list — yeşil tik, eski hissiyat */
+  .vs-check {
+    @apply flex items-start gap-2.5 text-sm leading-6;
+    color: var(--vs-text-2);
+  }
+  .vs-check svg {
+    @apply h-5 w-5 shrink-0 mt-0.5;
+    color: #10b981;
+  }
+
+  /* ---------- Navbar: yüzen cam pill ---------- */
+
+  .vs-nav {
+    @apply fixed inset-x-0 top-0 z-50 pt-3;
+    pointer-events: none; /* sadece pill tıklanır */
+  }
+  .vs-nav-pill {
+    @apply flex items-center justify-between gap-3 rounded-2xl px-4 sm:px-5;
+    pointer-events: auto;
+    height: 64px;
+    background: color-mix(in srgb, var(--vs-card-2) 88%, transparent);
+    -webkit-backdrop-filter: blur(16px) saturate(1.5);
+    backdrop-filter: blur(16px) saturate(1.5);
+    border: 1px solid var(--vs-line);
+    box-shadow: var(--vs-shadow-sm);
+    transition: box-shadow .3s ease, border-color .3s ease;
+  }
+  .vs-nav.is-scrolled .vs-nav-pill {
+    box-shadow: var(--vs-shadow);
+    border-color: var(--vs-line-2);
+  }
+
+  .vs-nav-link {
+    @apply relative inline-flex items-center gap-1 rounded-lg px-3 py-2 text-[0.925rem] font-medium transition-colors;
+    color: var(--vs-text-2);
+  }
+  .vs-nav-link:hover, .vs-nav-link[aria-expanded="true"] {
+    color: var(--vs-text);
+    background: color-mix(in srgb, var(--vs-500) 8%, transparent);
+  }
+
+  /* Yuvarlak ikon butonlar (tema, dil) — çerçevesiz, hover'da yumuşak dolgu */
+  .vs-nav-iconbtn {
+    @apply inline-flex h-10 items-center justify-center gap-1.5 rounded-full px-2.5 text-sm font-medium transition-colors;
+    color: var(--vs-text-2);
+  }
+  .vs-nav-iconbtn:hover, .vs-nav-iconbtn[aria-expanded="true"] {
+    color: var(--vs-text);
+    background: color-mix(in srgb, var(--vs-500) 10%, transparent);
+  }
+
+  .vs-menu {
+    @apply absolute mt-3 w-72 rounded-2xl p-2 z-50 origin-top;
+    background: var(--vs-card-2);
+    border: 1px solid var(--vs-line);
+    box-shadow: var(--vs-shadow-lg);
+    transition: opacity .15s ease, transform .15s ease;
+  }
+  .vs-menu.hidden-anim { opacity: 0; transform: translateY(-6px) scale(.98); pointer-events: none; }
+  .vs-menu-item {
+    @apply flex items-start gap-3 rounded-xl px-3 py-2.5 transition-colors;
+  }
+  .vs-menu-item:hover { background: color-mix(in srgb, var(--vs-500) 8%, transparent); }
+  .vs-menu-item .t { @apply text-sm font-semibold; color: var(--vs-text); }
+  .vs-menu-item .d { @apply text-xs mt-0.5 leading-5; color: var(--vs-text-2); }
+
+  /* ---------- Badges ---------- */
+
+  .vs-badge {
+    @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold;
+    color: var(--vs-600);
+    background: color-mix(in srgb, var(--vs-500) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--vs-500) 24%, transparent);
+  }
+  html.dark .vs-badge { color: var(--vs-300); }
+
+  .vs-badge-hot {
+    @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold text-white;
+    background: var(--vs-grad-hot);
+    box-shadow: 0 6px 18px -6px rgba(217, 70, 239, .6);
+  }
+
+  /* ---------- Pricing ---------- */
+
+  .vs-plan {
+    @apply vs-card flex flex-col p-7;
+  }
+  .vs-plan-featured {
+    background:
+      linear-gradient(var(--vs-card-2), var(--vs-card-2)) padding-box,
+      linear-gradient(150deg, var(--vs-400), var(--vs-indigo) 55%, var(--vs-fuchsia)) border-box;
+    border: 2px solid transparent;
+    box-shadow: var(--vs-shadow-lg), 0 20px 50px -24px rgba(217, 70, 239, .35);
+  }
+  .vs-price { @apply flex items-baseline gap-1; color: var(--vs-text); }
+  .vs-price .cur { @apply text-xl font-semibold; color: var(--vs-text-2); }
+  .vs-price .amt { @apply text-5xl font-extrabold tracking-tight; }
+  .vs-price .per { @apply text-sm font-medium; color: var(--vs-text-2); }
+
+  /* ---------- Footer ---------- */
+
+  .vs-footer {
+    background: var(--vs-ink);
+    color: #c5d7e2;
+  }
+  .vs-footer a { @apply transition-colors; color: #9fb6c5; }
+  .vs-footer a:hover { color: #fff; }
+  .vs-footer .head { @apply text-sm font-semibold uppercase tracking-wider mb-4; color: #e8f1f7; }
+}
+
+@layer utilities {
+  /* Hero video layer: GPU-friendly, no filters, no backdrop blur */
+  .vs-video-layer video {
+    transform: translateZ(0);
+    will-change: transform;
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+  }
+
+  .vs-fade-bottom {
+    -webkit-mask-image: linear-gradient(180deg, #000 60%, transparent);
+    mask-image: linear-gradient(180deg, #000 60%, transparent);
+  }
+
+  /* Soft reveal on scroll (JS adds .in) */
+  .vs-reveal { opacity: 0; transform: translateY(18px); transition: opacity .6s ease, transform .6s ease; }
+  .vs-reveal.in { opacity: 1; transform: none; }
+
+  /* Hero mockup animasyonları */
+  @keyframes vs-float { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(-10px) } }
+  .vs-float      { animation: vs-float 6s ease-in-out infinite; }
+  .vs-float-slow { animation: vs-float 8s ease-in-out 1.6s infinite; }
+
+  @keyframes vs-spin { to { transform: rotate(360deg) } }
+  .vs-spin-slower { animation: vs-spin 60s linear infinite; }
+
+  @keyframes vs-ping-soft {
+    0%        { transform: scale(1);   opacity: .5 }
+    80%, 100% { transform: scale(1.8); opacity: 0 }
+  }
+  .vs-pulse-ring { animation: vs-ping-soft 2.6s cubic-bezier(0, 0, .2, 1) infinite; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .vs-reveal { opacity: 1; transform: none; transition: none; }
+    .vs-float, .vs-float-slow, .vs-spin-slower, .vs-pulse-ring { animation: none; }
   }
 }

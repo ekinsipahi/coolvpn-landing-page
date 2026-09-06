@@ -1,14 +1,68 @@
 {% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{% trans "Payment status" %} — {{ site_name }}{% endblock %}
+{% block meta_robots %}noindex,nofollow{% endblock %}
+
+{% block header %}
+  {% include "partials/navbar.html" %}
+{% endblock %}
+
 {% block content %}
-<section class="max-w-lg mx-auto p-6">
-  <h1 class="text-xl font-semibold">Payment status</h1>
-  <p id="msg" class="mt-2 text-sm text-gray-600">Checking your payment…</p>
-  <div class="mt-4">
-    <a id="dl" href="/account" class="hidden underline">Go to your account →</a>
+<section class="relative flex min-h-[calc(100vh-72px)] items-center justify-center py-12">
+  <div class="pointer-events-none absolute inset-0 -z-10" aria-hidden="true"
+       style="background:radial-gradient(40rem 26rem at 50% 0%, color-mix(in srgb, var(--vs-500) 10%, transparent), transparent 65%)"></div>
+
+  <div class="w-full max-w-md mx-auto px-5">
+    <div class="vs-card !p-8 text-center" style="box-shadow:var(--vs-shadow-lg)">
+
+      <!-- durum ikonu -->
+      <div id="status-icon" class="mx-auto grid h-20 w-20 place-content-center rounded-full"
+           style="background:color-mix(in srgb, var(--vs-500) 10%, transparent); border:1px solid color-mix(in srgb, var(--vs-500) 25%, transparent)">
+        <svg class="h-9 w-9 animate-spin" viewBox="0 0 24 24" fill="none" stroke-linecap="round"
+             style="color:var(--vs-500)">
+          <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2.5" opacity=".2"/>
+          <path d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" stroke-width="2.5"/>
+        </svg>
+      </div>
+
+      <h1 class="mt-6 text-xl font-bold tracking-tight" style="color:var(--vs-text)">{% trans "Payment status" %}</h1>
+      <p id="msg" class="mt-2 text-sm" style="color:var(--vs-text-2)">{% trans "Checking your payment…" %}</p>
+
+      <div class="mt-7 space-y-3">
+        <a id="dl" href="{% url 'dashboard' %}" class="vs-btn vs-btn-primary w-full hidden">
+          {% trans "Go to your dashboard" %}
+          <svg class="h-5 w-5 rtl:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </a>
+        <a href="{% url 'home' %}" class="vs-btn vs-btn-ghost w-full">{% trans "Back to home" %}</a>
+      </div>
+
+      <p class="mt-6 text-[11px]" style="color:var(--vs-text-2)">
+        {% trans "Need help?" %} <a href="mailto:support@vpnsterr.com" class="underline">support@vpnsterr.com</a>
+      </p>
+    </div>
   </div>
 </section>
+
 <script>
   const orderId = "{{ order_id|escapejs }}";
+
+  const ICON_OK = `<svg class="h-9 w-9" viewBox="0 0 24 24" fill="none" stroke="#12b76a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>`;
+  const ICON_FAIL = `<svg class="h-9 w-9" viewBox="0 0 24 24" fill="none" stroke="#e11d48" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>`;
+
+  function setIcon(kind){
+    const box = document.getElementById('status-icon');
+    if(!box) return;
+    if(kind === 'ok'){
+      box.style.background = 'rgba(18,183,106,.1)';
+      box.style.borderColor = 'rgba(18,183,106,.3)';
+      box.innerHTML = ICON_OK;
+    } else if(kind === 'fail'){
+      box.style.background = 'rgba(225,29,72,.08)';
+      box.style.borderColor = 'rgba(225,29,72,.25)';
+      box.innerHTML = ICON_FAIL;
+    }
+  }
 
   async function check(){
     const r = await fetch(`/api/order/status/?order_id=${encodeURIComponent(orderId)}`, {credentials:'same-origin'});
@@ -16,16 +70,18 @@
     const msg = document.getElementById('msg'); const dl = document.getElementById('dl');
 
     if(!d?.ok){
-      msg.textContent = 'Order not found or not ready yet.';
+      msg.textContent = '{% trans "Order not found or not ready yet." %}';
       return false;
     }
     if(d.paid){
-      msg.textContent = 'Payment confirmed ✔ Your subscription is active.';
+      msg.textContent = '{% trans "Payment confirmed — your subscription is active." %}';
+      setIcon('ok');
       dl.classList.remove('hidden');
       return true;
     }
     if(d.status === 'failed' || d.status === 'expired' || d.status === 'refunded'){
-      msg.textContent = 'Payment did not complete ('+d.status+'). Please try again.';
+      msg.textContent = '{% trans "Payment did not complete" %} ('+d.status+'). {% trans "Please try again." %}';
+      setIcon('fail');
       return true;
     }
 
@@ -38,7 +94,7 @@
       });
     }catch(_){}
 
-    msg.textContent = 'Awaiting confirmations on the network…';
+    msg.textContent = '{% trans "Awaiting confirmations on the network…" %}';
     return false;
   }
 
@@ -49,7 +105,7 @@
       await new Promise(r=>setTimeout(r, 5000));
     }
     // zaman aşımı
-    document.getElementById('msg').textContent = 'Still pending. We will activate as soon as it confirms.';
+    document.getElementById('msg').textContent = '{% trans "Still pending. We will activate your plan as soon as it confirms." %}';
   })();
 </script>
 {% endblock %}

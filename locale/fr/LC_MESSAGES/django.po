@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-08 22:58+0000\n"
+"POT-Creation-Date: 2026-09-06 13:20+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,392 +18,2400 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: landing/templates/landing/home.html:21
-msgid "Audited no-logs VPN with private node, unlimited bandwidth."
+#: landing/helpers/ui.py:33 templates/partials/plan_tabs.html:19
+#: templates/partials/pricing_block.html:41
+msgid "Monthly"
 msgstr ""
 
-#: landing/templates/landing/home.html:35
+#: landing/helpers/ui.py:36
+msgid "per month"
+msgstr ""
+
+#: landing/helpers/ui.py:44 templates/partials/plan_tabs.html:64
+#: templates/partials/pricing_block.html:123
+msgid "6 Months"
+msgstr ""
+
+#: landing/helpers/ui.py:47
+msgid "per 6 months"
+msgstr ""
+
+#: landing/helpers/ui.py:55 templates/partials/plan_tabs.html:40
+#: templates/partials/pricing_block.html:79
+msgid "Annual"
+msgstr ""
+
+#: landing/helpers/ui.py:58
+msgid "per year"
+msgstr ""
+
+#: landing/templates/landing/acceptable_use.html:4
+#: landing/templates/landing/acceptable_use.html:15
+msgid "Acceptable Use Policy"
+msgstr ""
+
+#: landing/templates/landing/acceptable_use.html:5
+msgid "VPNsterr Acceptable Use Policy: what you can and cannot do on our network. Privacy is a right; abuse is not."
+msgstr ""
+
+#: landing/templates/landing/acceptable_use.html:14
+#: landing/templates/landing/privacy_policy.html:41
+#: landing/templates/landing/refund_policy.html:14
+#: landing/templates/landing/terms.html:41 templates/partials/footer.html:68
+msgid "Legal"
+msgstr ""
+
+#: landing/templates/landing/acceptable_use.html:16
+#: landing/templates/landing/privacy_policy.html:43
+#: landing/templates/landing/refund_policy.html:16
+#: landing/templates/landing/terms.html:43
+msgid "Last updated:"
+msgstr ""
+
+#: landing/templates/landing/acceptable_use.html:19
+msgid "VPNsterr (operated by <strong>Sterr Technologies</strong>) exists to protect privacy. That mission only works if the network isn't abused. By using the free extension or a Premium subscription you agree to this policy, which forms part of our <a href=\"/terms/\" class=\"underline\">Terms of Service</a>."
+msgstr ""
+
+#: landing/templates/landing/acceptable_use.html:22
+msgid "1) You may"
+msgstr ""
+
+#: landing/templates/landing/acceptable_use.html:24
+msgid "Use the service for personal privacy, security on public networks, and accessing content available to you."
+msgstr ""
+
+#: landing/templates/landing/acceptable_use.html:25
+msgid "Use it on the number of devices your plan allows, for yourself and your household."
+msgstr ""
+
+#: landing/templates/landing/acceptable_use.html:30
+msgid "2) You may not use the service to"
+msgstr ""
+
+#: landing/templates/landing/acceptable_use.html:32
+msgid "Break the law of the jurisdiction you are in, or facilitate others doing so."
+msgstr ""
+
+#: landing/templates/landing/acceptable_use.html:33
+msgid "Send spam, run phishing campaigns, distribute malware, or operate botnets / command-and-control infrastructure."
+msgstr ""
+
+#: landing/templates/landing/acceptable_use.html:34
+msgid "Attack networks or systems: DDoS, unauthorized access attempts, port scanning of third parties, exploitation of vulnerabilities you are not authorized to test."
+msgstr ""
+
+#: landing/templates/landing/acceptable_use.html:35
+msgid "Access, share or distribute child sexual abuse material — zero tolerance; accounts are terminated and reported where the law requires."
+msgstr ""
+
+#: landing/templates/landing/acceptable_use.html:36
+msgid "Infringe intellectual property rights at scale, engage in fraud, harassment, or identity theft."
+msgstr ""
+
+#: landing/templates/landing/acceptable_use.html:37
+msgid "Resell, rent or commercially redistribute the service without a written agreement with Sterr Technologies."
+msgstr ""
+
+#: landing/templates/landing/acceptable_use.html:38
+msgid "Interfere with the network itself: probing our infrastructure, evading device limits, or degrading service for other users."
+msgstr ""
+
+#: landing/templates/landing/acceptable_use.html:43
+msgid "3) Enforcement — how it works with zero logs"
+msgstr ""
+
+#: landing/templates/landing/acceptable_use.html:44
+msgid "We do not log your browsing activity, so enforcement is based on real-time signals (such as abuse reports tied to shared exit IPs and automated volumetric anomalies), never on stored activity history. We may suspend or terminate accounts involved in abuse, throttle abusive flows in real time, and block destinations subject to repeated abuse complaints."
+msgstr ""
+
+#: landing/templates/landing/acceptable_use.html:48
+msgid "4) Reporting abuse"
+msgstr ""
+
+#: landing/templates/landing/acceptable_use.html:49
+msgid "To report abuse originating from our network, contact <a href=\"mailto:support@vpnsterr.com\" class=\"underline\">support@vpnsterr.com</a> with timestamps, IPs and evidence. We respond to all legitimate reports."
+msgstr ""
+
+#: landing/templates/landing/acceptable_use.html:53
+msgid "5) Changes"
+msgstr ""
+
+#: landing/templates/landing/acceptable_use.html:54
+msgid "We may update this policy; material changes are posted on this page with a new \\"
+msgstr ""
+
+#: landing/templates/landing/acceptable_use.html:59
+#: landing/templates/landing/privacy_policy.html:149
+#: landing/templates/landing/refund_policy.html:51
+#: landing/templates/landing/terms.html:5
+#: landing/templates/landing/terms.html:42 templates/partials/footer.html:71
+msgid "Terms of Service"
+msgstr ""
+
+#: landing/templates/landing/acceptable_use.html:60
+#: landing/templates/landing/privacy_policy.html:5
+#: landing/templates/landing/privacy_policy.html:42
+#: landing/templates/landing/terms.html:125 templates/partials/footer.html:70
+msgid "Privacy Policy"
+msgstr ""
+
+#: landing/templates/landing/best_free_vpn_extension.html:40
+msgid "Free extensions · Tested 2026"
+msgstr ""
+
+#: landing/templates/landing/best_free_vpn_extension.html:41
+msgid "The 10 Best Free VPN Extensions for Chrome (2026)"
+msgstr ""
+
+#: landing/templates/landing/best_free_vpn_extension.html:43
+msgid "\\"
+msgstr ""
+
+#: landing/templates/landing/best_free_vpn_extension.html:54
+#: landing/templates/landing/best_vpn.html:87
+msgid "Extension"
+msgstr ""
+
+#: landing/templates/landing/best_free_vpn_extension.html:55
+msgid "Truly unlimited"
+msgstr ""
+
+#: landing/templates/landing/best_free_vpn_extension.html:56
+msgid "No sign-up"
+msgstr ""
+
+#: landing/templates/landing/best_free_vpn_extension.html:57
+#: templates/partials/features_premium.html:49
+msgid "Zero logs"
+msgstr ""
+
+#: landing/templates/landing/best_free_vpn_extension.html:69
+msgid "Speed-limited"
+msgstr ""
+
+#: landing/templates/landing/best_free_vpn_extension.html:75
+msgid "10GB/month"
+msgstr ""
+
+#: landing/templates/landing/best_free_vpn_extension.html:81
+msgid "Heavily throttled"
+msgstr ""
+
+#: landing/templates/landing/best_free_vpn_extension.html:83
+#: landing/templates/landing/best_vpn.html:114
+msgid "Partial"
+msgstr ""
+
+#: landing/templates/landing/best_free_vpn_extension.html:86
+msgid "others"
+msgstr ""
+
+#: landing/templates/landing/best_free_vpn_extension.html:87
+#: landing/templates/landing/best_free_vpn_extension.html:88
+msgid "Varies"
+msgstr ""
+
+#: landing/templates/landing/best_free_vpn_extension.html:89
+msgid "Data concerns"
+msgstr ""
+
+#: landing/templates/landing/best_free_vpn_extension.html:105
+msgid "the only truly unlimited free extension"
+msgstr ""
+
+#: landing/templates/landing/best_free_vpn_extension.html:108
+msgid "Unlimited bandwidth with no data cap, no sign-up, no email — and a strict zero-logs policy, so your browsing can't be stored or sold. One-click connect, per-tab routing, ad & tracker blocking built in. The free tier is ad-supported at standard speed; Premium ($4.99/mo) adds maximum speed, premium servers and removes ads. That's the whole business model — your data isn't part of it."
+msgstr ""
+
+#: landing/templates/landing/best_free_vpn_extension.html:111
+msgid "Add the free extension"
+msgstr ""
+
+#: landing/templates/landing/best_free_vpn_extension.html:120
+msgid "Trustworthy free tier with no data cap — but speeds are limited on free, only a few locations are available, and you must create an account first."
+msgstr ""
+
+#: landing/templates/landing/best_free_vpn_extension.html:126
+msgid "One of the fairest free plans around — but it's capped at 10GB/month and requires sign-up. Great until the cap hits mid-month."
+msgstr ""
+
+#: landing/templates/landing/best_free_vpn_extension.html:132
+msgid "Popular and easy, no sign-up needed — but free speeds are heavily throttled and the privacy policy is lighter on specifics than we'd like."
+msgstr ""
+
+#: landing/templates/landing/best_free_vpn_extension.html:138
+msgid "Unlimited and free with many locations — but read the privacy policy: it's a data-supported network, which is exactly what a VPN should protect you from."
+msgstr ""
+
+#: landing/templates/landing/best_free_vpn_extension.html:144
+msgid "The household name of free VPNs — powered historically by peer-to-peer routing, meaning others' traffic could exit through your connection. Convenient, but know the trade."
+msgstr ""
+
+#: landing/templates/landing/best_free_vpn_extension.html:150
+msgid "A long-running favorite for Chrome — now folded into CyberGhost, with the free tier limited in speed and locations."
+msgstr ""
+
+#: landing/templates/landing/best_free_vpn_extension.html:156
+msgid "Slick extension with a usable free mode — location choice and speed are gated behind the paid plan."
+msgstr ""
+
+#: landing/templates/landing/best_free_vpn_extension.html:162
+msgid "Simple one-tap design carried over from mobile; free servers are crowded and the ownership structure is opaque."
+msgstr ""
+
+#: landing/templates/landing/best_free_vpn_extension.html:168
+msgid "Lives up to the name — one click, no settings. Fine for a quick location switch; limited transparency about who runs the servers."
+msgstr ""
+
+#: landing/templates/landing/best_free_vpn_extension.html:176
+msgid "Free should mean free — not \\"
+msgstr ""
+
+#: landing/templates/landing/best_free_vpn_extension.html:179
+msgid "No data limits, no sign-up wall, no logs to sell. Add VPNsterr to your browser and see for yourself — it takes about ten seconds."
+msgstr ""
+
+#: landing/templates/landing/best_free_vpn_extension.html:183
+msgid "Get the #1 Free VPN Extension"
+msgstr ""
+
+#: landing/templates/landing/best_vpn.html:41
+msgid "Comparison · Updated for 2026"
+msgstr ""
+
+#: landing/templates/landing/best_vpn.html:42
+msgid "The Best VPN in 2026: Top 10 Compared"
+msgstr ""
+
+#: landing/templates/landing/best_vpn.html:44
+msgid "We ranked the 10 best VPNs on the things that actually matter: price, real speed, logging policy and whether the free tier is genuinely usable. Here's how they stack up — including where we're honest about our own product."
+msgstr ""
+
+#: landing/templates/landing/best_vpn.html:60
+msgid "Our pick"
+msgstr ""
+
+#: landing/templates/landing/best_vpn.html:70
+msgid "Monthly plan"
+msgstr ""
+
+#: landing/templates/landing/best_vpn.html:78
+msgid "Cheapest deal (per month)"
+msgstr ""
+
+#: landing/templates/landing/best_vpn.html:79
+msgid "1-yr, no lock-in games"
+msgstr ""
+
+#: landing/templates/landing/best_vpn.html:80
+#: landing/templates/landing/best_vpn.html:82
+#: landing/templates/landing/best_vpn.html:83
+msgid "2-yr plan"
+msgstr ""
+
+#: landing/templates/landing/best_vpn.html:81
+msgid "27-mo promo"
+msgstr ""
+
+#: landing/templates/landing/best_vpn.html:86
+msgid "Truly unlimited free tier"
+msgstr ""
+
+#: landing/templates/landing/best_vpn.html:91
+msgid "Limited speed"
+msgstr ""
+
+#: landing/templates/landing/best_vpn.html:94
+#: landing/templates/landing/vpn_extension.html:177
+msgid "Zero-logs policy"
+msgstr ""
+
+#: landing/templates/landing/best_vpn.html:102
+msgid "No sign-up needed (free)"
+msgstr ""
+
+#: landing/templates/landing/best_vpn.html:110
+msgid "Built-in ad & tracker blocker"
+msgstr ""
+
+#: landing/templates/landing/best_vpn.html:118
+msgid "Per-tab browser routing"
+msgstr ""
+
+#: landing/templates/landing/best_vpn.html:130
+msgid "Competitor prices are the providers' listed monthly-plan prices, checked August 2026; long-term bundle prices vary by promotion. Yes, this is our site — that's why we show you the raw numbers and let you verify them."
+msgstr ""
+
+#: landing/templates/landing/best_vpn.html:135
+msgid "Top 10 VPNs of 2026, ranked"
+msgstr ""
+
+#: landing/templates/landing/best_vpn.html:146
+msgid "Best overall + best free"
+msgstr ""
+
+#: landing/templates/landing/best_vpn.html:149
+#, python-format
+msgid "The only VPN on this list with a 100%% free, genuinely unlimited browser extension — no data caps, no sign-up, and a strict zero-logs policy so your activity is never stored. Premium ($4.99/mo, $39.99/yr) unlocks maximum speed on the 1000 Gbps core, premium servers and an ad-free experience. If you want to try before spending a cent, nothing else here lets you do it without limits."
+msgstr ""
+
+#: landing/templates/landing/best_vpn.html:152
+msgid "Get the free extension"
+msgstr ""
+
+#: landing/templates/landing/best_vpn.html:153
+msgid "See Premium plans"
+msgstr ""
+
+#: landing/templates/landing/best_vpn.html:163
+msgid "The biggest name in the space: huge server fleet, consistently fast, audited no-logs. You pay for that brand — the monthly plan is $12.99 and there's no free tier."
+msgstr ""
+
+#: landing/templates/landing/best_vpn.html:168
+msgid "Excellent privacy pedigree from the Proton Mail team and one of the few real free tiers — but the free plan throttles speed, requires an account, and limits locations."
+msgstr ""
+
+#: landing/templates/landing/best_vpn.html:173
+msgid "Great value on long 2-year bundles with unlimited devices. The catch: the monthly plan is one of the priciest at $15.45, and there's no free option."
+msgstr ""
+
+#: landing/templates/landing/best_vpn.html:178
+msgid "Polished apps and reliable speeds everywhere — but consistently the most expensive way to buy a VPN, at roughly $100/year."
+msgstr ""
+
+#: landing/templates/landing/best_vpn.html:183
+msgid "The privacy purist's choice — anonymous accounts, flat €5/month. No free tier, no browser-only option, and fewer streaming-friendly features."
+msgstr ""
+
+#: landing/templates/landing/best_vpn.html:188
+msgid "A likeable free plan — but capped at 10GB/month and it needs an account. Solid paid tiers if the cap frustrates you."
+msgstr ""
+
+#: landing/templates/landing/best_vpn.html:193
+msgid "Veteran provider with court-proven no-logs claims and deep configurability. The apps feel dated and monthly pricing is mid-pack."
+msgstr ""
+
+#: landing/templates/landing/best_vpn.html:198
+msgid "Streaming-optimized servers and cheap long-term bundles; the monthly plan is expensive and the apps can feel heavy."
+msgstr ""
+
+#: landing/templates/landing/best_vpn.html:203
+msgid "Respected no-logs provider with a small free plan — limited locations and data, but a fair way to test the service."
+msgstr ""
+
+#: landing/templates/landing/best_vpn.html:212
+msgid "The verdict: start free, upgrade if you love it"
+msgstr ""
+
+#: landing/templates/landing/best_vpn.html:215
+msgid "Every other VPN on this list asks for your money (or your email) before you can really use it. VPNsterr doesn't — the extension is unlimited and free, and Premium is there when you want maximum speed without ads."
+msgstr ""
+
+#: landing/templates/landing/best_vpn.html:219
+msgid "Try VPNsterr Free"
+msgstr ""
+
+#: landing/templates/landing/best_vpn.html:222
+msgid "Compare Premium plans"
+msgstr ""
+
+#: landing/templates/landing/dashboard.html:4
+#: landing/templates/landing/dashboard.html:17
+#: templates/partials/footer.html:49 templates/partials/navbar.html:154
+#: templates/partials/navbar.html:187
+msgid "Dashboard"
+msgstr ""
+
+#: landing/templates/landing/dashboard.html:19
+msgid "Welcome back"
+msgstr ""
+
+#: landing/templates/landing/dashboard.html:29
+msgid "Account status"
+msgstr ""
+
+#: landing/templates/landing/dashboard.html:37
+#: landing/templates/landing/vpn_extension.html:162
+msgid "Premium"
+msgstr ""
+
+#: landing/templates/landing/dashboard.html:40
+#: landing/templates/landing/vpn_extension.html:161
+msgid "Free"
+msgstr ""
+
+#: landing/templates/landing/dashboard.html:44
+msgid "plan"
+msgstr ""
+
+#: landing/templates/landing/dashboard.html:55
+msgid "Time left"
+msgstr ""
+
+#: landing/templates/landing/dashboard.html:60
+#: landing/templates/landing/dashboard.html:70
+msgid "Ends"
+msgstr ""
+
+#: landing/templates/landing/dashboard.html:69
+msgid "Started"
+msgstr ""
+
+#: landing/templates/landing/dashboard.html:78
+msgid "Upgrade to unlock Premium features and higher device limits."
+msgstr ""
+
+#: landing/templates/landing/dashboard.html:79
+#: landing/templates/landing/refund_policy.html:50
+msgid "View plans"
+msgstr ""
+
+#: landing/templates/landing/dashboard.html:86
+msgid "Device limit"
+msgstr ""
+
+#: landing/templates/landing/dashboard.html:91
+#, python-format
+msgid "You can add %(remaining)s more device%(remaining|pluralize)s."
+msgstr ""
+
+#: landing/templates/landing/dashboard.html:94
+msgid "Limit reached. Revoke a device to add another."
+msgstr ""
+
+#: landing/templates/landing/dashboard.html:103
+msgid "Your devices"
+msgstr ""
+
+#: landing/templates/landing/dashboard.html:104
+msgid "Get the app"
+msgstr ""
+
+#: landing/templates/landing/dashboard.html:134
+msgid "revoked"
+msgstr ""
+
+#: landing/templates/landing/dashboard.html:141
+msgid "Last seen"
+msgstr ""
+
+#: landing/templates/landing/dashboard.html:152
+msgid "Copy"
+msgstr ""
+
+#: landing/templates/landing/dashboard.html:159
+msgid "Revoke"
+msgstr ""
+
+#: landing/templates/landing/dashboard.html:164
+msgid "This device cannot connect."
+msgstr ""
+
+#: landing/templates/landing/dashboard.html:172
+msgid "No devices yet. Install the app and sign in to link your first device."
+msgstr ""
+
+#: landing/templates/landing/dashboard.html:178
+msgid "You’ve reached your device limit."
+msgstr ""
+
+#: landing/templates/landing/dashboard.html:184
+msgid "Add device by UUID"
+msgstr ""
+
+#: landing/templates/landing/dashboard.html:188
+msgid "paste device UUID here"
+msgstr ""
+
+#: landing/templates/landing/dashboard.html:193
+msgid "Remaining device slots:"
+msgstr ""
+
+#: landing/templates/landing/dashboard.html:198
+msgid "Add device"
+msgstr ""
+
+#: landing/templates/landing/dashboard.html:200
+msgid "QR help"
+msgstr ""
+
+#: landing/templates/landing/dashboard.html:298
+msgid "Expired"
+msgstr ""
+
+#: landing/templates/landing/home.html:14
+#, python-format
+msgid "100%% no-logs, anonymous VPN with unlimited bandwidth on every device."
+msgstr ""
+
+#: landing/templates/landing/home.html:15
+msgid "Privacy, speed, control — connect in seconds, forget it's even on."
+msgstr ""
+
+#: landing/templates/landing/home.html:17
+msgid "Strict zero logs — your activity is never stored."
+msgstr ""
+
+#: landing/templates/landing/home.html:18
+msgid "Built-in ad and tracker blocker for cleaner, faster browsing."
+msgstr ""
+
+#: landing/templates/landing/home.html:19
+msgid "Instant traffic cut if VPN drops — no IP or DNS leaks."
+msgstr ""
+
+#: landing/templates/landing/home.html:20
+msgid "Auto-connect on startup and auto-reconnect for reliability."
+msgstr ""
+
+#: landing/templates/landing/home.html:21
+msgid "Per-tab routing in Chrome — choose which tabs use the VPN."
+msgstr ""
+
+#: landing/templates/landing/home.html:22
+msgid "1000 Gbps backbone for peak throughput and low jitter."
+msgstr ""
+
+#: landing/templates/landing/home.html:23
+msgid "24/7 live support — real humans, around the clock."
+msgstr ""
+
+#: landing/templates/landing/login.html:4
+#: landing/templates/landing/login.html:29
+#: landing/templates/landing/login.html:69 templates/partials/navbar.html:164
+#: templates/partials/navbar.html:262
+msgid "Sign in"
+msgstr ""
+
+#: landing/templates/landing/login.html:5 landing/views.py:780
+msgid "Sign in to manage your VPNsterr subscription."
+msgstr ""
+
+#: landing/templates/landing/login.html:30
+msgid "Access your dashboard and subscriptions."
+msgstr ""
+
+#: landing/templates/landing/login.html:37
+#: landing/templates/landing/payment.html:72
+msgid "Email"
+msgstr ""
+
+#: landing/templates/landing/login.html:46
+#: landing/templates/landing/payment.html:82
+msgid "Password"
+msgstr ""
+
+#: landing/templates/landing/login.html:51
+msgid "Your password"
+msgstr ""
+
+#: landing/templates/landing/login.html:55
+#: landing/templates/landing/payment.html:91
+msgid "Show password"
+msgstr ""
+
+#: landing/templates/landing/login.html:72
+msgid "Forgot password?"
+msgstr ""
+
+#: landing/templates/landing/login.html:79
+#: landing/templates/landing/payment.html:109
+msgid "or"
+msgstr ""
+
+#: landing/templates/landing/login.html:91
+#: landing/templates/landing/payment.html:122
+msgid "Continue with Google"
+msgstr ""
+
+#: landing/templates/landing/login.html:102
+msgid "Don’t have an account?"
+msgstr ""
+
+#: landing/templates/landing/login.html:103
+msgid "Create it by signing in — we’ll set it up automatically."
+msgstr ""
+
+#: landing/templates/landing/login.html:153
+msgid "Account found. Enter your password to sign in."
+msgstr ""
+
+#: landing/templates/landing/login.html:154
+msgid "No account found. We will create one after you set a password."
+msgstr ""
+
+#: landing/templates/landing/login.html:167
+msgid "Please enter a valid email."
+msgstr ""
+
+#: landing/templates/landing/login.html:168
+msgid "Please enter your password (min 6 chars)."
+msgstr ""
+
+#: landing/templates/landing/login.html:178
+msgid "Invalid email or password."
+msgstr ""
+
+#: landing/templates/landing/login.html:178
+msgid "Sign-in failed. Try again."
+msgstr ""
+
+#: landing/templates/landing/login.html:179
+msgid "Network problem. Try again."
+msgstr ""
+
+#: landing/templates/landing/login.html:211
+#: landing/templates/landing/login.html:212
+msgid "Google sign-in failed."
+msgstr ""
+
+#: landing/templates/landing/login.html:216
+#: landing/templates/landing/login.html:235
+msgid "Google is not ready. Please try again."
+msgstr ""
+
+#: landing/templates/landing/login.html:234
+msgid "Could not open Google popup."
+msgstr ""
+
+#: landing/templates/landing/payment.html:4
+#: landing/templates/landing/payment.html:25
+msgid "Checkout"
+msgstr ""
+
+#: landing/templates/landing/payment.html:5
+msgid "Secure checkout. Sign in and complete your VPNsterr purchase."
+msgstr ""
+
+#: landing/templates/landing/payment.html:26
+msgid "Secure Checkout"
+msgstr ""
+
+#: landing/templates/landing/payment.html:28
+msgid "Finish sign-in, pick a payment method, and confirm your order."
+msgstr ""
+
+#: landing/templates/landing/payment.html:34
+msgid "256-bit encrypted checkout"
+msgstr ""
+
+#: landing/templates/landing/payment.html:48
+msgid "Your account"
+msgstr ""
+
+#: landing/templates/landing/payment.html:61
+msgid "Signed in with Google"
+msgstr ""
+
+#: landing/templates/landing/payment.html:61
+msgid "Signed in with email"
+msgstr ""
+
+#: landing/templates/landing/payment.html:68
+msgid "We'll send your receipt and license details to this address."
+msgstr ""
+
+#: landing/templates/landing/payment.html:87
+msgid "Create a password"
+msgstr ""
+
+#: landing/templates/landing/payment.html:102
+msgid "We couldn't find an account. Create a password to continue."
+msgstr ""
+
+#: landing/templates/landing/payment.html:128
+msgid "By continuing you accept our <a href=\"/terms/\" class=\"underline\">Terms</a> and <a href=\"/privacy-policy/\" class=\"underline\">Privacy Policy</a>."
+msgstr ""
+
+#: landing/templates/landing/payment.html:138
+msgid "Payment method"
+msgstr ""
+
+#: landing/templates/landing/payment.html:141
+msgid "Pay with crypto via NOWPayments (150+ coins). Card payments are coming soon."
+msgstr ""
+
+#: landing/templates/landing/payment.html:150
+msgid "Included in every plan"
+msgstr ""
+
+#: landing/templates/landing/payment.html:152
+#: templates/partials/pricing_block.html:57
+msgid "Kill Switch & leak protection"
+msgstr ""
+
+#: landing/templates/landing/payment.html:153
+#: templates/partials/plan_tabs.html:30
+#: templates/partials/pricing_block.html:58
+#: templates/partials/pricing_block.html:194
+msgid "Ad & tracker blocking"
+msgstr ""
+
+#: landing/templates/landing/payment.html:154
+#: templates/partials/pricing_block.html:59
+#: templates/partials/pricing_block.html:198
+msgid "Strict zero logs"
+msgstr ""
+
+#: landing/templates/landing/payment.html:155
+#: templates/partials/features_premium.html:67
+msgid "1000 Gbps network core"
+msgstr ""
+
+#: landing/templates/landing/payment.html:156
+#: templates/partials/features_premium.html:76
+#: templates/partials/pricing_block.html:60
+msgid "Per-tab routing for Chrome"
+msgstr ""
+
+#: landing/templates/landing/payment.html:157
+#: landing/templates/landing/payment.html:226
+#: templates/partials/features_premium.html:85
+msgid "24/7 live support"
+msgstr ""
+
+#: landing/templates/landing/payment.html:164
+msgid "Order summary"
+msgstr ""
+
+#: landing/templates/landing/payment.html:173
+msgid "devices"
+msgstr ""
+
+#: landing/templates/landing/payment.html:183
+msgid "Change plan"
+msgstr ""
+
+#: landing/templates/landing/payment.html:187
+msgid "Have a coupon?"
+msgstr ""
+
+#: landing/templates/landing/payment.html:192
+msgid "Enter code"
+msgstr ""
+
+#: landing/templates/landing/payment.html:193
+msgid "Apply"
+msgstr ""
+
+#: landing/templates/landing/payment.html:201
+msgid "Subtotal"
+msgstr ""
+
+#: landing/templates/landing/payment.html:205
+msgid "Discount"
+msgstr ""
+
+#: landing/templates/landing/payment.html:209
+msgid "Fees"
+msgstr ""
+
+#: landing/templates/landing/payment.html:213
+msgid "Total"
+msgstr ""
+
+#: landing/templates/landing/payment.html:217
+msgid "VAT may apply at payment."
+msgstr ""
+
+#: landing/templates/landing/payment.html:220
+msgid "Pay now"
+msgstr ""
+
+#: landing/templates/landing/payment.html:227
+msgid "Refund available if unused"
+msgstr ""
+
+#: landing/templates/landing/payment.html:228
+msgid "Zero logs — your data stays yours"
+msgstr ""
+
+#: landing/templates/landing/payment.html:240
+msgid "Heads up"
+msgstr ""
+
+#: landing/templates/landing/payment.html:241 landing/views.py:234
+msgid "Something went wrong. Please try again."
+msgstr ""
+
+#: landing/templates/landing/payment_success.html:4
+#: landing/templates/landing/payment_success.html:29
+msgid "Payment status"
+msgstr ""
+
+#: landing/templates/landing/payment_success.html:30
+msgid "Checking your payment…"
+msgstr ""
+
+#: landing/templates/landing/payment_success.html:34
+msgid "Go to your dashboard"
+msgstr ""
+
+#: landing/templates/landing/payment_success.html:37
+msgid "Back to home"
+msgstr ""
+
+#: landing/templates/landing/payment_success.html:41
+msgid "Need help?"
+msgstr ""
+
+#: landing/templates/landing/payment_success.html:73
+msgid "Order not found or not ready yet."
+msgstr ""
+
+#: landing/templates/landing/payment_success.html:77
+msgid "Payment confirmed — your subscription is active."
+msgstr ""
+
+#: landing/templates/landing/payment_success.html:83
+msgid "Payment did not complete"
+msgstr ""
+
+#: landing/templates/landing/payment_success.html:83
+msgid "Please try again."
+msgstr ""
+
+#: landing/templates/landing/payment_success.html:97
+msgid "Awaiting confirmations on the network…"
+msgstr ""
+
+#: landing/templates/landing/payment_success.html:108
+msgid "Still pending. We will activate your plan as soon as it confirms."
+msgstr ""
+
+#: landing/templates/landing/pricing.html:46
+msgid "Home"
+msgstr ""
+
+#: landing/templates/landing/pricing.html:49 templates/partials/footer.html:45
+#: templates/partials/navbar.html:89 templates/partials/navbar.html:256
+#: templates/partials/plan_tabs.html:8 templates/partials/pricing_block.html:8
+msgid "Pricing"
+msgstr ""
+
+#: landing/templates/landing/pricing.html:56
+msgid "Strict no-logs VPN with unlimited bandwidth on every device."
+msgstr ""
+
+#: landing/templates/landing/privacy_policy.html:6
+msgid "VPNsterr Privacy Policy: strict zero activity logs, minimal account data, no selling of user data — for the website, apps and the free browser extension."
+msgstr ""
+
+#: landing/templates/landing/privacy_policy.html:48
+msgid "The short version"
+msgstr ""
+
+#: landing/templates/landing/privacy_policy.html:50
+msgid "We keep zero activity logs: no browsing history, no DNS queries, no traffic content, no IP after connection."
+msgstr ""
+
+#: landing/templates/landing/privacy_policy.html:51
+msgid "The free extension works with no account — we couldn't tie activity to you even if we wanted to."
+msgstr ""
+
+#: landing/templates/landing/privacy_policy.html:52
+msgid "We never sell or rent user data to anyone, for any purpose. Ads on the free tier are served without profiling you."
+msgstr ""
+
+#: landing/templates/landing/privacy_policy.html:59
+msgid "1) Who we are & scope"
+msgstr ""
+
+#: landing/templates/landing/privacy_policy.html:60
+msgid "VPNsterr (\"we\", \"us\") is operated by <strong>Sterr Technologies</strong>, the data controller. This policy covers the vpnsterr.com website, our apps, and the <strong>VPNsterr browser extension</strong> distributed through the Chrome Web Store and other extension stores."
+msgstr ""
+
+#: landing/templates/landing/privacy_policy.html:64
+msgid "2) What we never collect (zero-logs policy)"
+msgstr ""
+
+#: landing/templates/landing/privacy_policy.html:65
+msgid "By architecture, our VPN service does not record:"
+msgstr ""
+
+#: landing/templates/landing/privacy_policy.html:67
+msgid "Websites you visit or apps you use"
+msgstr ""
+
+#: landing/templates/landing/privacy_policy.html:68
+msgid "DNS queries"
+msgstr ""
+
+#: landing/templates/landing/privacy_policy.html:69
+msgid "Traffic contents or metadata that could identify your activity"
+msgstr ""
+
+#: landing/templates/landing/privacy_policy.html:70
+msgid "Your originating IP address after a connection is established"
+msgstr ""
+
+#: landing/templates/landing/privacy_policy.html:71
+msgid "Connection timestamps tied to your identity"
+msgstr ""
+
+#: landing/templates/landing/privacy_policy.html:73
+msgid "Shared exit IPs are used by default, so your identity and your activity stay structurally separate."
+msgstr ""
+
+#: landing/templates/landing/privacy_policy.html:77
+msgid "3) The free browser extension"
+msgstr ""
+
+#: landing/templates/landing/privacy_policy.html:78
+msgid "The extension has a single purpose: routing your browser traffic through an encrypted VPN proxy. It works without an account, so no personal data is required to use it."
+msgstr ""
+
+#: landing/templates/landing/privacy_policy.html:79
+msgid "Permissions and what they're for:"
+msgstr ""
+
+#: landing/templates/landing/privacy_policy.html:81
+msgid "routes browser traffic through the VPN. This is the product."
+msgstr ""
+
+#: landing/templates/landing/privacy_policy.html:82
+msgid "optional on-device ad & tracker blocking. Filtering happens inside your browser; block decisions are never transmitted to us."
+msgstr ""
+
+#: landing/templates/landing/privacy_policy.html:83
+msgid "saves your preferences (location, auto-connect, ad-block toggle) and a random client identifier, locally in your browser."
+msgstr ""
+
+#: landing/templates/landing/privacy_policy.html:84
+msgid "powers per-tab routing (choosing which tabs use the VPN). Page contents are never read."
+msgstr ""
+
+#: landing/templates/landing/privacy_policy.html:86
+msgid "In line with the Chrome Web Store User Data Policy: we only use extension data to provide the VPN's single purpose, we transmit connection data over encrypted channels, and we <strong>do not sell, rent or transfer user data</strong> to third parties for advertising, credit-worthiness or any unrelated purpose. The free tier is supported by ads shown inside the extension UI; these are served <strong>without behavioral profiling</strong> — we have no browsing data to profile you with."
+msgstr ""
+
+#: landing/templates/landing/privacy_policy.html:90
+msgid "4) What we do collect (minimal)"
+msgstr ""
+
+#: landing/templates/landing/privacy_policy.html:92
+msgid "Premium account data:"
+msgstr ""
+
+#: landing/templates/landing/privacy_policy.html:92
+msgid "email (or federated sign-in ID), plan and subscription status, invoices. Needed to deliver what you paid for."
+msgstr ""
+
+#: landing/templates/landing/privacy_policy.html:93
+msgid "Payments:"
+msgstr ""
+
+#: landing/templates/landing/privacy_policy.html:93
+msgid "processed by third-party gateways (e.g. crypto payment processors); we receive only non-sensitive status metadata (paid / failed / refunded, currency, plan). We never see or store card numbers or wallet private keys."
+msgstr ""
+
+#: landing/templates/landing/privacy_policy.html:94
+msgid "Operational telemetry:"
+msgstr ""
+
+#: landing/templates/landing/privacy_policy.html:94
+msgid "authentication events, a device identifier for seat limits, and aggregate server load. None of it links to your browsing activity; retention is short."
+msgstr ""
+
+#: landing/templates/landing/privacy_policy.html:99
+msgid "5) Cookies & local storage"
+msgstr ""
+
+#: landing/templates/landing/privacy_policy.html:100
+msgid "The website uses only functional cookies (session, CSRF, language, theme). The extension stores preferences and its client identifier locally in your browser. We do not run third-party advertising or cross-site tracking cookies on our website."
+msgstr ""
+
+#: landing/templates/landing/privacy_policy.html:104
+msgid "6) Sharing"
+msgstr ""
+
+#: landing/templates/landing/privacy_policy.html:105
+msgid "We share data only with processors strictly needed to run the service: payment gateways, email delivery, and infrastructure providers — each bound by data-processing agreements. We disclose data if legally compelled, but since we keep no activity logs, there is no browsing history to hand over."
+msgstr ""
+
+#: landing/templates/landing/privacy_policy.html:109
+msgid "7) Legal bases (GDPR)"
+msgstr ""
+
+#: landing/templates/landing/privacy_policy.html:111
+msgid "Contract performance — providing the VPN you signed up for"
+msgstr ""
+
+#: landing/templates/landing/privacy_policy.html:112
+msgid "Legitimate interests — abuse prevention and network security"
+msgstr ""
+
+#: landing/templates/landing/privacy_policy.html:113
+msgid "Consent — optional marketing emails (opt-out any time)"
+msgstr ""
+
+#: landing/templates/landing/privacy_policy.html:118
+msgid "8) Retention"
+msgstr ""
+
+#: landing/templates/landing/privacy_policy.html:119
+msgid "Account and billing records are kept for statutory periods; device links only while active; security telemetry is short-lived unless needed for an active incident. Activity logs are never retained because they are never created."
+msgstr ""
+
+#: landing/templates/landing/privacy_policy.html:123
+msgid "9) Your rights"
+msgstr ""
+
+#: landing/templates/landing/privacy_policy.html:124
+msgid "Depending on your jurisdiction (GDPR, CCPA and similar), you may request access, correction, deletion, portability, or object to/restrict processing. Email <a href=\"mailto:support@vpnsterr.com\" class=\"underline\">support@vpnsterr.com</a> — we respond within 30 days."
+msgstr ""
+
+#: landing/templates/landing/privacy_policy.html:128
+msgid "10) International transfers"
+msgstr ""
+
+#: landing/templates/landing/privacy_policy.html:129
+msgid "Where providers operate outside your country, we rely on appropriate safeguards such as Standard Contractual Clauses."
+msgstr ""
+
+#: landing/templates/landing/privacy_policy.html:133
+msgid "11) Security"
+msgstr ""
+
+#: landing/templates/landing/privacy_policy.html:134
+msgid "AES-256 / ChaCha20 encrypted transport (WireGuard & OpenVPN), hardened infrastructure, least-privilege access, and regular patching."
+msgstr ""
+
+#: landing/templates/landing/privacy_policy.html:138
+msgid "12) Children"
+msgstr ""
+
+#: landing/templates/landing/privacy_policy.html:139
+msgid "The service is not intended for children under 16, and we do not knowingly collect their data."
+msgstr ""
+
+#: landing/templates/landing/privacy_policy.html:143
+msgid "13) Changes & contact"
+msgstr ""
+
+#: landing/templates/landing/privacy_policy.html:144
+msgid "Material changes are posted here with a new \"Last updated\" date. Controller: <strong>Sterr Technologies</strong> · <a href=\"mailto:support@vpnsterr.com\" class=\"underline\">support@vpnsterr.com</a>"
+msgstr ""
+
+#: landing/templates/landing/privacy_policy.html:150
+#: landing/templates/landing/terms.html:126 templates/partials/footer.html:73
+msgid "Acceptable Use"
+msgstr ""
+
+#: landing/templates/landing/privacy_policy.html:151
+#: landing/templates/landing/refund_policy.html:4
+#: landing/templates/landing/refund_policy.html:15
+#: templates/partials/footer.html:72
+msgid "Refund Policy"
+msgstr ""
+
+#: landing/templates/landing/refund_policy.html:5
+msgid "VPNsterr refund policy: full refunds are available for unused Premium subscriptions. The free extension never needs one — it's free forever."
+msgstr ""
+
+#: landing/templates/landing/refund_policy.html:20
+msgid "1) The free extension"
+msgstr ""
+
+#: landing/templates/landing/refund_policy.html:21
+#, python-format
+msgid "The VPNsterr browser extension is 100%% free with unlimited use. No payment is ever collected for it, so no refund is ever needed."
+msgstr ""
+
+#: landing/templates/landing/refund_policy.html:25
+msgid "2) Premium subscriptions — refunds for unused service"
+msgstr ""
+
+#: landing/templates/landing/refund_policy.html:26
+msgid "We offer a full refund on any Premium subscription that has not been used. \\"
+msgstr ""
+
+#: landing/templates/landing/refund_policy.html:28
+#, python-format
+msgid "Eligible: you purchased Premium but never connected — contact support any time within 14 days of purchase for a 100%% refund."
+msgstr ""
+
+#: landing/templates/landing/refund_policy.html:29
+msgid "Not eligible: once the service has been used (a Premium connection was made), the purchase is final and the subscription runs to the end of its term."
+msgstr ""
+
+#: landing/templates/landing/refund_policy.html:34
+msgid "3) How to request a refund"
+msgstr ""
+
+#: landing/templates/landing/refund_policy.html:35
+msgid "Email <a href=\"mailto:support@vpnsterr.com\" class=\"underline\">support@vpnsterr.com</a> from the address on the account, with your order ID. Eligible refunds are confirmed within 2 business days and returned via the original payment method. Crypto refunds are sent to a wallet address you provide, in the same currency and network as the original payment."
+msgstr ""
+
+#: landing/templates/landing/refund_policy.html:39
+msgid "4) Renewals & cancellation"
+msgstr ""
+
+#: landing/templates/landing/refund_policy.html:40
+msgid "You can cancel auto-renewal at any time from your dashboard; access continues until the end of the paid period. A renewal charge that has not been used follows the same unused-service refund rule above."
+msgstr ""
+
+#: landing/templates/landing/refund_policy.html:44
+msgid "5) Statutory rights"
+msgstr ""
+
+#: landing/templates/landing/refund_policy.html:45
+msgid "Nothing in this policy limits any non-waivable rights you hold under the consumer-protection law of your country of residence."
+msgstr ""
+
+#: landing/templates/landing/terms.html:6
+msgid "VPNsterr Terms of Service — acceptable use, the free extension, payments, renewals, refunds and legal notices."
+msgstr ""
+
+#: landing/templates/landing/terms.html:47
+msgid "These Terms govern your use of <strong>VPNsterr</strong>, operated by <strong>Sterr Technologies</strong>. By using the Service — including the free browser extension — you agree to these Terms."
+msgstr ""
+
+#: landing/templates/landing/terms.html:50
+msgid "1) Account & eligibility"
+msgstr ""
+
+#: landing/templates/landing/terms.html:52
+msgid "You must be legally capable to contract in your jurisdiction."
+msgstr ""
+
+#: landing/templates/landing/terms.html:53
+msgid "Keep credentials confidential; you're responsible for account activity."
+msgstr ""
+
+#: landing/templates/landing/terms.html:54
+msgid "The free extension requires no account; these Terms still apply to its use."
+msgstr ""
+
+#: landing/templates/landing/terms.html:59
+msgid "2) License"
+msgstr ""
+
+#: landing/templates/landing/terms.html:60
+msgid "We grant a limited, revocable, non-transferable license to use the Service in accordance with these Terms."
+msgstr ""
+
+#: landing/templates/landing/terms.html:64
+msgid "3) Acceptable use"
+msgstr ""
+
+#: landing/templates/landing/terms.html:65
+msgid "Do not use the Service for illegal activities, infringement, spam/DDoS, malware, or to bypass limits or abuse the network. The full rules are in our <a href=\"/acceptable-use/\" class=\"underline\">Acceptable Use Policy</a>, which forms part of these Terms. We may suspend or terminate accounts for violations."
+msgstr ""
+
+#: landing/templates/landing/terms.html:69
+msgid "4) Privacy & zero logs"
+msgstr ""
+
+#: landing/templates/landing/terms.html:70
+msgid "We operate a strict no-activity-logs practice as described in our <a href=\"/privacy-policy/\" class=\"underline\">Privacy Policy</a>. We never sell user data."
+msgstr ""
+
+#: landing/templates/landing/terms.html:74
+msgid "5) The free tier & Premium"
+msgstr ""
+
+#: landing/templates/landing/terms.html:76
+msgid "The browser extension is free with unlimited bandwidth. It is ad-supported and runs on standard-speed servers."
+msgstr ""
+
+#: landing/templates/landing/terms.html:77
+msgid "Premium adds maximum speed on our multi-Gbps backbone, premium server locations, an ad-free experience and higher device limits."
+msgstr ""
+
+#: landing/templates/landing/terms.html:78
+msgid "All plans include always-on protection, auto-connect, Kill Switch, optional ad/tracker blocking and per-tab routing (Chrome). Capacity varies by region and conditions; we may apply fair-use to keep the network stable for everyone."
+msgstr ""
+
+#: landing/templates/landing/terms.html:83
+msgid "6) Availability & changes"
+msgstr ""
+
+#: landing/templates/landing/terms.html:84
+msgid "Service is provided \\"
+msgstr ""
+
+#: landing/templates/landing/terms.html:88
+msgid "7) Payments, renewals, refunds"
+msgstr ""
+
+#: landing/templates/landing/terms.html:90
+msgid "Subscriptions renew automatically unless canceled."
+msgstr ""
+
+#: landing/templates/landing/terms.html:91
+msgid "Prices, currencies and taxes depend on billing region."
+msgstr ""
+
+#: landing/templates/landing/terms.html:92
+msgid "Refunds are available <strong>only for unused subscriptions</strong> — see the <a href=\"/refund-policy/\" class=\"underline\">Refund Policy</a>. Once the service has been used, the purchase is final."
+msgstr ""
+
+#: landing/templates/landing/terms.html:97
+msgid "8) Disclaimers"
+msgstr ""
+
+#: landing/templates/landing/terms.html:98
+msgid "No guarantee of access to every third-party platform; geo-unblocking can vary due to third-party countermeasures."
+msgstr ""
+
+#: landing/templates/landing/terms.html:102
+msgid "9) Limitation of liability"
+msgstr ""
+
+#: landing/templates/landing/terms.html:103
+msgid "To the maximum extent permitted by law, we're not liable for indirect, special or consequential damages, or lost data/profits. Aggregate liability is limited to fees paid in the 12 months preceding the claim."
+msgstr ""
+
+#: landing/templates/landing/terms.html:107
+msgid "10) Termination"
+msgstr ""
+
+#: landing/templates/landing/terms.html:108
+msgid "You may cancel anytime. We may suspend or terminate for breach, abuse, or non-payment. License ends upon termination."
+msgstr ""
+
+#: landing/templates/landing/terms.html:112
+msgid "11) Governing law & disputes"
+msgstr ""
+
+#: landing/templates/landing/terms.html:113
+msgid "Governing law and venue: <strong>England & Wales</strong>; courts of <strong>London, UK</strong> have exclusive jurisdiction (consumers retain non-waivable rights)."
+msgstr ""
+
+#: landing/templates/landing/terms.html:117
+msgid "12) Contact"
+msgstr ""
+
+#: landing/templates/landing/terms.html:119
+msgid "Email:"
+msgstr ""
+
+#: landing/templates/landing/terms.html:124
+msgid "View Plans"
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:34
+msgid "Is the VPNsterr VPN extension really free?"
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:35
+#, python-format
+msgid "Yes — 100%% free with unlimited bandwidth and no data caps. You can use it as much as you want. Premium is optional and adds maximum speed, premium servers and an ad-free experience."
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:39
+msgid "Do I need to sign up to use the free VPN extension?"
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:40
+msgid "No sign-up, no email, no credit card. Add it to your browser and connect with one click."
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:44
+msgid "Does the free VPN extension keep logs?"
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:45
+msgid "No. VPNsterr operates a strict zero-logs policy on free and Premium alike — we never store the sites you visit or what you do online."
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:49
+msgid "Which browsers does the VPN extension support?"
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:50
+msgid "Chrome, Edge, Brave and Opera (all Chromium browsers), including per-tab routing so you choose exactly which tabs go through the VPN."
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:64
+#, python-format
+msgid "100%% Free · Unlimited · No Sign-Up"
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:66
+msgid "The Free VPN Extension for Chrome & Edge"
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:69
+msgid "One click and your IP is hidden. Unlimited bandwidth, no data caps, no account needed — and we keep zero logs, so what you do online stays yours. Forever free."
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:75
+msgid "Add to Chrome — It's Free"
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:77
+#: landing/templates/landing/vpn_extension.html:147
+msgid "Free vs Premium"
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:81
+#: templates/partials/pricing_block.html:186 templates/partials/why_vpn.html:89
+msgid "Unlimited bandwidth"
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:82
+msgid "No sign-up, no login"
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:83
+msgid "Zero logs — fully anonymous"
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:98
+#: templates/partials/pricing_block.html:19
+msgid "FREE"
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:106
+msgid "One-click connect"
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:109
+msgid "Data used"
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:110
+#: landing/templates/landing/vpn_extension.html:168
+#: landing/templates/landing/vpn_extension.html:169
+msgid "Unlimited"
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:113
+#: templates/partials/hero.html:193
+msgid "Logs kept"
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:127
+msgid "Works in Chrome, Edge, Brave & Opera"
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:130
+msgid "One extension for every Chromium browser — with per-tab routing, so one tab uses the VPN while another stays on your normal connection."
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:139
+msgid "Firefox and Safari support is on the roadmap."
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:148
+msgid "Free forever. Premium when you want more."
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:150
+msgid "The free extension is genuinely unlimited — no caps, no trial clock. Premium exists for one reason: maximum speed, premium servers and zero ads."
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:167
+msgid "Bandwidth"
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:172
+msgid "Sign-up required"
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:173
+msgid "No"
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:174
+msgid "Email only"
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:182
+msgid "Speed"
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:183
+msgid "Standard"
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:184
+msgid "Maximum — 1000 Gbps core"
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:187
+msgid "Servers"
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:188
+msgid "Standard locations"
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:189
+msgid "Premium servers, all locations"
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:192
+msgid "Ads"
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:193
+msgid "Ad-supported"
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:194
+#, python-format
+msgid "100%% ad-free"
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:197
+msgid "Devices & apps"
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:198
+msgid "Browser extension"
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:199
+msgid "Up to 20 devices, all apps"
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:207
+msgid "Start Free"
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:209
+msgid "Go Premium"
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:209
+#: templates/partials/hero.html:52
+msgid "mo"
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:220
+msgid "How it works"
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:221
+msgid "Hide your IP in three clicks"
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:227
+msgid "Add to your browser"
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:228
+msgid "Install the extension from the Chrome Web Store — it takes seconds and no account is needed."
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:233
+msgid "Pick a location"
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:234
+msgid "Choose a country or let Auto pick the fastest server for you."
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:239
+msgid "Click connect"
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:240
+msgid "Your IP is hidden and your traffic is encrypted — with zero logs kept, ever."
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:250
+#: templates/partials/faq_teaser.html:8 templates/partials/footer.html:60
+#: templates/partials/navbar.html:90 templates/partials/navbar.html:257
+msgid "FAQ"
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:251
+msgid "Free VPN extension — quick answers"
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:257
+msgid "Is the VPN extension really free and unlimited?"
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:260
+msgid "Yes. Unlimited bandwidth, no data caps, no trial that expires. Use it as much as you want, forever. Premium is optional — it adds maximum speed, premium servers and removes ads."
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:264
+msgid "Do I need an account or credit card?"
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:267
+msgid "No. The free extension works without sign-up, login, email or card. Install, click, connected."
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:271
+msgid "How can it be free? What's the catch?"
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:274
+msgid "The free tier is ad-supported and runs on standard-speed servers; Premium subscriptions fund the network. What we never do is sell your data — we can't, because we keep zero logs."
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:278
+msgid "Can I choose which tabs use the VPN?"
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:281
+msgid "Yes — per-tab routing is built in. Send one tab through the VPN and keep another on your regular connection, at the same time."
+msgstr ""
+
+#: landing/templates/landing/vpn_extension.html:287
+msgid "Add the Free VPN Extension"
+msgstr ""
+
+#: landing/templatetags/faq_questions.py:8
+msgid "What is the most anonymous VPN?"
+msgstr ""
+
+#: landing/templatetags/faq_questions.py:10
+msgid "VPNsterr is built for maximum anonymity. We keep zero activity logs by design — we do not log IP addresses or DNS queries, and use shared exit IPs by default so your identity stays separate from your activity. Bottom line: we’re engineered to be the most anonymous VPN you can use today."
+msgstr ""
+
+#: landing/templatetags/faq_questions.py:19
+msgid "What is a VPN?"
+msgstr ""
+
+#: landing/templatetags/faq_questions.py:21
+msgid "A Virtual Private Network encrypts your traffic and routes it through a secure server so your IP and location stay private."
+msgstr ""
+
+#: landing/templatetags/faq_questions.py:28
+msgid "Why use a VPN?"
+msgstr ""
+
+#: landing/templatetags/faq_questions.py:30
+msgid "To hide your IP, stop ISP/advertiser tracking, protect data on public Wi-Fi, bypass geo-blocks and restricted networks."
+msgstr ""
+
+#: landing/templatetags/faq_questions.py:37
 msgid "Do you keep logs?"
 msgstr ""
 
-#: landing/templates/landing/home.html:36
-msgid "No. Our no-logs policy is independently audited."
+#: landing/templatetags/faq_questions.py:39
+msgid "No. We operate a strict zero-logs policy. Your identity is kept separate from your activity."
 msgstr ""
 
-#: landing/templates/landing/home.html:40
-msgid "Does it work on restricted networks?"
+#: landing/templatetags/faq_questions.py:46
+msgid "What if I need help?"
 msgstr ""
 
-#: landing/templates/landing/home.html:41
-msgid ""
-"Yes — our obfuscation is engineered to maximize access on restricted "
-"networks."
+#: landing/templatetags/faq_questions.py:48
+msgid "Our support team is available 24/7. Real humans, around the clock — you'll get an answer in minutes, not days."
 msgstr ""
 
-#: landing/templatetags/pricing.py:116
+#: landing/templatetags/faq_questions.py:55
+msgid "How many devices can I use with one subscription?"
+msgstr ""
+
+#: landing/templatetags/faq_questions.py:56
+msgid "Up to 10 devices simultaneously — phones, laptops and browsers can all stay protected at once."
+msgstr ""
+
+#: landing/templatetags/faq_questions.py:61
+msgid "Which platforms do you support?"
+msgstr ""
+
+#: landing/templatetags/faq_questions.py:62
+msgid "iOS, Android, Windows, macOS, Linux and Chrome (including per-tab routing for Chrome)."
+msgstr ""
+
+#: landing/templatetags/faq_questions.py:67
+msgid "How fast is VPNsterr?"
+msgstr ""
+
+#: landing/templatetags/faq_questions.py:68
+msgid "Our 1000 Gbps backbone and modern protocols deliver high throughput and low jitter. Most users see minimal slowdown."
+msgstr ""
+
+#: landing/templatetags/faq_questions.py:73
+msgid "Will a VPN slow down my internet?"
+msgstr ""
+
+#: landing/templatetags/faq_questions.py:74
+msgid "Some overhead is normal with encryption, but our network and routing are tuned to keep speeds as close to your line rate as possible."
+msgstr ""
+
+#: landing/templatetags/faq_questions.py:79
+msgid "What is your refund policy?"
+msgstr ""
+
+#: landing/templatetags/faq_questions.py:80
+msgid "Refunds are available only for unused subscriptions. If you purchased a plan but never used the service, contact support and we’ll refund you in full."
+msgstr ""
+
+#: landing/templatetags/faq_questions.py:85
+msgid "Is a VPN legal to use?"
+msgstr ""
+
+#: landing/templatetags/faq_questions.py:86
+msgid "In most countries, yes. You’re responsible for complying with local laws and the terms of services you access."
+msgstr ""
+
+#: landing/templatetags/faq_questions.py:91
+msgid "What payment methods do you accept?"
+msgstr ""
+
+#: landing/templatetags/faq_questions.py:92
+msgid "Major cards and privacy-friendly options vary by region. At checkout you’ll see the methods available in your country."
+msgstr ""
+
+#: landing/templatetags/pricing.py:96 landing/templatetags/pricing.py:200
+#: landing/views.py:104
 msgid "Monthly Plan"
 msgstr ""
 
-#: landing/templatetags/pricing.py:116
+#: landing/templatetags/pricing.py:97 landing/templatetags/pricing.py:201
+msgid "6-Month Plan"
+msgstr ""
+
+#: landing/templatetags/pricing.py:98 landing/templatetags/pricing.py:202
 msgid "Annual Plan"
 msgstr ""
 
-#: landing/views.py:20
-msgid "CoolVPN — Private Node. Obfuscation. No-Logs."
+#: landing/views.py:73
+msgid "VPNsterr — Free Unlimited No-Logs & Anonymous VPN"
 msgstr ""
 
-#: landing/views.py:22
-msgid ""
-"Bypass restrictions with audited no-logs VPN. Private node on annual plans. "
-"Unlimited bandwidth."
+#: landing/views.py:75
+msgid "Browse with zero logs and full anonymity. VPNsterr's free VPN extension is truly unlimited — upgrade to Premium from $4.99/mo for faster, ad-free servers."
 msgstr ""
 
-#: templates/partials/hero.html:26
-msgid "Coolvpn is Private. Fast. & Yours."
+#: landing/views.py:151
+msgid "Cheap VPN from $4.99/mo — Plans & Deals | VPNsterr"
 msgstr ""
 
-#: templates/partials/hero.html:31
-msgid "One-tap connect. No-logs. No limits. CoolVPN."
+#: landing/views.py:153
+msgid "Looking for a cheap VPN that doesn't cut corners? VPNsterr Premium starts at $4.99/mo ($39.99/yr) with zero logs, unlimited speed and 24/7 support — or use our free unlimited extension."
 msgstr ""
 
-#: templates/partials/hero.html:38
-msgid "This month only"
+#: landing/views.py:166
+msgid "Free VPN Extension for Chrome — Unlimited | VPNsterr"
 msgstr ""
 
-#: templates/partials/hero.html:40
+#: landing/views.py:168
+msgid "Add the free VPN extension to Chrome — unlimited bandwidth, no sign-up, zero logs. Works on Edge and Brave too. Go Premium for faster, ad-free browsing."
+msgstr ""
+
+#: landing/views.py:182
+msgid "Best VPN 2026 — Top 10 Free & Paid Picks | VPNsterr"
+msgstr ""
+
+#: landing/views.py:184
 #, python-format
-msgid "Save 44%%"
+msgid "Looking for a good VPN? Our top 10 of 2026 puts VPNsterr first — a 100% free, unlimited, zero-logs extension. Go faster and ad-free from $4.99/mo."
 msgstr ""
 
-#: templates/partials/hero.html:45
-msgid "Current price"
+#: landing/views.py:204
+msgid "Best Free VPN Extension for Chrome: Top 10 (2026) | VPNsterr"
 msgstr ""
 
-#: templates/partials/hero.html:57
+#: landing/views.py:206
+msgid "We ranked the top 10 free VPN Chrome extensions for speed and privacy. Only VPNsterr stays truly unlimited — zero logs, no sign-up needed. See why it wins."
+msgstr ""
+
+#: landing/views.py:229
+msgid "Please enter a valid email address."
+msgstr ""
+
+#: landing/views.py:230
+msgid "Email saved."
+msgstr ""
+
+#: landing/views.py:231
+msgid "Please enter a coupon."
+msgstr ""
+
+#: landing/views.py:232
+msgid "Coupon applied."
+msgstr ""
+
+#: landing/views.py:233
+msgid "Coupon not valid."
+msgstr ""
+
+#: landing/views.py:235 landing/views.py:490
+msgid "Please sign in first."
+msgstr ""
+
+#: landing/views.py:236
+msgid "Please select a payment method."
+msgstr ""
+
+#: landing/views.py:237
+msgid "Unable to start the payment. Try again."
+msgstr ""
+
+#: landing/views.py:238
+msgid "Account found. Continue to sign in or pay."
+msgstr ""
+
+#: landing/views.py:239
+msgid "Account not found. Please create a password."
+msgstr ""
+
+#: landing/views.py:241
+msgid "We found an account. Please log in with your password."
+msgstr ""
+
+#: landing/views.py:247
+msgid "Checkout — VPNsterr"
+msgstr ""
+
+#: landing/views.py:249
+msgid "Secure checkout for VPNsterr plans. Choose sign-in and payment method."
+msgstr ""
+
+#: landing/views.py:500
+msgid "Unsupported gateway."
+msgstr ""
+
+#: landing/views.py:779
+msgid "Sign in — VPNsterr"
+msgstr ""
+
+#: templates/partials/faq_teaser.html:9
+msgid "Got questions? We've got quick answers."
+msgstr ""
+
+#: templates/partials/faq_teaser.html:11
+msgid "Here are the essentials. For everything else, see the full FAQ."
+msgstr ""
+
+#: templates/partials/faq_teaser.html:37
+msgid "No questions yet."
+msgstr ""
+
+#: templates/partials/faq_teaser.html:44
+msgid "Compare plans"
+msgstr ""
+
+#: templates/partials/faq_teaser.html:47
+msgid "See full FAQ"
+msgstr ""
+
+#: templates/partials/features_premium.html:8
+msgid "Privacy · Speed · Control"
+msgstr ""
+
+#: templates/partials/features_premium.html:9
+msgid "Premium features, zero friction"
+msgstr ""
+
+#: templates/partials/features_premium.html:11
+msgid "Every protection is included on every plan. Smooth, quiet, and fast — just connect and forget."
+msgstr ""
+
+#: templates/partials/features_premium.html:22
+msgid "Auto-connect on startup"
+msgstr ""
+
+#: templates/partials/features_premium.html:23
+msgid "Launches with your device and reconnects automatically."
+msgstr ""
+
+#: templates/partials/features_premium.html:31 templates/partials/hero.html:205
+#: templates/partials/pricing_block.html:190
+msgid "Kill Switch"
+msgstr ""
+
+#: templates/partials/features_premium.html:32
+msgid "If the VPN drops, traffic is cut instantly — no leaks."
+msgstr ""
+
+#: templates/partials/features_premium.html:40
+msgid "Built-in Ad & Tracker Blocker"
+msgstr ""
+
+#: templates/partials/features_premium.html:41
+msgid "Cleaner pages, fewer trackers — no extra extensions."
+msgstr ""
+
+#: templates/partials/features_premium.html:50
+msgid "We don't track the sites you visit or what you do online."
+msgstr ""
+
+#: templates/partials/features_premium.html:58
+#, python-format
+msgid "100%% anonymous"
+msgstr ""
+
+#: templates/partials/features_premium.html:59
+msgid "Shared exit nodes and masked IP keep identity separate from activity."
+msgstr ""
+
+#: templates/partials/features_premium.html:68
+msgid "Backbone capacity for peak throughput and low jitter."
+msgstr ""
+
+#: templates/partials/features_premium.html:77
+msgid "Send one tab through VPN and keep another on your regular connection."
+msgstr ""
+
+#: templates/partials/features_premium.html:86
+msgid "Real humans, around the clock — answers in minutes, not days."
+msgstr ""
+
+#: templates/partials/features_premium.html:92
+msgid "Get all features"
+msgstr ""
+
+#: templates/partials/footer.html:18
+msgid "Private. Fast. Yours. One tap and you're invisible — on every device you own."
+msgstr ""
+
+#: templates/partials/footer.html:43
+msgid "Product"
+msgstr ""
+
+#: templates/partials/footer.html:46 templates/partials/navbar.html:69
+#: templates/partials/navbar.html:228
+msgid "Desktop App"
+msgstr ""
+
+#: templates/partials/footer.html:47 templates/partials/navbar.html:76
+#: templates/partials/navbar.html:229
+msgid "Mobile App"
+msgstr ""
+
+#: templates/partials/footer.html:48
+msgid "Free VPN Extension"
+msgstr ""
+
+#: templates/partials/footer.html:55
+msgid "Company"
+msgstr ""
+
+#: templates/partials/footer.html:57
+msgid "Best VPN 2026"
+msgstr ""
+
+#: templates/partials/footer.html:58
+msgid "Best Free Extensions"
+msgstr ""
+
+#: templates/partials/footer.html:59 templates/partials/navbar.html:91
+#: templates/partials/navbar.html:258
+msgid "Blog"
+msgstr ""
+
+#: templates/partials/footer.html:61
+msgid "No-Logs Policy"
+msgstr ""
+
+#: templates/partials/footer.html:78
+msgid "support"
+msgstr ""
+
+#: templates/partials/footer.html:87
+msgid "All rights reserved."
+msgstr ""
+
+#: templates/partials/footer.html:90
+msgid "No-logs"
+msgstr ""
+
+#: templates/partials/hero.html:29
+#, python-format
+msgid "100%% no-logs, anonymous VPN"
+msgstr ""
+
+#: templates/partials/hero.html:34
+msgid "Private."
+msgstr ""
+
+#: templates/partials/hero.html:35
+msgid "Fast."
+msgstr ""
+
+#: templates/partials/hero.html:37
+msgid "Yours."
+msgstr ""
+
+#: templates/partials/hero.html:42
+msgid "One tap and you're invisible — no logs, no limits, no slowdowns. VPNsterr protects every device you own."
+msgstr ""
+
+#: templates/partials/hero.html:48
+#, python-format
+msgid "Save 33%% with annual"
+msgstr ""
+
+#: templates/partials/hero.html:58
 #, python-format
 msgid "or %(sym)s%(yr)s/year"
 msgstr ""
 
-#: templates/partials/hero.html:66 templates/partials/hero.html:113
+#: templates/partials/hero.html:65
 msgid "Get Started"
 msgstr ""
 
-#: templates/partials/hero.html:77 templates/partials/hero.html:123
+#: templates/partials/hero.html:69
 msgid "See How It Works"
 msgstr ""
 
-#: templates/partials/hero.html:87
+#: templates/partials/hero.html:74
+msgid "Not ready to pay?"
+msgstr ""
+
+#: templates/partials/hero.html:76
+#, python-format
+msgid "Get the 100%% free unlimited browser extension"
+msgstr ""
+
+#: templates/partials/hero.html:77
+msgid "no sign-up needed."
+msgstr ""
+
+#: templates/partials/hero.html:84
 msgid "No-logs policy"
 msgstr ""
 
-#: templates/partials/hero.html:93
-msgid "1-tap connect"
+#: templates/partials/hero.html:88
+msgid "One-tap connect"
 msgstr ""
 
-#: templates/partials/hero.html:102
-msgid "Blazing speed"
+#: templates/partials/hero.html:92
+msgid "Up to 10 devices"
 msgstr ""
 
-#: templates/partials/hero.html:136
-msgid "Ad & Tracker Blocking"
+#: templates/partials/hero.html:140
+msgid "Connected"
 msgstr ""
 
-#: templates/partials/hero.html:145
-msgid "1000 Gbps Backbone"
+#: templates/partials/hero.html:162
+msgid "Your IP is hidden"
 msgstr ""
 
-#: templates/partials/hero.html:154
-msgid "Zero-Logs. Anonymous."
+#: templates/partials/hero.html:175
+msgid "Fastest server"
 msgstr ""
 
-#: templates/partials/hero.html:164
-msgid "Smart, Fair Pricing"
+#: templates/partials/hero.html:178
+msgid "Auto"
 msgstr ""
 
-#: templates/partials/navbar.html:20 templates/partials/navbar.html:218
+#: templates/partials/hero.html:185
+msgid "Download"
+msgstr ""
+
+#: templates/partials/hero.html:189
+msgid "Ping"
+msgstr ""
+
+#: templates/partials/hero.html:208
+msgid "Active"
+msgstr ""
+
+#: templates/partials/hero.html:220
+msgid "ads blocked"
+msgstr ""
+
+#: templates/partials/hero.html:221
+msgid "this week"
+msgstr ""
+
+#: templates/partials/navbar.html:23 templates/partials/navbar.html:211
 msgid "Features"
 msgstr ""
 
-#: templates/partials/navbar.html:33 templates/partials/navbar.html:222
-msgid "Stealth / Obfuscation"
-msgstr ""
-
-#: templates/partials/navbar.html:34
-msgid "Engineered to maximize access on restricted networks"
-msgstr ""
-
-#: templates/partials/navbar.html:41 templates/partials/navbar.html:223
-msgid "Dedicated IP / Private Node"
-msgstr ""
-
-#: templates/partials/navbar.html:42
-msgid "Annual plans include your own private endpoint"
-msgstr ""
-
-#: templates/partials/navbar.html:49 templates/partials/navbar.html:224
-msgid "WebRTC Leak Block"
-msgstr ""
-
-#: templates/partials/navbar.html:50
-msgid "Prevent IP leaks in modern browsers"
-msgstr ""
-
-#: templates/partials/navbar.html:57 templates/partials/navbar.html:225
-msgid "Split Tunneling / Whitelist"
-msgstr ""
-
-#: templates/partials/navbar.html:58
-msgid "Choose what routes through VPN"
-msgstr ""
-
-#: templates/partials/navbar.html:68 templates/partials/navbar.html:232
-msgid "Advantages"
-msgstr ""
-
-#: templates/partials/navbar.html:78 templates/partials/navbar.html:236
+#: templates/partials/navbar.html:31 templates/partials/navbar.html:215
 msgid "No-Logs by design"
 msgstr ""
 
-#: templates/partials/navbar.html:83 templates/partials/navbar.html:237
-msgid "Privacy-friendly jurisdiction"
+#: templates/partials/navbar.html:32
+msgid "Your activity is never stored — verified by architecture."
 msgstr ""
 
-#: templates/partials/navbar.html:88 templates/partials/navbar.html:238
-msgid "Unlimited bandwidth & high throughput"
+#: templates/partials/navbar.html:38 templates/partials/navbar.html:216
+msgid "WebRTC Leak Block"
 msgstr ""
 
-#: templates/partials/navbar.html:97 templates/partials/navbar.html:245
-msgid "Our Products"
+#: templates/partials/navbar.html:39
+msgid "Stops browsers from exposing your real IP."
 msgstr ""
 
-#: templates/partials/navbar.html:107 templates/partials/navbar.html:249
+#: templates/partials/navbar.html:45 templates/partials/navbar.html:217
+msgid "Split Tunneling"
+msgstr ""
+
+#: templates/partials/navbar.html:46
+msgid "Choose exactly what routes through the VPN."
+msgstr ""
+
+#: templates/partials/navbar.html:52 templates/partials/navbar.html:218
+msgid "Unlimited Speed"
+msgstr ""
+
+#: templates/partials/navbar.html:53
+msgid "1000 Gbps backbone, zero throttling."
+msgstr ""
+
+#: templates/partials/navbar.html:61 templates/partials/navbar.html:224
+msgid "Apps"
+msgstr ""
+
+#: templates/partials/navbar.html:83 templates/partials/navbar.html:230
 msgid "Browser Extension"
 msgstr ""
 
-#: templates/partials/navbar.html:112 templates/partials/navbar.html:250
-msgid "Desktop App"
+#: templates/partials/navbar.html:84
+msgid "Per-tab routing for Chrome & Edge"
 msgstr ""
 
-#: templates/partials/navbar.html:117 templates/partials/navbar.html:251
-msgid "Mobile App"
+#: templates/partials/navbar.html:98 templates/partials/navbar.html:171
+msgid "Toggle dark mode"
 msgstr ""
 
-#: templates/partials/navbar.html:122 templates/partials/navbar.html:276
-msgid "Pricing"
-msgstr ""
-
-#: templates/partials/navbar.html:123 templates/partials/navbar.html:277
-msgid "Blog"
-msgstr ""
-
-#: templates/partials/navbar.html:124 templates/partials/navbar.html:278
-msgid "FAQ"
-msgstr ""
-
-#: templates/partials/navbar.html:179
-msgid "Dashboard"
-msgstr ""
-
-#: templates/partials/navbar.html:180
-msgid "Settings"
-msgstr ""
-
-#: templates/partials/navbar.html:181
-msgid "Sign out"
-msgstr ""
-
-#: templates/partials/navbar.html:186
-msgid "Sign in"
-msgstr ""
-
-#: templates/partials/navbar.html:258
+#: templates/partials/navbar.html:114 templates/partials/navbar.html:239
 msgid "Language"
 msgstr ""
 
-#: templates/partials/plan_tabs.html:26
+#: templates/partials/navbar.html:155 templates/partials/navbar.html:188
+msgid "Settings"
+msgstr ""
+
+#: templates/partials/navbar.html:158 templates/partials/navbar.html:191
+msgid "Sign out"
+msgstr ""
+
+#: templates/partials/navbar.html:165 templates/partials/navbar.html:263
+#: templates/partials/supported_platforms.html:73
+msgid "Get VPNsterr"
+msgstr ""
+
+#: templates/partials/navbar.html:198
+msgid "Open main menu"
+msgstr ""
+
+#: templates/partials/plan_tabs.html:9
 msgid "Choose Your Plan"
 msgstr ""
 
-#: templates/partials/plan_tabs.html:37
-msgid "Pricing plans"
+#: templates/partials/plan_tabs.html:11
+msgid "Fast setup, no-logs, unlimited bandwidth — every plan includes everything. Pick the term that fits you."
 msgstr ""
 
-#: templates/partials/plan_tabs.html:43 templates/partials/plan_tabs.html:247
-msgid "Monthly"
-msgstr ""
-
-#: templates/partials/plan_tabs.html:53
-msgid "6 Months"
-msgstr ""
-
-#: templates/partials/plan_tabs.html:56
-msgid "Save vs monthly"
-msgstr ""
-
-#: templates/partials/plan_tabs.html:67 templates/partials/plan_tabs.html:264
-msgid "Annual"
-msgstr ""
-
-#: templates/partials/plan_tabs.html:70
-msgid "Best value"
-msgstr ""
-
-#: templates/partials/plan_tabs.html:97 templates/partials/plan_tabs.html:144
-msgid "Unlimited bandwidth & speed"
-msgstr ""
-
-#: templates/partials/plan_tabs.html:102
-msgid "Independently audited no-logs"
-msgstr ""
-
-#: templates/partials/plan_tabs.html:113 templates/partials/plan_tabs.html:325
+#: templates/partials/plan_tabs.html:23 templates/partials/plan_tabs.html:113
+#: templates/partials/pricing_block.html:45
+#: templates/partials/pricing_block.html:229
 msgid "month"
 msgstr ""
 
-#: templates/partials/plan_tabs.html:117
+#: templates/partials/plan_tabs.html:25
+msgid "Maximum flexibility — cancel anytime."
+msgstr ""
+
+#: templates/partials/plan_tabs.html:28
+msgid "5 devices included"
+msgstr ""
+
+#: templates/partials/plan_tabs.html:29
+#: templates/partials/pricing_block.html:56
+msgid "Unlimited bandwidth & speed"
+msgstr ""
+
+#: templates/partials/plan_tabs.html:31
+msgid "Strict zero logs — fully anonymous"
+msgstr ""
+
+#: templates/partials/plan_tabs.html:34
+#: templates/partials/pricing_block.html:64
 msgid "Choose Monthly"
 msgstr ""
 
-#: templates/partials/plan_tabs.html:147
-msgid "Ad & tracker blocking"
+#: templates/partials/plan_tabs.html:41
+#, python-format
+msgid "Best value · Save 33%%"
 msgstr ""
 
-#: templates/partials/plan_tabs.html:148
-msgid "24/7 support"
-msgstr ""
-
-#: templates/partials/plan_tabs.html:159 templates/partials/plan_tabs.html:257
-msgid "6 months"
-msgstr ""
-
-#: templates/partials/plan_tabs.html:169
-msgid "Choose 6-Month"
-msgstr ""
-
-#: templates/partials/plan_tabs.html:199
-msgid "Private node on annual plans"
-msgstr ""
-
-#: templates/partials/plan_tabs.html:200
-msgid "30-day money-back guarantee"
-msgstr ""
-
-#: templates/partials/plan_tabs.html:201
-msgid "Priority support"
-msgstr ""
-
-#: templates/partials/plan_tabs.html:202
-msgid "Everything in Monthly"
-msgstr ""
-
-#: templates/partials/plan_tabs.html:213
+#: templates/partials/plan_tabs.html:46
+#: templates/partials/pricing_block.html:85
 msgid "year"
 msgstr ""
 
-#: templates/partials/plan_tabs.html:223
+#: templates/partials/plan_tabs.html:52
+msgid "20 devices included"
+msgstr ""
+
+#: templates/partials/plan_tabs.html:53 templates/partials/plan_tabs.html:77
+#: templates/partials/pricing_block.html:99
+#: templates/partials/pricing_block.html:142
+msgid "Everything in Monthly"
+msgstr ""
+
+#: templates/partials/plan_tabs.html:54
+#: templates/partials/pricing_block.html:101
+msgid "Priority 24/7 support"
+msgstr ""
+
+#: templates/partials/plan_tabs.html:55
+#: templates/partials/pricing_block.html:100
+msgid "Best price per month"
+msgstr ""
+
+#: templates/partials/plan_tabs.html:58
+#: templates/partials/pricing_block.html:107
 msgid "Choose Annual"
 msgstr ""
 
-#: templates/partials/plan_tabs.html:239
-msgid "Plan"
+#: templates/partials/plan_tabs.html:65
+#: templates/partials/pricing_block.html:124
+#, python-format
+msgid "Save 13%%"
 msgstr ""
 
-#: templates/partials/plan_tabs.html:240
-msgid "CoolVPN"
+#: templates/partials/plan_tabs.html:70
+#: templates/partials/pricing_block.html:129
+msgid "6 months"
 msgstr ""
 
-#: templates/partials/plan_tabs.html:241
-msgid "Typical market price"
+#: templates/partials/plan_tabs.html:76
+msgid "10 devices included"
 msgstr ""
 
-#: templates/partials/plan_tabs.html:242
-msgid "Notes"
+#: templates/partials/plan_tabs.html:78
+#: templates/partials/pricing_block.html:144
+#: templates/partials/pricing_block.html:214
+msgid "24/7 support"
 msgstr ""
 
-#: templates/partials/plan_tabs.html:250
-msgid "Often $7–$13/mo"
+#: templates/partials/plan_tabs.html:79
+#: templates/partials/pricing_block.html:145
+msgid "Perfect middle ground"
 msgstr ""
 
-#: templates/partials/plan_tabs.html:255
-msgid "6-Month"
+#: templates/partials/plan_tabs.html:82
+#: templates/partials/pricing_block.html:149
+msgid "Choose 6-Month"
 msgstr ""
 
-#: templates/partials/plan_tabs.html:269
-msgid "Best long-term value"
+#: templates/partials/plan_tabs.html:90
+#: templates/partials/pricing_block.html:158
+msgid "Cancel anytime"
 msgstr ""
 
-#: templates/partials/why_vpn.html:15
-msgid "Why You Need a VPN Today"
+#: templates/partials/plan_tabs.html:94
+#: templates/partials/pricing_block.html:162
+msgid "Refund available on unused subscriptions"
 msgstr ""
 
-#: templates/partials/why_vpn.html:20
-msgid ""
-"Every click, every app, every Wi-Fi network collects your data. CoolVPN "
-"hides your identity, encrypts your traffic, and gives you true online "
-"freedom — on any device, anywhere."
+#: templates/partials/plan_tabs.html:98
+msgid "Secure payments"
 msgstr ""
 
-#: templates/partials/why_vpn.html:34
-msgid "Stay Safe on Public Wi-Fi"
+#: templates/partials/pricing_block.html:9
+msgid "Simple, honest pricing."
 msgstr ""
 
-#: templates/partials/why_vpn.html:37
-msgid ""
-"Protect your data from hackers on café or airport networks with AES-256 "
-"encryption."
+#: templates/partials/pricing_block.html:11
+msgid "Every plan includes every feature. The only difference is how long you commit — and how much you save."
 msgstr ""
 
-#: templates/partials/why_vpn.html:40
-msgid "Always-on Kill Switch & Leak Protection included."
+#: templates/partials/pricing_block.html:21
+msgid "Just browsing?"
 msgstr ""
 
-#: templates/partials/why_vpn.html:53
-msgid "Access Restricted Content"
+#: templates/partials/pricing_block.html:22
+#, python-format
+msgid "Our browser extension is 100%% free — unlimited, no sign-up, zero logs."
 msgstr ""
 
-#: templates/partials/why_vpn.html:56
-msgid ""
-"Bypass geo-blocks and censorship — stream, play, and browse without borders."
+#: templates/partials/pricing_block.html:25
+msgid "Get it free"
 msgstr ""
 
-#: templates/partials/why_vpn.html:59
-msgid "Obfuscation to work on restricted networks."
+#: templates/partials/pricing_block.html:47
+msgid "Billed monthly · cancel anytime"
 msgstr ""
 
-#: templates/partials/why_vpn.html:72
-msgid "Keep Your Privacy Intact"
+#: templates/partials/pricing_block.html:52
+msgid "5 devices"
 msgstr ""
 
-#: templates/partials/why_vpn.html:75
-msgid ""
-"Your ISP and advertisers can’t track what you do online — your activity "
-"stays yours."
+#: templates/partials/pricing_block.html:80
+#, python-format
+msgid "Most popular · Save 33%%"
 msgstr ""
 
-#: templates/partials/why_vpn.html:78
-msgid "No-logs policy — independently audited."
+#: templates/partials/pricing_block.html:90
+msgid "Less than a coffee a month — a full year of privacy."
 msgstr ""
 
-#: templates/partials/why_vpn.html:87
+#: templates/partials/pricing_block.html:95
+msgid "20 devices"
+msgstr ""
+
+#: templates/partials/pricing_block.html:102
+msgid "Early access to new features"
+msgstr ""
+
+#: templates/partials/pricing_block.html:103
+msgid "One payment, a year of privacy"
+msgstr ""
+
+#: templates/partials/pricing_block.html:138
+msgid "10 devices"
+msgstr ""
+
+#: templates/partials/pricing_block.html:143
+msgid "Lower cost per month"
+msgstr ""
+
+#: templates/partials/pricing_block.html:166
+msgid "Secure crypto payments — cards coming soon"
+msgstr ""
+
+#: templates/partials/pricing_block.html:173
+msgid "Every plan includes"
+msgstr ""
+
+#: templates/partials/pricing_block.html:202
+msgid "Auto-connect & reconnect"
+msgstr ""
+
+#: templates/partials/pricing_block.html:206
+msgid "WebRTC leak block"
+msgstr ""
+
+#: templates/partials/pricing_block.html:210
+msgid "Apps for every platform"
+msgstr ""
+
+#: templates/partials/security.html:9
+msgid "Data Security"
+msgstr ""
+
+#: templates/partials/security.html:10
+msgid "Be invisible online — without slowing down."
+msgstr ""
+
+#: templates/partials/security.html:12
+msgid "VPNsterr encrypts every packet, blocks trackers, and masks your IP — so your identity stays yours while speeds stay fast."
+msgstr ""
+
+#: templates/partials/security.html:18
+msgid "AES-256 & ChaCha20 encryption on every connection"
+msgstr ""
+
+#: templates/partials/security.html:22
+msgid "Zero-logs, Kill Switch & leak protection built in"
+msgstr ""
+
+#: templates/partials/security.html:26
+msgid "WireGuard & OpenVPN — modern, battle-tested protocols"
+msgstr ""
+
+#: templates/partials/security.html:32 templates/partials/why_vpn.html:73
 msgid "Start in 60 seconds"
 msgstr ""
 
-#: templates/partials/why_vpn.html:96
+#: templates/partials/security.html:36 templates/partials/why_vpn.html:77
 msgid "See how it works"
 msgstr ""
 
-#: templates/partials/why_vpn.html:104
-msgid "Light speed VPN Servers"
+#: templates/partials/security.html:45
+msgid "VPN data security illustration"
 msgstr ""
 
-#: templates/partials/why_vpn.html:109
-msgid "Unlimited bandwidth"
+#: templates/partials/security.html:99
+msgid "Encrypted network with shield and lock indicating privacy and security."
 msgstr ""
 
-#: templates/partials/why_vpn.html:114
-msgid "Apps for iOS • Android • Desktop"
+#: templates/partials/supported_platforms.html:7
+msgid "Supported platforms"
 msgstr ""
 
-#: templates/stubs/simple.html:19
-msgid "This is a placeholder page. Replace with real content when ready."
+#: templates/partials/supported_platforms.html:8
+msgid "One plan, all your devices"
+msgstr ""
+
+#: templates/partials/supported_platforms.html:10
+msgid "Secure up to 10 devices with a single subscription — phones, laptops, and even your browser."
+msgstr ""
+
+#: templates/partials/supported_platforms.html:22
+#: templates/partials/supported_platforms.html:31
+msgid "Native app"
+msgstr ""
+
+#: templates/partials/supported_platforms.html:40
+#: templates/partials/supported_platforms.html:49
+msgid "Desktop app"
+msgstr ""
+
+#: templates/partials/supported_platforms.html:58
+msgid "CLI & GUI options"
+msgstr ""
+
+#: templates/partials/supported_platforms.html:67
+msgid "Per-tab extension"
+msgstr ""
+
+#: templates/partials/supported_platforms.html:76
+#: templates/stubs/simple.html:23
+msgid "See plans"
+msgstr ""
+
+#: templates/partials/supported_platforms.html:80
+msgid "One subscription covers up to 10 active devices simultaneously. Browser extension supports per-tab routing on Chromium browsers."
+msgstr ""
+
+#: templates/partials/why_vpn.html:6
+msgid "Why VPNsterr"
+msgstr ""
+
+#: templates/partials/why_vpn.html:7
+msgid "Why You Need a VPN Today"
+msgstr ""
+
+#: templates/partials/why_vpn.html:9
+msgid "Every click, every app, every Wi-Fi network collects your data. VPNsterr hides your identity, encrypts your traffic, and gives you true online freedom — on any device, anywhere."
+msgstr ""
+
+#: templates/partials/why_vpn.html:23
+msgid "Stay Safe on Public Wi-Fi"
+msgstr ""
+
+#: templates/partials/why_vpn.html:26
+msgid "Protect your data from hackers on café or airport networks with AES-256 encryption."
+msgstr ""
+
+#: templates/partials/why_vpn.html:29
+msgid "Always-on Kill Switch & Leak Protection included."
+msgstr ""
+
+#: templates/partials/why_vpn.html:41
+msgid "Access Content Anywhere"
+msgstr ""
+
+#: templates/partials/why_vpn.html:44
+msgid "Bypass geo-blocks — stream, play, and browse without borders, at full speed."
+msgstr ""
+
+#: templates/partials/why_vpn.html:47
+msgid "Servers optimized for streaming & gaming."
+msgstr ""
+
+#: templates/partials/why_vpn.html:59
+msgid "Keep Your Privacy Intact"
+msgstr ""
+
+#: templates/partials/why_vpn.html:62
+msgid "Your ISP and advertisers can't track what you do online — your activity stays yours."
+msgstr ""
+
+#: templates/partials/why_vpn.html:65
+msgid "Strict no-logs policy — your data is never stored."
+msgstr ""
+
+#: templates/partials/why_vpn.html:85
+msgid "Light-speed servers"
+msgstr ""
+
+#: templates/partials/why_vpn.html:93
+msgid "iOS · Android · Desktop"
+msgstr ""
+
+#: templates/stubs/simple.html:21
+msgid "Full details for this page are coming soon. In the meantime, every feature is already included in all plans."
 msgstr ""

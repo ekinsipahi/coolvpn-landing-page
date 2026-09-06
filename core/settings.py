@@ -8,8 +8,15 @@ SECRET_KEY = "django-insecure-og-03q*s7tt+!f@*4f%!-th8&1#prrb3$ad*9vkc7_+an#j&j*
 DEBUG = True
 ALLOWED_HOSTS = ["*"]
 
+# ---- Site kimliği
+SITE_NAME = "VPNsterr"
+COMPANY_LEGAL_NAME = "Sterr Technologies"
+SUPPORT_EMAIL = "support@vpnsterr.com"
+# Chrome Web Store yayın linki gelince doldur:
+CHROME_STORE_URL = ""
+
 # ---- Site URL (dev/prod’a göre ayarla)
-SITE_URL = "http://127.0.0.1:8000"  # prod'da: "https://coolvpn.yourdomain.com"
+SITE_URL = "http://127.0.0.1:8000"  # prod'da: "https://vpnsterr.com"
 
 # ------------ Apps
 INSTALLED_APPS = [
@@ -19,6 +26,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.sitemaps",             # <-- sitemap.xml
     "django.contrib.sites",                # <-- GEREKLİ
     "allauth",                             # <-- GEREKLİ
     "allauth.account",
@@ -89,25 +97,12 @@ USE_TZ = True
 
 LANGUAGES = [
     ("en", "English"),
-    ("tr", "Türkçe"),
-    ("ar", "العربية"),
-    ("fa", "فارسی"),
-    ("ru", "Русский"),
-    ("zh-hans", "简体中文"),
-    ("hi", "हिन्दी"),
-    ("ur", "اردو"),
-    ("id", "Bahasa Indonesia"),
-    ("ms", "Bahasa Melayu"),
-    ("de", "Deutsch"),
-    ("fr", "Français"),
-    ("es", "Español"),
-    ("it", "Italiano"),
-    ("nl", "Nederlands"),
-    ("pl", "Polski"),
-    ("uk", "Українська"),
-    ("he", "עברית"),
-    ("ro", "Română"),
-    ("az", "Azərbaycan dili"),
+    # Şimdilik sadece İngilizce. Diğer dilleri açmak için bu listeyi geri genişlet:
+    # ("tr", "Türkçe"), ("ar", "العربية"), ("fa", "فارسی"), ("ru", "Русский"),
+    # ("zh-hans", "简体中文"), ("hi", "हिन्दी"), ("ur", "اردو"), ("id", "Bahasa Indonesia"),
+    # ("ms", "Bahasa Melayu"), ("de", "Deutsch"), ("fr", "Français"), ("es", "Español"),
+    # ("it", "Italiano"), ("nl", "Nederlands"), ("pl", "Polski"), ("uk", "Українська"),
+    # ("he", "עברית"), ("ro", "Română"), ("az", "Azərbaycan dili"),
 ]
 LOCALE_PATHS = [BASE_DIR / "locale"]
 LANGUAGE_COOKIE_NAME = "django_language"

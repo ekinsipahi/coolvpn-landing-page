@@ -1,10 +1,19 @@
 # landing/urls.py
 from django.urls import path
 from . import views
+from django.views.generic import TemplateView
+
 
 urlpatterns = [
     path("", views.home, name="home"),
     path("pricing/", views.pricing, name="pricing"),
+
+    # SEO landing sayfaları
+    path("vpn-extension/", views.vpn_extension, name="vpn_extension"),
+    path("free-vpn/", views.free_vpn, name="free_vpn"),
+    path("features/<slug:slug>/", views.feature_detail, name="feature_detail"),
+    path("best-vpn/", views.best_vpn, name="best_vpn"),
+    path("best-free-vpn-extension/", views.best_free_vpn_extension, name="best_free_vpn_extension"),
     path("payment/", views.payment, name="payment"),
     path("login/", views.login_view, name="login"),
     path("dashboard/", views.dashboard, name="dashboard"),
@@ -35,6 +44,11 @@ urlpatterns = [
     
     path("privacy-policy/", views.privacy_policy, name="privacy_policy"),
     path("terms/", views.terms_of_service, name="terms_of_service"),
+    path("refund-policy/", views.refund_policy, name="refund_policy"),
+    path("acceptable-use/", views.acceptable_use, name="acceptable_use"),
+    
+    # SEO
+    path("robots.txt", TemplateView.as_view(template_name="landing/robots.txt", content_type="text/plain")),
 ]
 
 

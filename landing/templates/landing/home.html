@@ -11,43 +11,41 @@
 {% block meta_description %}{{ seo_description }}{% endblock %}
 
 {% block schema_jsonld %}
-  {% blocktrans asvar product_desc %}Audited no logs VPN with private node, unlimited bandwidth.{% endblocktrans %}
-  {% blocktrans asvar product_slogan %}Privacy, speed, control  connect in seconds forget its even on.{% endblocktrans %}
+  {% blocktrans asvar product_desc %}100% no-logs, anonymous VPN with unlimited bandwidth on every device.{% endblocktrans %}
+  {% blocktrans asvar product_slogan %}Privacy, speed, control — connect in seconds, forget it's even on.{% endblocktrans %}
 
-  {% blocktrans asvar feature_nologs %}Independently audited zero logs your activity is never stored.{% endblocktrans %}
-  {% blocktrans asvar feature_dpi %}Stealth obfuscation to bypass DPI and restricted networks.{% endblocktrans %}
-  {% blocktrans asvar feature_adblock %}Built in ad tracker and  blocker for cleaner, faster browsing.{% endblocktrans %}
-  {% blocktrans asvar feature_killswitch %}Instant traffic cut if VPN drops   no IP or DNS leaks.{% endblocktrans %}
-  {% blocktrans asvar feature_autoconnect %}Auto connect on startup and auto reconnect for reliability.{% endblocktrans %}
-  {% blocktrans asvar feature_pertab %}Per tab routing in Chrome   choose which tabs use the VPN.{% endblocktrans %}
+  {% blocktrans asvar feature_nologs %}Strict zero logs — your activity is never stored.{% endblocktrans %}
+  {% blocktrans asvar feature_adblock %}Built-in ad and tracker blocker for cleaner, faster browsing.{% endblocktrans %}
+  {% blocktrans asvar feature_killswitch %}Instant traffic cut if VPN drops — no IP or DNS leaks.{% endblocktrans %}
+  {% blocktrans asvar feature_autoconnect %}Auto-connect on startup and auto-reconnect for reliability.{% endblocktrans %}
+  {% blocktrans asvar feature_pertab %}Per-tab routing in Chrome — choose which tabs use the VPN.{% endblocktrans %}
   {% blocktrans asvar feature_capacity %}1000 Gbps backbone for peak throughput and low jitter.{% endblocktrans %}
-  {% blocktrans asvar feature_dedicated %}Annual plans include a dedicated private server (single tenant).{% endblocktrans %}
+  {% blocktrans asvar feature_support %}24/7 live support — real humans, around the clock.{% endblocktrans %}
 
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": ["Product", "SoftwareApplication"],
-    "name": "CoolVPN",
+    "name": "VPNsterr",
     "inLanguage": "{{ LANGUAGE_CODE|default:'en' }}",
     "url": "{{ canonical_url|default:request.build_absolute_uri }}",
     "image": "{{ logo_url }}",
     "category": "VPN",
     "applicationCategory": "SecurityApplication",
     "operatingSystem": "iOS, Android, Windows, macOS, Linux, Chrome",
-    "brand": { "@type": "Brand", "name": "CoolVPN" },
+    "brand": { "@type": "Brand", "name": "VPNsterr" },
     "description": "{{ product_desc|escapejs }}",
     "slogan": "{{ product_slogan|escapejs }}",
     "isAccessibleForFree": true,
 
     "additionalProperty": [
       { "@type": "PropertyValue", "name": "No-logs policy",              "value": "{{ feature_nologs|escapejs }}" },
-      { "@type": "PropertyValue", "name": "DPI/obfuscation",             "value": "{{ feature_dpi|escapejs }}" },
       { "@type": "PropertyValue", "name": "Ad & tracker blocker",        "value": "{{ feature_adblock|escapejs }}" },
       { "@type": "PropertyValue", "name": "Kill Switch",                 "value": "{{ feature_killswitch|escapejs }}" },
       { "@type": "PropertyValue", "name": "Auto-connect on startup",     "value": "{{ feature_autoconnect|escapejs }}" },
       { "@type": "PropertyValue", "name": "Per-tab routing (Chrome)",    "value": "{{ feature_pertab|escapejs }}" },
       { "@type": "PropertyValue", "name": "Network capacity",            "value": "{{ feature_capacity|escapejs }}" },
-      { "@type": "PropertyValue", "name": "Annual perk",                 "value": "{{ feature_dedicated|escapejs }}" }
+      { "@type": "PropertyValue", "name": "Support",                     "value": "{{ feature_support|escapejs }}" }
     ],
 
     "audience": {{ audience_json|safe }},

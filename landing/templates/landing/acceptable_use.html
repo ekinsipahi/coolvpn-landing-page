@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{% trans "Acceptable Use Policy" %} — {{ site_name }}{% endblock %}
+{% block meta_description %}{% trans "VPNsterr Acceptable Use Policy: what you can and cannot do on our network. Privacy is a right; abuse is not." %}{% endblock %}
+
+{% block header %}
+  {% include "partials/navbar.html" %}
+{% endblock %}
+
+{% block content %}
+<section class="vs-section !pt-12">
+  <div class="vs-shell max-w-3xl">
+    <span class="vs-eyebrow">{% trans "Legal" %}</span>
+    <h1 class="vs-h2">{% trans "Acceptable Use Policy" %}</h1>
+    <p class="mt-2 text-sm" style="color:var(--vs-text-2)">{% trans "Last updated:" %} {% now "Y-m-d" %}</p>
+
+    <div class="mt-8 space-y-8 text-[15px] leading-7" style="color:var(--vs-text-2)">
+      <p>{% blocktrans trimmed %}VPNsterr (operated by <strong>Sterr Technologies</strong>) exists to protect privacy. That mission only works if the network isn't abused. By using the free extension or a Premium subscription you agree to this policy, which forms part of our <a href="/terms/" class="underline">Terms of Service</a>.{% endblocktrans %}</p>
+
+      <div>
+        <h2 class="text-lg font-bold tracking-tight mb-2" style="color:var(--vs-text)">{% trans "1) You may" %}</h2>
+        <ul class="space-y-2 list-disc ps-5">
+          <li>{% trans "Use the service for personal privacy, security on public networks, and accessing content available to you." %}</li>
+          <li>{% trans "Use it on the number of devices your plan allows, for yourself and your household." %}</li>
+        </ul>
+      </div>
+
+      <div>
+        <h2 class="text-lg font-bold tracking-tight mb-2" style="color:var(--vs-text)">{% trans "2) You may not use the service to" %}</h2>
+        <ul class="space-y-2 list-disc ps-5">
+          <li>{% trans "Break the law of the jurisdiction you are in, or facilitate others doing so." %}</li>
+          <li>{% trans "Send spam, run phishing campaigns, distribute malware, or operate botnets / command-and-control infrastructure." %}</li>
+          <li>{% trans "Attack networks or systems: DDoS, unauthorized access attempts, port scanning of third parties, exploitation of vulnerabilities you are not authorized to test." %}</li>
+          <li>{% trans "Access, share or distribute child sexual abuse material — zero tolerance; accounts are terminated and reported where the law requires." %}</li>
+          <li>{% trans "Infringe intellectual property rights at scale, engage in fraud, harassment, or identity theft." %}</li>
+          <li>{% trans "Resell, rent or commercially redistribute the service without a written agreement with Sterr Technologies." %}</li>
+          <li>{% trans "Interfere with the network itself: probing our infrastructure, evading device limits, or degrading service for other users." %}</li>
+        </ul>
+      </div>
+
+      <div>
+        <h2 class="text-lg font-bold tracking-tight mb-2" style="color:var(--vs-text)">{% trans "3) Enforcement — how it works with zero logs" %}</h2>
+        <p>{% trans "We do not log your browsing activity, so enforcement is based on real-time signals (such as abuse reports tied to shared exit IPs and automated volumetric anomalies), never on stored activity history. We may suspend or terminate accounts involved in abuse, throttle abusive flows in real time, and block destinations subject to repeated abuse complaints." %}</p>
+      </div>
+
+      <div>
+        <h2 class="text-lg font-bold tracking-tight mb-2" style="color:var(--vs-text)">{% trans "4) Reporting abuse" %}</h2>
+        <p>{% blocktrans trimmed %}To report abuse originating from our network, contact <a href="mailto:support@vpnsterr.com" class="underline">support@vpnsterr.com</a> with timestamps, IPs and evidence. We respond to all legitimate reports.{% endblocktrans %}</p>
+      </div>
+
+      <div>
+        <h2 class="text-lg font-bold tracking-tight mb-2" style="color:var(--vs-text)">{% trans "5) Changes" %}</h2>
+        <p>{% trans "We may update this policy; material changes are posted on this page with a new \"Last updated\" date. Continued use after a change means acceptance." %}</p>
+      </div>
+    </div>
+
+    <div class="mt-10 flex flex-wrap gap-3">
+      <a href="{% url 'terms_of_service' %}" class="vs-btn vs-btn-ghost">{% trans "Terms of Service" %}</a>
+      <a href="{% url 'privacy_policy' %}" class="vs-btn vs-btn-ghost">{% trans "Privacy Policy" %}</a>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block footer %}
+  {% include "partials/footer.html" %}
+{% endblock %}

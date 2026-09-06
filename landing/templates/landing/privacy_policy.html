@@ -1,148 +1,172 @@
-{% load static i18n %}
+{% extends "base.html" %}
+{% load i18n static %}
 {% now "Y-m-d" as today_iso %}
 
-<!doctype html>
-<html lang="en" class="h-full" >
-<head>
-  <meta charset="utf-8">
-  <title>Privacy Policy · CoolVPN</title>
-  <meta name="description" content="CoolVPN Privacy Policy — no activity logs, minimal telemetry, on-device ad & tracker blocking.">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="{% static 'css/tailwind.css' %}" rel="stylesheet">
-  <link rel="icon" href="{% static 'img/favicon.ico' %}">
-  <script type="application/ld+json">
+{% block title %}{% trans "Privacy Policy" %} — {{ site_name }}{% endblock %}
+{% block meta_description %}{% trans "VPNsterr Privacy Policy: strict zero activity logs, minimal account data, no selling of user data — for the website, apps and the free browser extension." %}{% endblock %}
+
+{% block header %}
+  {% include "partials/navbar.html" %}
+{% endblock %}
+
+{% block schema_jsonld %}
+<script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@graph": [
     {
-      "@type": "Organization",
-      "name": "Sipahi Software Ltd.",
-      "url": "https://coolvpn.app",
-      "logo": {
-        "@type": "ImageObject",
-        "url": "https://coolvpn.app{% static 'img/COOLVPN-LOGO.png' %}"
-      }
-    },
-    {
       "@type": "BreadcrumbList",
       "itemListElement": [
-        { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://coolvpn.app/" },
-        { "@type": "ListItem", "position": 2, "name": "Terms of Service", "item": "https://coolvpn.app/terms/" }
+        { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://vpnsterr.com/" },
+        { "@type": "ListItem", "position": 2, "name": "Privacy Policy", "item": "https://vpnsterr.com/privacy-policy/" }
       ]
     },
     {
-      "@type": "TermsOfService",
-      "name": "CoolVPN Terms of Service",
-      "inLanguage": "en",
-      "url": "https://coolvpn.app/terms/",
-      "dateModified": "2025-10-15",
-      "publisher": { "@type": "Organization", "name": "Sipahi Software Ltd.", "url": "https://coolvpn.app" },
-      "isPartOf": { "@type": "WebSite", "url": "https://coolvpn.app", "name": "CoolVPN" }
+      "@type": "PrivacyPolicy",
+      "name": "VPNsterr Privacy Policy",
+      "inLanguage": "{{ LANGUAGE_CODE|default:'en' }}",
+      "url": "https://vpnsterr.com/privacy-policy/",
+      "dateModified": "{{ today_iso }}",
+      "publisher": { "@type": "Organization", "name": "Sterr Technologies", "url": "https://vpnsterr.com" },
+      "isPartOf": { "@type": "WebSite", "url": "https://vpnsterr.com", "name": "VPNsterr" }
     }
   ]
 }
 </script>
+{% endblock %}
 
-</head>
-<body class="h-full bg-white text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-100">
-  <main class="mx-auto max-w-3xl px-4 py-10 sm:py-14">
-    <!-- Header / Breadcrumb -->
-    <nav class="mb-6 text-sm text-zinc-500 dark:text-zinc-400">
-      <a href="{% url 'home' %}" class="hover:text-zinc-800 dark:hover:text-zinc-200">Home</a>
-      <span class="mx-2">/</span>
-      <span>Privacy Policy</span>
-    </nav>
+{% block content %}
+<section class="vs-section !pt-12">
+  <div class="vs-shell max-w-3xl">
+    <span class="vs-eyebrow">{% trans "Legal" %}</span>
+    <h1 class="vs-h2">{% trans "Privacy Policy" %}</h1>
+    <p class="mt-2 text-sm" style="color:var(--vs-text-2)">{% trans "Last updated:" %} {{ today_iso }}</p>
 
-    <header class="mb-8">
-      <h1 class="text-3xl font-extrabold tracking-tight sm:text-4xl">Privacy Policy</h1>
-      <p class="mt-2 text-zinc-600 dark:text-zinc-400">
-        Last updated: {{ today_iso }}
-      </p>
-    </header>
-
-    <article class="prose prose-zinc max-w-none dark:prose-invert">
-      <p><strong>CoolVPN</strong> (“we”, “us”, “our”) is provided by
-        <strong>{{ COMPANY_NAME|default:"Sipahi Software Ltd." }}</strong>.
-        This policy explains what we collect, why, and your choices.</p>
-
-      <h2>Summary</h2>
-      <ul>
-        <li>We <strong>do not log</strong> your browsing activity, DNS queries, or traffic content.</li>
-        <li>Only minimal account/billing data is kept to operate the service and comply with law.</li>
-        <li>The browser extension applies ad/tracker blocking <em>on-device</em> via DNR. Data is not sold.</li>
+    <!-- Özet kartı -->
+    <div class="mt-8 rounded-2xl p-6"
+         style="background:color-mix(in srgb, var(--vs-500) 7%, transparent); border:1px solid color-mix(in srgb, var(--vs-500) 20%, transparent)">
+      <h2 class="text-sm font-bold uppercase tracking-wider mb-3" style="color:var(--vs-600)">{% trans "The short version" %}</h2>
+      <ul class="space-y-2">
+        <li class="vs-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>{% trans "We keep zero activity logs: no browsing history, no DNS queries, no traffic content, no IP after connection." %}</li>
+        <li class="vs-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>{% trans "The free extension works with no account — we couldn't tie activity to you even if we wanted to." %}</li>
+        <li class="vs-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>{% trans "We never sell or rent user data to anyone, for any purpose. Ads on the free tier are served without profiling you." %}</li>
       </ul>
-
-      <h2>Data We Process</h2>
-      <h3>Account Data</h3>
-      <p>Email or federated ID, subscription status/plan, invoices and payment status; optional device nickname.</p>
-
-      <h3>Payments</h3>
-      <p>Processed by third-party gateways; we receive non-sensitive metadata (paid/failed/refunded, currency, plan).
-         We do not store full card numbers.</p>
-
-      <h3>Service Telemetry (Minimal)</h3>
-      <p>Authentication events (success/fail timestamps), device identifier (seat limits/abuse prevention),
-         aggregate server load (no activity/content ties). Retention is short and limited.</p>
-
-      <h3>No Activity Logs</h3>
-      <p>We do <strong>not</strong> collect: websites visited, app content, original IP after connection, DNS lookups, or payloads.</p>
-
-      <h2>Extension Permissions</h2>
-      <ul>
-        <li><code>proxy</code> — to route browser traffic via VPN proxy.</li>
-        <li><code>declarativeNetRequest</code> — optional on-device ad & tracker blocking.</li>
-        <li><code>storage</code> — preferences (auto-connect, kill switch, ad-block) & client UUID.</li>
-        <li><code>tabs</code> (if enabled) — used for per-tab routing decisions; page contents aren’t read.</li>
-      </ul>
-
-      <h2>Cookies & Local Storage</h2>
-      <p>Website uses session/CSRF cookies; extension stores preferences and client UUID locally/sync.</p>
-
-      <h2>Legal Bases (GDPR)</h2>
-      <ul>
-        <li>Contract performance — providing the VPN.</li>
-        <li>Legitimate interests — abuse prevention, security.</li>
-        <li>Consent — optional marketing emails.</li>
-      </ul>
-
-      <h2>Retention</h2>
-      <p>Account/billing per statutory periods; device links while active; security logs short-lived unless needed for incidents.</p>
-
-      <h2>Your Rights</h2>
-      <p>Where applicable, you may request access, correction, deletion, portability, or object/restrict.
-         Contact: <a href="mailto:{{ SUPPORT_EMAIL|default:'support@coolvpn.app' }}">{{ SUPPORT_EMAIL|default:'support@coolvpn.app' }}</a>.</p>
-
-      <h2>International Transfers</h2>
-      <p>We may use providers outside your country with appropriate safeguards (e.g., SCCs where applicable).</p>
-
-      <h2>Security</h2>
-      <p>Encrypted transport, hardened infra, least-privilege access, regular patching.</p>
-
-      <h2>Children</h2>
-      <p>Not intended for under 16s.</p>
-
-      <h2>Contact</h2>
-      <p>
-        Controller: <strong>{{ COMPANY_NAME|default:"Sipahi Software Ltd." }}</strong><br>
-        Email: <a href="mailto:{{ SUPPORT_EMAIL|default:'support@coolvpn.app' }}">{{ SUPPORT_EMAIL|default:'support@coolvpn.app' }}</a>
-      </p>
-
-      <h2>Changes</h2>
-      <p>We may update this policy. We’ll post changes here and update the “Last updated” date.</p>
-    </article>
-
-    <!-- footer cta -->
-    <div class="mt-10 flex flex-wrap gap-3">
-      <a href="{% url 'pricing' %}" class="inline-flex items-center rounded-lg px-4 py-2
-         bg-emerald-600 text-white font-medium shadow hover:bg-emerald-500">
-        View Plans
-      </a>
-      <a href="{% url 'home' %}" class="inline-flex items-center rounded-lg px-4 py-2
-         border border-zinc-200 text-zinc-700 hover:bg-zinc-50
-         dark:border-white/10 dark:text-zinc-200 dark:hover:bg-white/5">
-        Back to Home
-      </a>
     </div>
-  </main>
-</body>
-</html>
+
+    <div class="mt-10 space-y-9 text-[15px] leading-7" style="color:var(--vs-text-2)">
+
+      <div>
+        <h2 class="text-lg font-bold tracking-tight mb-2" style="color:var(--vs-text)">{% trans "1) Who we are & scope" %}</h2>
+        <p>{% blocktrans trimmed %}VPNsterr ("we", "us") is operated by <strong>Sterr Technologies</strong>, the data controller. This policy covers the vpnsterr.com website, our apps, and the <strong>VPNsterr browser extension</strong> distributed through the Chrome Web Store and other extension stores.{% endblocktrans %}</p>
+      </div>
+
+      <div>
+        <h2 class="text-lg font-bold tracking-tight mb-2" style="color:var(--vs-text)">{% trans "2) What we never collect (zero-logs policy)" %}</h2>
+        <p>{% trans "By architecture, our VPN service does not record:" %}</p>
+        <ul class="mt-2 space-y-1.5 list-disc ps-5">
+          <li>{% trans "Websites you visit or apps you use" %}</li>
+          <li>{% trans "DNS queries" %}</li>
+          <li>{% trans "Traffic contents or metadata that could identify your activity" %}</li>
+          <li>{% trans "Your originating IP address after a connection is established" %}</li>
+          <li>{% trans "Connection timestamps tied to your identity" %}</li>
+        </ul>
+        <p class="mt-2">{% trans "Shared exit IPs are used by default, so your identity and your activity stay structurally separate." %}</p>
+      </div>
+
+      <div>
+        <h2 class="text-lg font-bold tracking-tight mb-2" style="color:var(--vs-text)">{% trans "3) The free browser extension" %}</h2>
+        <p>{% trans "The extension has a single purpose: routing your browser traffic through an encrypted VPN proxy. It works without an account, so no personal data is required to use it." %}</p>
+        <p class="mt-2">{% trans "Permissions and what they're for:" %}</p>
+        <ul class="mt-2 space-y-1.5 list-disc ps-5">
+          <li><code>proxy</code> — {% trans "routes browser traffic through the VPN. This is the product." %}</li>
+          <li><code>declarativeNetRequest</code> — {% trans "optional on-device ad & tracker blocking. Filtering happens inside your browser; block decisions are never transmitted to us." %}</li>
+          <li><code>storage</code> — {% trans "saves your preferences (location, auto-connect, ad-block toggle) and a random client identifier, locally in your browser." %}</li>
+          <li><code>tabs</code> — {% trans "powers per-tab routing (choosing which tabs use the VPN). Page contents are never read." %}</li>
+        </ul>
+        <p class="mt-3">{% blocktrans trimmed %}In line with the Chrome Web Store User Data Policy: we only use extension data to provide the VPN's single purpose, we transmit connection data over encrypted channels, and we <strong>do not sell, rent or transfer user data</strong> to third parties for advertising, credit-worthiness or any unrelated purpose. The free tier is supported by ads shown inside the extension UI; these are served <strong>without behavioral profiling</strong> — we have no browsing data to profile you with.{% endblocktrans %}</p>
+      </div>
+
+      <div>
+        <h2 class="text-lg font-bold tracking-tight mb-2" style="color:var(--vs-text)">{% trans "3.1) How each feature affects your data" %}</h2>
+        <ul class="space-y-2 list-disc ps-5">
+          <li><strong>{% trans "Auto-connect:" %}</strong> {% trans "runs locally; your startup preference is stored only in your browser." %}</li>
+          <li><strong>{% trans "Kill Switch:" %}</strong> {% trans "operates entirely on-device; no events are reported to us when it activates." %}</li>
+          <li><strong>{% trans "Ad & Tracker Blocker:" %}</strong> {% trans "filters requests inside your browser; blocked-request lists and decisions never leave your device." %}</li>
+          <li><strong>{% trans "Zero logs / 100% anonymous:" %}</strong> {% trans "described throughout this policy — no activity records exist server-side." %}</li>
+          <li><strong>{% trans "1000 Gbps network:" %}</strong> {% trans "we monitor aggregate server load only, never per-user traffic." %}</li>
+          <li><strong>{% trans "Per-tab routing:" %}</strong> {% trans "the tab list is read locally to apply your routing choice; tab URLs and contents are not transmitted to us." %}</li>
+          <li><strong>{% trans "24/7 support:" %}</strong> {% trans "support staff can see subscription status only — there is no activity data to access." %}</li>
+        </ul>
+      </div>
+
+      <div>
+        <h2 class="text-lg font-bold tracking-tight mb-2" style="color:var(--vs-text)">{% trans "4) What we do collect (minimal)" %}</h2>
+        <ul class="space-y-2 list-disc ps-5">
+          <li><strong>{% trans "Premium account data:" %}</strong> {% trans "email (or federated sign-in ID), plan and subscription status, invoices. Needed to deliver what you paid for." %}</li>
+          <li><strong>{% trans "Payments:" %}</strong> {% trans "processed by third-party gateways (e.g. crypto payment processors); we receive only non-sensitive status metadata (paid / failed / refunded, currency, plan). We never see or store card numbers or wallet private keys." %}</li>
+          <li><strong>{% trans "Operational telemetry:" %}</strong> {% trans "authentication events, a device identifier for seat limits, and aggregate server load. None of it links to your browsing activity; retention is short." %}</li>
+        </ul>
+      </div>
+
+      <div>
+        <h2 class="text-lg font-bold tracking-tight mb-2" style="color:var(--vs-text)">{% trans "5) Cookies & local storage" %}</h2>
+        <p>{% trans "The website uses only functional cookies (session, CSRF, language, theme). The extension stores preferences and its client identifier locally in your browser. We do not run third-party advertising or cross-site tracking cookies on our website." %}</p>
+      </div>
+
+      <div>
+        <h2 class="text-lg font-bold tracking-tight mb-2" style="color:var(--vs-text)">{% trans "6) Sharing" %}</h2>
+        <p>{% trans "We share data only with processors strictly needed to run the service: payment gateways, email delivery, and infrastructure providers — each bound by data-processing agreements. We disclose data if legally compelled, but since we keep no activity logs, there is no browsing history to hand over." %}</p>
+      </div>
+
+      <div>
+        <h2 class="text-lg font-bold tracking-tight mb-2" style="color:var(--vs-text)">{% trans "7) Legal bases (GDPR)" %}</h2>
+        <ul class="space-y-1.5 list-disc ps-5">
+          <li>{% trans "Contract performance — providing the VPN you signed up for" %}</li>
+          <li>{% trans "Legitimate interests — abuse prevention and network security" %}</li>
+          <li>{% trans "Consent — optional marketing emails (opt-out any time)" %}</li>
+        </ul>
+      </div>
+
+      <div>
+        <h2 class="text-lg font-bold tracking-tight mb-2" style="color:var(--vs-text)">{% trans "8) Retention" %}</h2>
+        <p>{% trans "Account and billing records are kept for statutory periods; device links only while active; security telemetry is short-lived unless needed for an active incident. Activity logs are never retained because they are never created." %}</p>
+      </div>
+
+      <div>
+        <h2 class="text-lg font-bold tracking-tight mb-2" style="color:var(--vs-text)">{% trans "9) Your rights" %}</h2>
+        <p>{% blocktrans trimmed %}Depending on your jurisdiction (GDPR, CCPA and similar), you may request access, correction, deletion, portability, or object to/restrict processing. Email <a href="mailto:support@vpnsterr.com" class="underline">support@vpnsterr.com</a> — we respond within 30 days.{% endblocktrans %}</p>
+      </div>
+
+      <div>
+        <h2 class="text-lg font-bold tracking-tight mb-2" style="color:var(--vs-text)">{% trans "10) International transfers" %}</h2>
+        <p>{% trans "Where providers operate outside your country, we rely on appropriate safeguards such as Standard Contractual Clauses." %}</p>
+      </div>
+
+      <div>
+        <h2 class="text-lg font-bold tracking-tight mb-2" style="color:var(--vs-text)">{% trans "11) Security" %}</h2>
+        <p>{% trans "AES-256 / ChaCha20 encrypted transport (WireGuard & OpenVPN), hardened infrastructure, least-privilege access, and regular patching." %}</p>
+      </div>
+
+      <div>
+        <h2 class="text-lg font-bold tracking-tight mb-2" style="color:var(--vs-text)">{% trans "12) Children" %}</h2>
+        <p>{% trans "The service is not intended for children under 16, and we do not knowingly collect their data." %}</p>
+      </div>
+
+      <div>
+        <h2 class="text-lg font-bold tracking-tight mb-2" style="color:var(--vs-text)">{% trans "13) Changes & contact" %}</h2>
+        <p>{% blocktrans trimmed %}Material changes are posted here with a new "Last updated" date. Controller: <strong>Sterr Technologies</strong> · <a href="mailto:support@vpnsterr.com" class="underline">support@vpnsterr.com</a>{% endblocktrans %}</p>
+      </div>
+    </div>
+
+    <div class="mt-10 flex flex-wrap gap-3">
+      <a href="{% url 'terms_of_service' %}" class="vs-btn vs-btn-ghost">{% trans "Terms of Service" %}</a>
+      <a href="{% url 'acceptable_use' %}" class="vs-btn vs-btn-ghost">{% trans "Acceptable Use" %}</a>
+      <a href="{% url 'refund_policy' %}" class="vs-btn vs-btn-ghost">{% trans "Refund Policy" %}</a>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block footer %}
+  {% include "partials/footer.html" %}
+{% endblock %}

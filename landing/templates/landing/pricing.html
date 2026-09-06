@@ -53,14 +53,14 @@
   </script>
 
   {# Product + OfferCatalog (home’daki @id ile aynı Product @id kullanılır — kanonik tekil varlık!) #}
-  {% blocktrans asvar product_desc %}Audited no-logs VPN with private node, unlimited bandwidth.{% endblocktrans %}
+  {% blocktrans asvar product_desc %}Strict no-logs VPN with unlimited bandwidth on every device.{% endblocktrans %}
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": ["Product", "SoftwareApplication"],
-    "@id": "{{ request.build_absolute_uri|slice:':-1' }}/product/coolvpn",
-    "name": "CoolVPN",
-    "brand": { "@type": "Brand", "name": "CoolVPN" },
+    "@id": "{{ request.build_absolute_uri|slice:':-1' }}/product/vpnsterr",
+    "name": "VPNsterr",
+    "brand": { "@type": "Brand", "name": "VPNsterr" },
     "category": "VPN",
     "applicationCategory": "SecurityApplication",
     "operatingSystem": "iOS, Android, Windows, macOS, Linux, Chrome",
@@ -77,35 +77,35 @@
   {
     "@context": "https://schema.org",
     "@type": "OfferCatalog",
-    "name": "CoolVPN Pricing",
+    "name": "VPNsterr Pricing",
     "url": "{{ canonical_url|default:request.build_absolute_uri }}",
     "itemListElement": [
       {
         "@type": "Offer",
-        "sku": "coolvpn-monthly",
+        "sku": "vpnsterr-monthly",
         "price": "4.99",
         "priceCurrency": "{{ ui_currency|default:'USD' }}",
         "availability": "https://schema.org/InStock",
         "category": "subscription",
-        "itemOffered": { "@id": "{{ request.build_absolute_uri|slice:':-1' }}/product/coolvpn" }
+        "itemOffered": { "@id": "{{ request.build_absolute_uri|slice:':-1' }}/product/vpnsterr" }
       },
       {
         "@type": "Offer",
-        "sku": "coolvpn-semiannual",
-        "price": "25.80",
+        "sku": "vpnsterr-semiannual",
+        "price": "24.99",
         "priceCurrency": "{{ ui_currency|default:'USD' }}",
         "availability": "https://schema.org/InStock",
         "category": "subscription",
-        "itemOffered": { "@id": "{{ request.build_absolute_uri|slice:':-1' }}/product/coolvpn" }
+        "itemOffered": { "@id": "{{ request.build_absolute_uri|slice:':-1' }}/product/vpnsterr" }
       },
       {
         "@type": "Offer",
-        "sku": "coolvpn-annual",
+        "sku": "vpnsterr-annual",
         "price": "39.99",
         "priceCurrency": "{{ ui_currency|default:'USD' }}",
         "availability": "https://schema.org/InStock",
         "category": "subscription",
-        "itemOffered": { "@id": "{{ request.build_absolute_uri|slice:':-1' }}/product/coolvpn" }
+        "itemOffered": { "@id": "{{ request.build_absolute_uri|slice:':-1' }}/product/vpnsterr" }
       }
     ]
   }
@@ -114,6 +114,10 @@
 
 {% block content %}
   {% include "partials/pricing_block.html" %}
+{% endblock %}
+
+{% block footer %}
+  {% include "partials/footer.html" %}
 {% endblock %}
 
 

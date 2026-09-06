@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{{ seo_title }}{% endblock %}
+{% block meta_description %}{{ seo_description }}{% endblock %}
+
+{% block header %}
+  {% include "partials/navbar.html" %}
+{% endblock %}
+
+{% block schema_jsonld %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "inLanguage": "en",
+  "mainEntity": [
+    { "@type": "Question", "name": "Is there a good VPN that is actually free?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes — VPNsterr's free tier is genuinely unlimited: no data caps, no trial timers, no account required, and the same zero-logs policy as Premium. It is ad-supported at standard speed; Premium removes ads and unlocks maximum speed." } },
+    { "@type": "Question", "name": "How can a free VPN be safe?",
+      "acceptedAnswer": { "@type": "Answer", "text": "A free VPN is safe when its business model doesn't depend on your data. VPNsterr keeps zero activity logs and never sells user data; the free tier is funded by non-profiling ads and by Premium subscriptions." } },
+    { "@type": "Question", "name": "What's the catch with the free plan?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Two honest trade-offs: standard speed instead of maximum, and ads in the extension UI. Bandwidth is unlimited and privacy is identical to Premium." } }
+  ]
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<section class="vs-section !pt-12 md:!pt-16">
+  <div class="vs-shell">
+    <div class="max-w-3xl">
+      <span class="vs-badge-hot">{% trans "Free forever · No data caps · No account" %}</span>
+      <h1 class="vs-h2 !text-4xl md:!text-5xl !mt-5">{% trans "A free VPN that's actually good" %}</h1>
+      <p class="vs-sub">
+        {% trans "Most \"free VPNs\" are a data cap, a trial clock, or a data-harvesting business wearing a privacy costume. VPNsterr's free tier is none of those: unlimited bandwidth, no sign-up, and the same zero-logs architecture our Premium users get. Here's exactly how that works — including the honest trade-offs." %}
+      </p>
+      <div class="mt-8 flex flex-col sm:flex-row gap-3">
+        <a href="{% url 'vpn_extension' %}" class="vs-btn vs-btn-primary vs-btn-lg">
+          {% trans "Get the Free VPN Extension" %}
+          <svg class="h-5 w-5 rtl:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </a>
+        <a href="#how-free-works" class="vs-btn vs-btn-ghost vs-btn-lg">{% trans "How is it free?" %}</a>
+      </div>
+    </div>
+
+    <!-- Free vs tipik "free" -->
+    <div class="mt-16 overflow-hidden rounded-2xl vs-reveal"
+         style="background:var(--vs-card-2); border:1px solid var(--vs-line); box-shadow:var(--vs-shadow-sm)">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm min-w-[640px]">
+          <thead>
+            <tr style="border-bottom:1px solid var(--vs-line)">
+              <th class="px-5 py-4 text-left font-semibold" style="color:var(--vs-text-2)"></th>
+              <th class="px-5 py-4 text-center font-extrabold" style="color:var(--vs-600)">{% trans "VPNsterr Free" %}</th>
+              <th class="px-5 py-4 text-center font-bold" style="color:var(--vs-text)">{% trans "Typical \"free\" VPN" %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom:1px solid var(--vs-line)">
+              <td class="px-5 py-3.5 font-medium" style="color:var(--vs-text)">{% trans "Data limit" %}</td>
+              <td class="px-5 py-3.5 text-center font-semibold" style="color:#12b76a">{% trans "None — unlimited" %}</td>
+              <td class="px-5 py-3.5 text-center" style="color:var(--vs-text-2)">{% trans "500MB–10GB / month" %}</td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--vs-line)">
+              <td class="px-5 py-3.5 font-medium" style="color:var(--vs-text)">{% trans "Account required" %}</td>
+              <td class="px-5 py-3.5 text-center font-semibold" style="color:#12b76a">{% trans "No" %}</td>
+              <td class="px-5 py-3.5 text-center" style="color:var(--vs-text-2)">{% trans "Usually email sign-up" %}</td>
+            </tr>
+            <tr style="border-bottom:1px solid var(--vs-line)">
+              <td class="px-5 py-3.5 font-medium" style="color:var(--vs-text)">{% trans "Logs & data selling" %}</td>
+              <td class="px-5 py-3.5 text-center font-semibold" style="color:#12b76a">{% trans "Zero logs, nothing to sell" %}</td>
+              <td class="px-5 py-3.5 text-center text-rose-500">{% trans "Often the business model" %}</td>
+            </tr>
+            <tr>
+              <td class="px-5 py-3.5 font-medium" style="color:var(--vs-text)">{% trans "Time limits" %}</td>
+              <td class="px-5 py-3.5 text-center font-semibold" style="color:#12b76a">{% trans "None — free forever" %}</td>
+              <td class="px-5 py-3.5 text-center" style="color:var(--vs-text-2)">{% trans "7–30 day \"trials\"" %}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Nasıl bedava -->
+    <div id="how-free-works" class="mt-16 grid gap-10 lg:grid-cols-2 items-start scroll-mt-28">
+      <div>
+        <h2 class="text-2xl md:text-3xl font-bold tracking-tight" style="color:var(--vs-text)">{% trans "How can it be free? The honest answer." %}</h2>
+        <div class="mt-4 space-y-4 text-[15px] leading-7" style="color:var(--vs-text-2)">
+          <p>{% trans "Running a VPN network costs real money, so every free VPN is funded somehow. The dangerous ones fund themselves with your data. We don't — we can't, because our zero-logs architecture means there is no browsing data to sell." %}</p>
+          <p>{% trans "VPNsterr's free tier is funded two ways: light, non-profiling ads inside the extension UI, and Premium subscribers who want maximum speed and an ad-free experience. That's the entire model. Your traffic is not the product." %}</p>
+          <p>{% trans "The trade-offs are equally honest: free runs at standard speed on shared capacity, and you'll see ads in the extension. Bandwidth is unlimited, privacy is identical to Premium, and it never expires." %}</p>
+        </div>
+      </div>
+      <div class="rounded-2xl p-7" style="background:var(--vs-card-2); border:1px solid var(--vs-line); box-shadow:var(--vs-shadow-sm)">
+        <h3 class="text-sm font-bold uppercase tracking-wider mb-4" style="color:var(--vs-text-2)">{% trans "Everything in the free tier" %}</h3>
+        <ul class="space-y-3" role="list">
+          <li class="vs-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>{% trans "Unlimited bandwidth — no caps, ever" %}</li>
+          <li class="vs-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><a class="underline" href="{% url 'feature_detail' 'no-logs' %}">{% trans "Strict zero-logs policy" %}</a></li>
+          <li class="vs-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><a class="underline" href="{% url 'feature_detail' 'kill-switch' %}">{% trans "Always-on Kill Switch" %}</a></li>
+          <li class="vs-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><a class="underline" href="{% url 'feature_detail' 'ad-blocker' %}">{% trans "Built-in ad & tracker blocker" %}</a></li>
+          <li class="vs-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><a class="underline" href="{% url 'feature_detail' 'per-tab-routing' %}">{% trans "Per-tab routing (Chrome)" %}</a></li>
+          <li class="vs-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><a class="underline" href="{% url 'feature_detail' 'auto-connect' %}">{% trans "Auto-connect & reconnect" %}</a></li>
+          <li class="vs-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><a class="underline" href="{% url 'feature_detail' 'support' %}">{% trans "24/7 human support" %}</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Premium köprüsü -->
+    <div class="mt-16 rounded-3xl p-8 md:p-10 text-center vs-reveal"
+         style="background:linear-gradient(135deg, color-mix(in srgb, var(--vs-500) 10%, transparent), color-mix(in srgb, var(--vs-fuchsia) 8%, transparent)); border:1px solid var(--vs-line)">
+      <h2 class="text-2xl md:text-3xl font-bold tracking-tight" style="color:var(--vs-text)">
+        {% trans "Want maximum speed and zero ads?" %}
+      </h2>
+      <p class="vs-sub mx-auto !mt-3">
+        {% blocktrans trimmed %}Premium unlocks the full 1000 Gbps backbone, premium server locations and an ad-free experience — from {{ ui_currency_symbol }}{{ ui_monthly }}/mo, or {{ ui_currency_symbol }}{{ ui_annual }}/yr (~{{ ui_currency_symbol }}3.33/mo).{% endblocktrans %}
+      </p>
+      <div class="mt-7 flex flex-col sm:flex-row items-center justify-center gap-3">
+        <a href="{% url 'vpn_extension' %}" class="vs-btn vs-btn-ghost vs-btn-lg">{% trans "Start Free" %}</a>
+        <a href="{% url 'pricing' %}" class="vs-btn vs-btn-primary vs-btn-lg">
+          {% trans "See Premium plans" %}
+          <svg class="h-5 w-5 rtl:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block footer %}
+  {% include "partials/footer.html" %}
+{% endblock %}

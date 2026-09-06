@@ -35,6 +35,7 @@ from landing.helpers.auth import pick_backend
 from landing.helpers.nowpay import effective_amount
 from landing.helpers.plans import normalize_plan_slug, plan_price_for_key
 from landing.helpers.ui import build_ui_context, build_plan_map
+from landing.helpers.features_content import FEATURES
 from landing.helpers.subscription import grant_subscription, plan_device_limit
 from landing.templatetags.faq_questions import FAQ_QUESTIONS
 from landing.templatetags.pricing import (
@@ -57,7 +58,7 @@ def home(request):
     # pricing + offers
     offers_json = build_all_offers_json(PRICING_BY_COUNTRY, request)  # string JSON list
     # mutlak logo url (image)
-    logo_url = request.build_absolute_uri(static('img/COOLVPN-LOGO.png'))
+    logo_url = request.build_absolute_uri(static('img/VPNSTERR-LOGO.png'))
     
     # audience object (PeopleAudience) — burada önerdiğin suggested age aralığını koy
     audience_obj = {
@@ -70,9 +71,9 @@ def home(request):
     
     # temel ctx
     ctx = {
-        "seo_title": _("CoolVPN — Private Node. Obfuscation. No-Logs."),
+        "seo_title": _("VPNsterr — Free Unlimited No-Logs & Anonymous VPN"),
         "seo_description": _(
-            "Bypass restrictions with audited no-logs VPN. Private node on annual plans. Unlimited bandwidth."
+            "Browse with zero logs and full anonymity. VPNsterr's free VPN extension is truly unlimited — upgrade to Premium from $4.99/mo for faster, ad-free servers."
         ),
         **ctx_ui,
         "faq_all": faq_sorted,
@@ -86,7 +87,7 @@ def home(request):
     # --- pricing / json-ld oluşturma ---
     try:
         # logo (mutlak url)
-        logo_abs = request.build_absolute_uri(static('img/COOLVPN-LOGO.png'))
+        logo_abs = request.build_absolute_uri(static('img/VPNSTERR-LOGO.png'))
 
         # request için bölge ve o bölgeye özel fiyat
         pricing_for_req = get_pricing_for_request(request)
@@ -113,14 +114,14 @@ def home(request):
         product_obj = {
             "@context": "https://schema.org",
             "@type": ["Product", "SoftwareApplication"],
-            "name": ctx.get("site_name", "CoolVPN"),
+            "name": ctx.get("site_name", "VPNsterr"),
             "inLanguage": getattr(request, "LANGUAGE_CODE", getattr(settings, "LANGUAGE_CODE", "en")),
             "url": request.build_absolute_uri(),
             "image": [logo_abs],
             "category": "VPN",
             "applicationCategory": "SecurityApplication",
             "operatingSystem": "iOS, Android, Windows, macOS, Linux, Chrome",
-            "brand": {"@type": "Brand", "name": "CoolVPN"},
+            "brand": {"@type": "Brand", "name": "VPNsterr"},
             "description": ctx.get("seo_description"),
             "slogan": ctx.get("seo_title"),
             "isAccessibleForFree": True,
@@ -148,11 +149,99 @@ def home(request):
 def pricing(request):
     ctx_ui, region = build_ui_context(request)
     ctx = {
-        "seo_title": _("Pricing — CoolVPN"),
-        "seo_description": _("Simple pricing. Premium features included."),
+        "seo_title": _("Cheap VPN from $4.99/mo — Plans & Deals | VPNsterr"),
+        "seo_description": _(
+            "Looking for a cheap VPN that doesn't cut corners? VPNsterr Premium starts at $4.99/mo "
+            "($39.99/yr) with zero logs, unlimited speed and 24/7 support — or use our free unlimited extension."
+        ),
         **ctx_ui,
     }
     return render(request, "landing/pricing.html", ctx)
+
+
+def vpn_extension(request):
+    """/vpn-extension/ — ücretsiz uzantı landing sayfası (ana SEO sayfası)."""
+    ctx_ui, region = build_ui_context(request)
+    faq_sorted = sorted(FAQ_QUESTIONS, key=lambda x: x.get("priority", 999))
+    ctx = {
+        "seo_title": _("Free VPN Extension for Chrome — Unlimited | VPNsterr"),
+        "seo_description": _(
+            "Add the free VPN extension to Chrome — unlimited bandwidth, no sign-up, zero logs. "
+            "Works on Edge and Brave too. Go Premium for faster, ad-free browsing."
+        ),
+        "chrome_store_url": getattr(settings, "CHROME_STORE_URL", ""),
+        "faq_teaser": [q for q in faq_sorted if q.get("teaser", False)][:4],
+        **ctx_ui,
+    }
+    return render(request, "landing/vpn_extension.html", ctx)
+
+
+def best_vpn(request):
+    """/best-vpn/ — top 10 VPN karşılaştırma sayfası."""
+    ctx_ui, region = build_ui_context(request)
+    ctx = {
+        "seo_title": _("Best VPN 2026 — Top 10 Free & Paid Picks | VPNsterr"),
+        "seo_description": _(
+            "Looking for a good VPN? Our top 10 of 2026 puts VPNsterr first — a 100% free, "
+            "unlimited, zero-logs extension. Go faster and ad-free from $4.99/mo."
+        ),
+        **ctx_ui,
+    }
+    return render(request, "landing/best_vpn.html", ctx)
+
+
+def feature_detail(request, slug):
+    """/features/<slug>/ — her feature'ın kendi içerik sayfası."""
+    from django.http import Http404
+    f = FEATURES.get(slug)
+    if not f:
+        raise Http404
+    ctx_ui, region = build_ui_context(request)
+    ctx = {
+        "seo_title": f["meta_title"],
+        "seo_description": f["meta_description"],
+        "f": f,
+        "slug": slug,
+        "features_nav": [(k, v["name"]) for k, v in FEATURES.items()],
+        **ctx_ui,
+    }
+    return render(request, "landing/feature_detail.html", ctx)
+
+
+def free_vpn(request):
+    """/free-vpn/ — ücretsiz katman hub sayfası."""
+    ctx_ui, region = build_ui_context(request)
+    ctx = {
+        "seo_title": "Free VPN — Truly Unlimited, No Sign-Up | VPNsterr",
+        "seo_description": (
+            "Looking for a good free VPN? VPNsterr's free tier is genuinely unlimited — "
+            "no data caps, no account, zero logs. See how it's funded and what Premium adds."
+        ),
+        **ctx_ui,
+    }
+    return render(request, "landing/free_vpn.html", ctx)
+
+
+def refund_policy(request):
+    return render(request, "landing/refund_policy.html")
+
+
+def acceptable_use(request):
+    return render(request, "landing/acceptable_use.html")
+
+
+def best_free_vpn_extension(request):
+    """/best-free-vpn-extension/ — ücretsiz uzantı listicle sayfası."""
+    ctx_ui, region = build_ui_context(request)
+    ctx = {
+        "seo_title": _("Best Free VPN Extension for Chrome: Top 10 (2026) | VPNsterr"),
+        "seo_description": _(
+            "We ranked the top 10 free VPN Chrome extensions for speed and privacy. Only VPNsterr "
+            "stays truly unlimited — zero logs, no sign-up needed. See why it wins."
+        ),
+        **ctx_ui,
+    }
+    return render(request, "landing/best_free_vpn_extension.html", ctx)
 
 
 def payment(request):
@@ -188,9 +277,9 @@ def payment(request):
     }
 
     ctx = {
-        "seo_title": _("Checkout — CoolVPN"),
+        "seo_title": _("Checkout — VPNsterr"),
         "seo_description": _(
-            "Secure checkout for CoolVPN plans. Choose sign-in and payment method."
+            "Secure checkout for VPNsterr plans. Choose sign-in and payment method."
         ),
         **ctx_ui,
         "plan_map": plan_map,
@@ -495,7 +584,7 @@ def checkout_create(request):
         "price_amount": float(total_amount),
         "price_currency": user_price_ccy,
         "order_id": order.order_id,
-        "order_description": f"CoolVPN {plan_key} plan",
+        "order_description": f"VPNsterr {plan_key} plan",
         "success_url": f"{success_u}?order_id={order.order_id}",
         "cancel_url": f"{cancel_u}?order_id={order.order_id}",
         "ipn_callback_url": ipn_url,
@@ -720,8 +809,8 @@ def login_view(request):
         **ctx_ui,
         "GOOGLE_CLIENT_ID": getattr(settings, "GOOGLE_CLIENT_ID", ""),
         "next": request.GET.get("next") or "/",
-        "seo_title": _("Sign in — CoolVPN"),
-        "seo_description": _("Sign in to manage your CoolVPN subscription."),
+        "seo_title": _("Sign in — VPNsterr"),
+        "seo_description": _("Sign in to manage your VPNsterr subscription."),
     }
     return render(request, "landing/login.html", ctx)
 

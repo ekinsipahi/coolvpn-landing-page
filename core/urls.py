@@ -11,28 +11,6 @@ Stub = TemplateView.as_view
 features_patterns = (
     [
         path(
-            "stealth/",
-            Stub(
-                template_name="stubs/simple.html",
-                extra_context={
-                    "title": "Stealth / Obfuscation",
-                    "subtitle": "Engineered to maximize access on restricted networks",
-                },
-            ),
-            name="stealth",
-        ),
-        path(
-            "dedicated-ip/",
-            Stub(
-                template_name="stubs/simple.html",
-                extra_context={
-                    "title": "Dedicated IP / Private Node",
-                    "subtitle": "Annual plans include your own private endpoint",
-                },
-            ),
-            name="dedicated_ip",
-        ),
-        path(
             "webrtc/",
             Stub(
                 template_name="stubs/simple.html",
@@ -150,8 +128,14 @@ blog_patterns = (
     "blog",
 )
 
+from django.contrib.sitemaps.views import sitemap as sitemap_view
+from core.sitemaps import SITEMAPS
+
 urlpatterns = [
     path("i18n/", include("django.conf.urls.i18n")),  # dil değişimi
+    # SEO: dil prefixsiz, tüm dilleri hreflang alternates ile listeler
+    path("sitemap.xml", sitemap_view, {"sitemaps": SITEMAPS},
+         name="django.contrib.sitemaps.views.sitemap"),
 ]
 
 urlpatterns += i18n_patterns(

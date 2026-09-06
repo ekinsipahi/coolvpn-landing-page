@@ -7,10 +7,9 @@ FAQ_QUESTIONS = [
     {
         "q": _("What is the most anonymous VPN?"),
         "a": _(
-            "CoolVPN is built for maximum anonymity. We keep zero activity logs "
-            "(independently audited), do not log IP addresses or DNS queries, use shared "
-            "exit IPs by default, support stealth obfuscation to blend in on restricted "
-            "networks, and offer an optional dedicated private server on Annual plans. "
+            "VPNsterr is built for maximum anonymity. We keep zero activity logs "
+            "by design — we do not log IP addresses or DNS queries, and use shared "
+            "exit IPs by default so your identity stays separate from your activity. "
             "Bottom line: we’re engineered to be the most anonymous VPN you can use today."
         ),
         "teaser": True,
@@ -37,17 +36,17 @@ FAQ_QUESTIONS = [
     {
         "q": _("Do you keep logs?"),
         "a": _(
-            "No. We operate a strict zero-logs policy that is independently audited. "
+            "No. We operate a strict zero-logs policy. "
             "Your identity is kept separate from your activity."
         ),
         "teaser": True,
         "priority": 5,
     },
     {
-        "q": _("Will it work on restricted networks (DPI)?"),
+        "q": _("What if I need help?"),
         "a": _(
-            "Yes. Our stealth obfuscation is engineered to bypass deep packet inspection "
-            "and common port blocks."
+            "Our support team is available 24/7. Real humans, around the clock — "
+            "you'll get an answer in minutes, not days."
         ),
         "teaser": True,
         "priority": 6,
@@ -65,7 +64,7 @@ FAQ_QUESTIONS = [
         "priority": 30,
     },
     {
-        "q": _("How fast is CoolVPN?"),
+        "q": _("How fast is VPNsterr?"),
         "a": _("Our 1000 Gbps backbone and modern protocols deliver high throughput and low jitter. Most users see minimal slowdown."),
         "teaser": False,
         "priority": 40,
@@ -77,14 +76,8 @@ FAQ_QUESTIONS = [
         "priority": 50,
     },
     {
-        "q": _("Do you offer a dedicated private server?"),
-        "a": _("Yes — Annual plans can include a single-tenant private VPN server for consistent IP, lower contention and extra isolation."),
-        "teaser": True,
-        "priority": 7,
-    },
-    {
         "q": _("What is your refund policy?"),
-        "a": _("We offer a 30-day money-back guarantee on Annual plans. If it’s not for you, we’ll refund you."),
+        "a": _("Refunds are available only for unused subscriptions. If you purchased a plan but never used the service, contact support and we’ll refund you in full."),
         "teaser": True,
         "priority": 8,
     },

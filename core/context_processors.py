@@ -38,18 +38,33 @@ def seo(request):
     org_schema = {
         "@context": "https://schema.org",
         "@type": "Organization",
-        "name": getattr(settings, "SITE_NAME", "CoolVPN"),
-        "url": getattr(settings, "SITE_URL", ""),
-        "logo": getattr(settings, "SITE_LOGO_URL", ""),
-        "sameAs": getattr(settings, "SITE_SAMEAS", []),
+        "@id": "https://vpnsterr.com/#org",
+        "name": getattr(settings, "SITE_NAME", "VPNsterr"),
+        "legalName": getattr(settings, "COMPANY_LEGAL_NAME", "Sterr Technologies"),
+        "url": getattr(settings, "SITE_URL", "https://vpnsterr.com"),
+        "logo": {
+            "@type": "ImageObject",
+            "url": "https://vpnsterr.com/static/img/VPNSTERR-LOGO.png",
+        },
+        "contactPoint": {
+            "@type": "ContactPoint",
+            "contactType": "customer support",
+            "email": getattr(settings, "SUPPORT_EMAIL", "support@vpnsterr.com"),
+            "availableLanguage": ["en", "tr"],
+        },
+        "sameAs": getattr(settings, "SITE_SAMEAS", [
+            "https://x.com/vpnsterr",
+            "https://instagram.com/vpnsterr",
+            "https://www.tiktok.com/@vpnsterr",
+        ]),
     }
     org_schema_json = json.dumps(org_schema, ensure_ascii=False)
 
     return {
-        "site_name": getattr(settings, "SITE_NAME", "CoolVPN"),
+        "site_name": getattr(settings, "SITE_NAME", "VPNsterr"),
         "default_description": getattr(
             settings, "DEFAULT_DESCRIPTION",
-            "Privacy-first VPN. Audited no-logs. Obfuscation for restricted networks."
+            "Privacy-first VPN. Strict no-logs. Unlimited bandwidth on every device."
         ),
         "canonical_url": abs_url,
         "hreflang_urls": hreflang_urls,

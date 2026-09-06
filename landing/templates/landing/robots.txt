@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /payment/
+Disallow: /dashboard/
+Disallow: /accounts/
+
+Sitemap: https://vpnsterr.com/sitemap.xml
