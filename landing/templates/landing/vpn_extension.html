@@ -70,7 +70,7 @@
         </p>
 
         <div class="mt-8 flex flex-col sm:flex-row gap-3">
-          <a href="{{ chrome_store_url|default:'#add-extension' }}" class="vs-btn vs-btn-primary vs-btn-lg" rel="nofollow">
+          <a href="{{ chrome_store_url|default:'#add-extension' }}" class="vs-btn vs-btn-primary vs-btn-lg" rel="nofollow" data-ga-event="extension_install_click" data-ga-label="hero">
             <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><path d="M21.17 8H12"/><path d="M3.95 6.06 8.54 14"/><path d="M10.88 21.94 15.46 14"/></svg>
             {% trans "Add to Chrome — It's Free" %}
           </a>
@@ -204,7 +204,7 @@
     </div>
 
     <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
-      <a href="{{ chrome_store_url|default:'#add-extension' }}" class="vs-btn vs-btn-ghost vs-btn-lg" rel="nofollow">{% trans "Start Free" %}</a>
+      <a href="{{ chrome_store_url|default:'#add-extension' }}" class="vs-btn vs-btn-ghost vs-btn-lg" rel="nofollow" data-ga-event="extension_install_click" data-ga-label="free_vs_premium">{% trans "Start Free" %}</a>
       <a href="{% url 'pricing' %}" class="vs-btn vs-btn-primary vs-btn-lg">
         {% trans "Go Premium" %} — {{ ui_currency_symbol }}{{ ui_monthly }}/{% trans "mo" %}
         <svg class="h-5 w-5 rtl:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
@@ -283,7 +283,7 @@
     </div>
 
     <div class="mt-10 text-center">
-      <a href="{{ chrome_store_url|default:'#add-extension' }}" class="vs-btn vs-btn-primary vs-btn-lg" rel="nofollow">
+      <a href="{{ chrome_store_url|default:'#add-extension' }}" class="vs-btn vs-btn-primary vs-btn-lg" rel="nofollow" data-ga-event="extension_install_click" data-ga-label="faq_bottom">
         {% trans "Add the Free VPN Extension" %}
         <svg class="h-5 w-5 rtl:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
       </a>

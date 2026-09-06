@@ -77,6 +77,20 @@
       msg.textContent = '{% trans "Payment confirmed — your subscription is active." %}';
       setIcon('ok');
       dl.classList.remove('hidden');
+      // GA4 purchase (order başına bir kez)
+      try {
+        const k = 'ga_purchase_' + orderId;
+        if (!localStorage.getItem(k)) {
+          localStorage.setItem(k, '1');
+          window.vsTrack && vsTrack('purchase', {
+            transaction_id: orderId,
+            currency: 'USD',
+            value: parseFloat('{{ ga_amount }}') || 0,
+            payment_type: 'crypto',
+            items: [{ item_id: '{{ ga_plan }}', item_name: 'VPNsterr {{ ga_plan }}' }]
+          });
+        }
+      } catch(_){}
       return true;
     }
     if(d.status === 'failed' || d.status === 'expired' || d.status === 'refunded'){

@@ -26,6 +26,9 @@ SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "dev-only-insecure-change-me")
 DEBUG = os.environ.get("DJANGO_DEBUG", "1") == "1"
 ALLOWED_HOSTS = [h.strip() for h in os.environ.get("DJANGO_ALLOWED_HOSTS", "*").split(",") if h.strip()]
 
+# ---- Analytics
+GA_MEASUREMENT_ID = os.environ.get("GA_MEASUREMENT_ID", "")
+
 # ---- Site kimliği
 SITE_NAME = "VPNsterr"
 COMPANY_LEGAL_NAME = "Sterr Technologies"

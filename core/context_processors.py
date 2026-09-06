@@ -61,6 +61,7 @@ def seo(request):
     org_schema_json = json.dumps(org_schema, ensure_ascii=False)
 
     return {
+        "GA_MEASUREMENT_ID": getattr(settings, "GA_MEASUREMENT_ID", ""),
         "site_name": getattr(settings, "SITE_NAME", "VPNsterr"),
         "default_description": getattr(
             settings, "DEFAULT_DESCRIPTION",

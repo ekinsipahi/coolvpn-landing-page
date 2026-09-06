@@ -31,7 +31,7 @@
           <li class="vs-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>{% trans "Strict zero logs — fully anonymous" %}</li>
         </ul>
 
-        <a href="{% url 'pricing' %}" class="vs-btn vs-btn-ghost mt-8 w-full">{% trans "Choose Monthly" %}</a>
+        <a href="{% url 'pricing' %}" class="vs-btn vs-btn-ghost mt-8 w-full" data-ga-event="select_item" data-ga-item="monthly" data-ga-value="4.99">{% trans "Choose Monthly" %}</a>
       </article>
 
       <!-- ANNUAL (featured, ortada) -->
@@ -55,7 +55,7 @@
           <li class="vs-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>{% trans "Best price per month" %}</li>
         </ul>
 
-        <a href="{% url 'pricing' %}" class="vs-btn vs-btn-primary mt-8 w-full">{% trans "Choose Annual" %}</a>
+        <a href="{% url 'pricing' %}" class="vs-btn vs-btn-primary mt-8 w-full" data-ga-event="select_item" data-ga-item="annual" data-ga-value="39.99">{% trans "Choose Annual" %}</a>
       </article>
 
       <!-- 6 MONTHS -->
@@ -79,7 +79,7 @@
           <li class="vs-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>{% trans "Perfect middle ground" %}</li>
         </ul>
 
-        <a href="{% url 'pricing' %}" class="vs-btn vs-btn-ghost mt-8 w-full">{% trans "Choose 6-Month" %}</a>
+        <a href="{% url 'pricing' %}" class="vs-btn vs-btn-ghost mt-8 w-full" data-ga-event="select_item" data-ga-item="semi" data-ga-value="24.99">{% trans "Choose 6-Month" %}</a>
       </article>
     </div>
 

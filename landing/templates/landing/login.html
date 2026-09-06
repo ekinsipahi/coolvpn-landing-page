@@ -147,6 +147,7 @@
         body: new URLSearchParams({email})
       });
       const d = await r.json();
+      window.__lastEmailExists = d?.ok ? !!d.exists : null;
       const el = qs('#email-hint');
       if(d?.ok && el){
         el.textContent = d.exists
@@ -174,7 +175,10 @@
         credentials:'same-origin'
       });
       const d = await r.json();
-      if(d?.ok){ location.href = nextUrl || '/'; }
+      if(d?.ok){
+        try { window.vsTrack && vsTrack(window.__lastEmailExists === false ? 'sign_up' : 'login', {method: 'email'}); } catch(_){}
+        location.href = nextUrl || '/';
+      }
       else{ showFormAlert(d?.error === 'invalid_credentials' ? "{{ _('Invalid email or password.') }}" : "{{ _('Sign-in failed. Try again.') }}"); }
     }catch(_){ showFormAlert("{{ _('Network problem. Try again.') }}"); }
   }
@@ -207,7 +211,10 @@
     if(!resp || !resp.credential) return;
     try{
       const d = await finishWithToken(resp.credential);
-      if(d?.ok){ location.href = nextUrl || '/'; }
+      if(d?.ok){
+        try { window.vsTrack && vsTrack('login', {method: 'google'}); } catch(_){}
+        location.href = nextUrl || '/';
+      }
       else{ showFormAlert(d?.error || "{{ _('Google sign-in failed.') }}"); }
     }catch(_){ showFormAlert("{{ _('Google sign-in failed.') }}"); }
   };

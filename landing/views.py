@@ -807,7 +807,12 @@ def nowpay_reconcile(request):
 
 def payment_success(request):
     order_id = (request.GET.get("order_id") or "").strip()
-    ctx = {"order_id": order_id}
+    order = Order.objects.filter(order_id=order_id).first() if order_id else None
+    ctx = {
+        "order_id": order_id,
+        "ga_plan": order.plan_key if order else "",
+        "ga_amount": str(order.price_amount) if order else "",
+    }
     return render(request, "landing/payment_success.html", ctx)
 
 @require_GET
@@ -1266,8 +1271,14 @@ def stripe_success(request):
         sess = _stripe().checkout.Session.retrieve(session_id, expand=["subscription"])
         if sess.get("payment_status") in ("paid", "no_payment_required") and sess.get("subscription"):
             plan_key = (sess.get("metadata") or {}).get("plan_key") or "monthly"
-            _grant_stripe_subscription(request.user, plan_key, sess["subscription"])
+            local = _grant_stripe_subscription(request.user, plan_key, sess["subscription"])
             messages.success(request, "Payment confirmed — Premium is active. Welcome aboard!")
+            amount = (sess.get("amount_total") or 0) / 100.0
+            from urllib.parse import urlencode
+            q = urlencode({"paid": "1", "plan": plan_key,
+                           "txn": local.stripe_subscription_id or session_id,
+                           "amount": f"{amount:.2f}"})
+            return redirect(f"/dashboard/?{q}")
     except Exception:
         messages.info(request, "Payment received — activation may take a minute.")
     return redirect("dashboard")

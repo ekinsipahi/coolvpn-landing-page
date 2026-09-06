@@ -198,7 +198,7 @@
         </div>
         {% else %}
           <a href="{% url 'login' %}" class="vs-nav-link !px-3.5">{% trans "Sign in" %}</a>
-          <a href="{% url 'pricing' %}" class="vs-btn !rounded-xl !px-4 !py-2.5 ms-1 text-white" style="background:linear-gradient(135deg, var(--vs-600), var(--vs-800)); box-shadow:var(--vs-shadow-sm)">{% trans "Get VPNsterr" %}</a>
+          <a href="{% url 'pricing' %}" class="vs-btn !rounded-xl !px-4 !py-2.5 ms-1 text-white" style="background:linear-gradient(135deg, var(--vs-600), var(--vs-800)); box-shadow:var(--vs-shadow-sm)" data-ga-event="cta_get_started" data-ga-label="navbar">{% trans "Get VPNsterr" %}</a>
         {% endif %}
       </div>
 

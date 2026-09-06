@@ -109,7 +109,8 @@
         {% if active_sub.source == "stripe" %}
           <form method="post" action="{% url 'stripe_billing_portal' %}" class="mt-5">
             {% csrf_token %}
-            <button type="submit" class="vs-btn vs-btn-ghost w-full !py-2.5 !text-xs">
+            <button type="submit" class="vs-btn vs-btn-ghost w-full !py-2.5 !text-xs"
+                    data-ga-event="billing_portal_open">
               {% trans "Manage / cancel subscription" %}
             </button>
           </form>
@@ -118,7 +119,8 @@
           </p>
         {% else %}
           <div class="mt-5 grid grid-cols-2 gap-2">
-            <a href="{% url 'payment' %}?plan={{ plan_key|default:'annual' }}" class="vs-btn vs-btn-ghost !py-2.5 !text-xs">
+            <a href="{% url 'payment' %}?plan={{ plan_key|default:'annual' }}" class="vs-btn vs-btn-ghost !py-2.5 !text-xs"
+               data-ga-event="extend_click" data-ga-item="{{ plan_key|default:'annual' }}">
               {% trans "Extend (crypto)" %}
             </a>
             <button type="button" id="btn-switch-card" data-plan="{{ plan_key|default:'annual' }}"
@@ -319,7 +321,7 @@
                 {% csrf_token %}
                 <input type="hidden" name="confirm" value="yes">
                 <button type="button" id="btn-delete-cancel" class="vs-btn vs-btn-ghost">{% trans "Cancel" %}</button>
-                <button type="submit" id="btn-delete-final" disabled
+                <button type="submit" id="btn-delete-final" disabled data-ga-event="account_delete"
                         class="vs-btn text-white transition-opacity opacity-40 cursor-not-allowed"
                         style="background:#e11d48">
                   {% trans "Yes, delete forever" %}
@@ -337,6 +339,28 @@
 {% block scripts %}
 {{ block.super }}
 <script>
+  // ---- GA4: Stripe dönüşünde purchase (txn başına bir kez) ----
+  (function(){
+    const q = new URLSearchParams(location.search);
+    if (q.get('paid') !== '1') return;
+    const txn = q.get('txn') || '';
+    try {
+      const k = 'ga_purchase_' + txn;
+      if (txn && !localStorage.getItem(k)) {
+        localStorage.setItem(k, '1');
+        window.vsTrack && vsTrack('purchase', {
+          transaction_id: txn,
+          currency: 'USD',
+          value: parseFloat(q.get('amount')) || 0,
+          payment_type: 'card',
+          items: [{ item_id: q.get('plan') || '', item_name: 'VPNsterr ' + (q.get('plan') || '') }]
+        });
+      }
+    } catch(_){}
+    // URL'i temizle (yenilemede tekrar tetiklenmesin)
+    try { history.replaceState({}, '', location.pathname); } catch(_){}
+  })();
+
   // ---- Kriptodan karta geçiş: Stripe Checkout (trial = mevcut bitiş) ----
   (function(){
     const btn = document.getElementById('btn-switch-card');
@@ -434,6 +458,7 @@
       try { data = await r.json(); } catch(e) { data = null; }
 
       if (r.ok && data && data.ok) {
+        try { window.vsTrack && vsTrack('revoke_device', {}); } catch(_){}
         location.reload();
         return false;
       }

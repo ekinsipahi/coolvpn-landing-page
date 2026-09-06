@@ -61,7 +61,7 @@
 
         <!-- CTA'lar -->
         <div class="mt-7 flex flex-col sm:flex-row gap-3">
-          <a href="{% url 'pricing' %}" class="vs-btn vs-btn-primary vs-btn-lg">
+          <a href="{% url 'pricing' %}" class="vs-btn vs-btn-primary vs-btn-lg" data-ga-event="cta_get_started">
             {% trans "Get Started" %}
             <svg class="h-5 w-5 rtl:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
           </a>
@@ -72,7 +72,7 @@
 
         <p class="mt-4 text-sm" style="color:var(--vs-text-2)">
           {% trans "Not ready to pay?" %}
-          <a href="{% url 'vpn_extension' %}" class="font-semibold underline" style="color:var(--vs-600)">
+          <a href="{% url 'vpn_extension' %}" class="font-semibold underline" style="color:var(--vs-600)" data-ga-event="extension_cta" data-ga-label="hero_free_line">
             {% trans "Get the 100% free unlimited browser extension" %}
           </a> — {% trans "no sign-up needed." %}
         </p>

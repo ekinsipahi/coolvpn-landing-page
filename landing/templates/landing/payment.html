@@ -357,6 +357,7 @@
         qsa('.gw-card').forEach(c=>c.classList.remove('is-selected'));
         card.classList.add('is-selected');
         selectedGW = 'nowpay_any';
+        try { window.vsTrack && vsTrack('add_payment_info', {payment_type: 'crypto', currency: 'USD', value: parseFloat('{{ plan.price }}')||0}); } catch(_){}
     });
 
     box.appendChild(card);
@@ -389,6 +390,7 @@
         qsa('.gw-card').forEach(c=>c.classList.remove('is-selected'));
         stripeCard.classList.add('is-selected');
         selectedGW = 'stripe';
+        try { window.vsTrack && vsTrack('add_payment_info', {payment_type: 'card', currency: 'USD', value: parseFloat('{{ plan.price }}')||0}); } catch(_){}
       });
       box.appendChild(stripeCard);
     }
@@ -462,7 +464,10 @@
         credentials: 'same-origin'
       });
       const d = await r.json();
-      if(d?.ok){ CFG.is_auth = true; }
+      if(d?.ok){
+        CFG.is_auth = true;
+        try { window.vsTrack && vsTrack(emailExists === false ? 'sign_up' : 'login', {method: 'email'}); } catch(_){}
+      }
       return d;
     }catch(e){
       return {ok:false, error:'network'};
@@ -559,6 +564,7 @@
     try{
       const d = await finishWithToken(resp.credential);
       if(d?.ok){
+        try { window.vsTrack && vsTrack('login', {method: 'google'}); } catch(_){}
         showBanner('Signed in ✔', true);
         setTimeout(()=>location.reload(), 300);
       } else {
@@ -663,6 +669,12 @@
 
   /* ---------- Init ---------- */
   document.addEventListener('DOMContentLoaded', ()=>{
+    // GA4: ödeme sayfası görüldü = funnel başladı
+    try { window.vsTrack && vsTrack('begin_checkout', {
+      currency: 'USD', value: parseFloat('{{ plan.price }}') || 0,
+      items: [{ item_id: '{{ plan.key }}', item_name: 'VPNsterr {{ plan.key }}' }]
+    }); } catch(_){}
+
     bindPasswordToggle();
 
     const emailInput = qs('#email');

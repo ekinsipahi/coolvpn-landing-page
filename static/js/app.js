@@ -1,6 +1,25 @@
 (function () {
   const html = document.documentElement;
 
+  /* ---------- Analytics yardımcıları ---------- */
+  // Her yerden: vsTrack('event_adi', {param: deger})
+  window.vsTrack = function (name, params) {
+    try { if (typeof gtag === 'function') gtag('event', name, params || {}); } catch (e) { }
+  };
+  // Deklaratif: <a data-ga-event="select_item" data-ga-item="annual" data-ga-value="39.99">
+  document.addEventListener('click', function (e) {
+    const el = e.target.closest('[data-ga-event]');
+    if (!el) return;
+    const params = {};
+    if (el.dataset.gaItem) {
+      params.item_list_id = 'plans';
+      params.items = [{ item_id: el.dataset.gaItem, item_name: 'VPNsterr ' + el.dataset.gaItem }];
+    }
+    if (el.dataset.gaValue) { params.value = parseFloat(el.dataset.gaValue); params.currency = 'USD'; }
+    if (el.dataset.gaLabel) params.label = el.dataset.gaLabel;
+    window.vsTrack(el.dataset.gaEvent, params);
+  }, { capture: true, passive: true });
+
   /* ---------- Theme ---------- */
   function applyTheme(next) {
     if (next === 'dark') {
