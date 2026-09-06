@@ -260,16 +260,47 @@
           <p class="mt-1.5 text-xs" style="color:var(--vs-text-2)">
             {% trans "Deleting your account removes your subscription, devices and all account data permanently. This cannot be undone." %}
           </p>
-          <form method="post" action="{% url 'account_delete' %}" class="mt-4"
-                onsubmit="return confirm('{% trans "Delete your account permanently? This cannot be undone." %}');">
-            {% csrf_token %}
-            <input type="hidden" name="confirm" value="yes">
-            <button type="submit"
-                    class="vs-btn !py-2 !text-xs text-rose-600 dark:text-rose-400"
-                    style="background:rgba(225,29,72,.06); border:1px solid rgba(225,29,72,.3)">
-              {% trans "Delete my account" %}
-            </button>
-          </form>
+          <button type="button" id="btn-delete-open"
+                  class="vs-btn mt-4 !py-2 !text-xs text-rose-600 dark:text-rose-400"
+                  style="background:rgba(225,29,72,.06); border:1px solid rgba(225,29,72,.3)">
+            {% trans "Delete my account" %}
+          </button>
+
+          <!-- İkinci onay modalı: direkt silme YOK -->
+          <div id="delete-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4"
+               role="dialog" aria-modal="true" aria-labelledby="delete-modal-title">
+            <div id="delete-modal-backdrop" class="absolute inset-0" style="background:rgba(4,16,28,.6); backdrop-filter:blur(4px)"></div>
+            <div class="relative w-full max-w-md rounded-2xl p-7"
+                 style="background:var(--vs-card-2); border:1px solid rgba(225,29,72,.35); box-shadow:var(--vs-shadow-lg)">
+              <div class="mx-auto grid h-14 w-14 place-content-center rounded-full"
+                   style="background:rgba(225,29,72,.1); color:#e11d48">
+                <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+              </div>
+              <h3 id="delete-modal-title" class="mt-4 text-center text-lg font-bold tracking-tight" style="color:var(--vs-text)">
+                {% trans "Your account will be permanently deleted" %}
+              </h3>
+              <p class="mt-2 text-center text-sm leading-6" style="color:var(--vs-text-2)">
+                {% trans "Are you absolutely sure? Your subscription, all linked devices and every piece of account data will be erased forever. There is no way to recover it." %}
+              </p>
+
+              <label class="mt-5 flex items-start gap-2.5 rounded-xl p-3 cursor-pointer text-sm"
+                     style="background:rgba(225,29,72,.05); border:1px solid rgba(225,29,72,.2); color:var(--vs-text)">
+                <input type="checkbox" id="delete-understand" class="mt-0.5 h-4 w-4 accent-rose-600">
+                <span>{% trans "I understand this action is permanent and cannot be undone." %}</span>
+              </label>
+
+              <form method="post" action="{% url 'account_delete' %}" class="mt-5 grid grid-cols-2 gap-3">
+                {% csrf_token %}
+                <input type="hidden" name="confirm" value="yes">
+                <button type="button" id="btn-delete-cancel" class="vs-btn vs-btn-ghost">{% trans "Cancel" %}</button>
+                <button type="submit" id="btn-delete-final" disabled
+                        class="vs-btn text-white transition-opacity opacity-40 cursor-not-allowed"
+                        style="background:#e11d48">
+                  {% trans "Yes, delete forever" %}
+                </button>
+              </form>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -280,6 +311,31 @@
 {% block scripts %}
 {{ block.super }}
 <script>
+  // ---- Hesap silme: iki aşamalı onay ----
+  (function(){
+    const openBtn  = document.getElementById('btn-delete-open');
+    const modal    = document.getElementById('delete-modal');
+    const backdrop = document.getElementById('delete-modal-backdrop');
+    const cancel   = document.getElementById('btn-delete-cancel');
+    const check    = document.getElementById('delete-understand');
+    const finalBtn = document.getElementById('btn-delete-final');
+    if(!openBtn || !modal) return;
+
+    function open(){ modal.classList.remove('hidden'); check.checked = false; sync(); }
+    function close(){ modal.classList.add('hidden'); }
+    function sync(){
+      const ok = check.checked;
+      finalBtn.disabled = !ok;
+      finalBtn.classList.toggle('opacity-40', !ok);
+      finalBtn.classList.toggle('cursor-not-allowed', !ok);
+    }
+    openBtn.addEventListener('click', open);
+    cancel.addEventListener('click', close);
+    backdrop.addEventListener('click', close);
+    document.addEventListener('keydown', e => { if(e.key === 'Escape') close(); });
+    check.addEventListener('change', sync);
+  })();
+
     // Copy helper
   function copyToClipboard(text, btn){
     if(!text) return;
