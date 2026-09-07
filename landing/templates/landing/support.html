@@ -53,19 +53,25 @@
         </span>
         <h2 class="mt-4 text-lg font-bold tracking-tight" style="color:var(--vs-text)">{% trans "Chat with us" %}</h2>
         <p class="mt-1.5 text-sm leading-6 flex-1" style="color:var(--vs-text-2)">
-          {% trans "The fastest option. Our assistant answers questions about the free extension, Premium plans and your account right away — and pulls in a human when something needs one. No account required." %}
+          {% trans "The fastest option. Our assistant answers questions about your account, Premium and the extension right away — and pulls in a human when something needs one. It lives in your dashboard, signed in, so the conversation stays tied to your account." %}
         </p>
         <p class="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold" style="color:#12b76a">
           <span class="h-1.5 w-1.5 rounded-full" style="background:#12b76a"></span>
           {% trans "Online now · instant reply" %}
         </p>
-        <button type="button" id="btn-open-chat" class="vs-btn vs-btn-primary mt-4 w-full !py-2.5 !text-sm"
-                data-ga-event="support_chat_open">
-          {% trans "Start a chat" %}
-        </button>
-        <p class="mt-2 text-center text-[11px]" style="color:var(--vs-text-2)">
-          {% trans "Or use the chat bubble in the bottom-right corner of any page." %}
-        </p>
+        {% if user.is_authenticated %}
+          <a href="{% url 'dashboard' %}" class="vs-btn vs-btn-primary mt-4 w-full !py-2.5 !text-sm"
+             data-ga-event="support_chat_open">{% trans "Open the chat" %}</a>
+          <p class="mt-2 text-center text-[11px]" style="color:var(--vs-text-2)">
+            {% trans "Look for the chat bubble in the bottom-right of your dashboard." %}
+          </p>
+        {% else %}
+          <a href="{% url 'login' %}?next={% url 'dashboard' %}" class="vs-btn vs-btn-primary mt-4 w-full !py-2.5 !text-sm"
+             data-ga-event="support_chat_open">{% trans "Sign in to chat" %}</a>
+          <p class="mt-2 text-center text-[11px]" style="color:var(--vs-text-2)">
+            {% trans "No account? Email us — same team, same answers." %}
+          </p>
+        {% endif %}
       </div>
 
       <!-- 2. Ticket -->
@@ -238,19 +244,3 @@
   {% include "partials/footer.html" %}
 {% endblock %}
 
-{% block scripts %}
-  {{ block.super }}
-  <script>
-    // "Start a chat" → köşedeki asistan balonunu aç (widget her sayfada var).
-    (function () {
-      var btn = document.getElementById('btn-open-chat');
-      if (!btn) return;
-      btn.addEventListener('click', function () {
-        var fab = document.getElementById('vsa-fab');
-        if (fab) { fab.click(); return; }
-        // Widget beklenmedik şekilde yoksa kullanıcı boşa tıklamasın:
-        window.location.href = 'mailto:support@vpnsterr.com';
-      });
-    })();
-  </script>
-{% endblock %}

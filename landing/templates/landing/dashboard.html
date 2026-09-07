@@ -410,6 +410,15 @@
 
 {% block scripts %}
 {{ block.super }}
+
+{% comment %}
+  AI asistan chatbox'ı SADECE burada — dashboard girişli kullanıcıya özel.
+  Halka açık sayfalara koyulduğunda /api/assistant/ herkese açık bir LLM
+  ucu hâline geliyor ve kötüye kullanımla token yakılıyordu. Uç nokta da
+  ayrıca giriş zorunlu kılıyor (views_support.assistant_api).
+{% endcomment %}
+{% include "partials/assistant_widget.html" %}
+
 <script>
   // ---- GA4: Stripe dönüşünde purchase (txn başına bir kez) ----
   (function(){

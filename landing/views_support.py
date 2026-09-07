@@ -125,29 +125,14 @@ _FALLBACK_REPLY = (
 )
 
 
-def _client_key(request) -> str:
-    """Konuşmanın sahibi: girişli kullanıcı id'si ya da anonim session key."""
-    if request.user.is_authenticated:
-        return f"u{request.user.id}"
-    if not request.session.session_key:
-        request.session.create()
-    return f"s{request.session.session_key}"
-
-
 def _active_conv(request, create: bool = False):
-    qs = AssistantConversation.objects.exclude(status=AssistantConversation.STATUS_CLOSED)
-    if request.user.is_authenticated:
-        conv = qs.filter(user=request.user).order_by("-updated_at").first()
-    else:
-        key = request.session.session_key or ""
-        conv = qs.filter(session_key=key, user__isnull=True).order_by("-updated_at").first() if key else None
+    """Girişli kullanıcının açık konuşması. Anonim erişim yok (bkz.
+    assistant_api): halka açık bir LLM ucu bırakmıyoruz."""
+    conv = (AssistantConversation.objects
+            .exclude(status=AssistantConversation.STATUS_CLOSED)
+            .filter(user=request.user).order_by("-updated_at").first())
     if conv is None and create:
-        if request.user.is_authenticated:
-            conv = AssistantConversation.objects.create(user=request.user)
-        else:
-            if not request.session.session_key:
-                request.session.create()
-            conv = AssistantConversation.objects.create(session_key=request.session.session_key)
+        conv = AssistantConversation.objects.create(user=request.user)
     return conv
 
 
@@ -169,8 +154,9 @@ def _serialize(conv, mark_seen: bool = False) -> dict:
 
 
 def _rate_limited(request) -> bool:
-    """LLM POST'u için kaba ama etkili saatlik sayaç (cache tabanlı)."""
-    who = _client_key(request)
+    """LLM POST'u için kaba ama etkili saatlik sayaç (cache tabanlı):
+    hesap başına ve IP başına ayrı ayrı — tek kişi çok hesapla da yakamaz."""
+    who = f"u{request.user.id}"
     ip = (request.META.get("HTTP_X_FORWARDED_FOR", "").split(",")[0].strip()
           or request.META.get("REMOTE_ADDR", "") or "?")
     now_h = timezone.now().strftime("%Y%m%d%H")
@@ -190,8 +176,22 @@ def _rate_limited(request) -> bool:
 @ensure_csrf_cookie
 def assistant_api(request):
     """GET → aktif konuşma (?seen=1 widget açık demek). POST → mesaj + AI cevabı.
+
+    GİRİŞ ZORUNLU. Bu uç her POST'ta para harcayan bir LLM çağrısı yapıyor;
+    anonime açık bırakmak, sitenin arkasında herkesin kullanabildiği bedava
+    bir Claude ucu bırakmak demekti. Widget da yalnızca dashboard'da render
+    ediliyor ama asıl kapı burası: sayfayı gizlemek uca istek atmayı
+    engellemez, giriş şartı engeller.
+
     @ensure_csrf_cookie: widget'ın ilk GET'i csrftoken çerezini garanti eder,
-    POST'lar X-CSRFToken başlığıyla korunur."""
+    POST'lar X-CSRFToken başlığıyla korunur.
+    """
+    if not request.user.is_authenticated:
+        # Şablon değil JSON: widget'ın fetch'i giriş sayfasına yönlendirilip
+        # HTML'i JSON sanmasın.
+        return JsonResponse({"error": "login_required",
+                             "detail": "Sign in to chat with the assistant."},
+                            status=401)
     if request.method == "GET":
         conv = _active_conv(request)
         return JsonResponse(_serialize(conv, mark_seen=request.GET.get("seen") == "1"))
