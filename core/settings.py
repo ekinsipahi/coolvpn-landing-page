@@ -193,6 +193,17 @@ EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
 EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "1") == "1"
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "VPNsterr <support@vpnsterr.com>")
 
+# ------------ Resend — işlem/pazarlama mailleri (welcome, premium aktif, ticket)
+# Boşsa landing.helpers.mailer Django EMAIL_BACKEND'e düşer (dev'de console).
+RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "").strip()
+NOREPLY_EMAIL = os.environ.get("NOREPLY_EMAIL", "VPNsterr <noreply@vpnsterr.com>").strip()
+# Ticket/escalation bildirimlerinin yönlendiği operatör adresi.
+SUPPORT_FORWARD_EMAIL = os.environ.get("SUPPORT_FORWARD_EMAIL", "").strip()
+
+# ------------ AI asistan (köşedeki chatbox) — Claude
+ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "").strip()
+ASSISTANT_MODEL = os.environ.get("ASSISTANT_MODEL", "claude-haiku-4-5-20251001").strip()
+
 # ------------ Static
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]

@@ -1,0 +1,372 @@
+{% load static %}
+{% comment %}
+Köşedeki AI asistan chatbox'ı — her sayfada (base.html'den include edilir).
+Kendi kendine yeten parça: stil + davranış + ZİL SESLERİ (Web Audio sentezi,
+ses dosyası yok). Poll ritmi: açıkken 6 sn; kapalıyken 60-75 sn (sadece
+konuşması OLAN ziyaretçi için) — yeni cevap gelince rozet + "sparkle" zili.
+{% endcomment %}
+<div id="vsa-root" dir="ltr">
+  <!-- Panel -->
+  <div id="vsa-panel" hidden>
+    <div class="vsa-head">
+      <span class="vsa-ava">
+        <img src="{% static 'img/logo-mark.png' %}" alt="" width="26" height="26" onerror="this.style.display='none'">
+      </span>
+      <div class="vsa-headtxt">
+        <div class="vsa-title">VPNsterr Assistant</div>
+        <div class="vsa-sub"><span id="vsa-status">⚡ AI online — ask anything</span></div>
+      </div>
+      <button id="vsa-close" aria-label="Close chat">✕</button>
+    </div>
+
+    <div class="vsa-bodywrap">
+      <div id="vsa-msgs" class="vsa-msgs">
+        <div id="vsa-empty" class="vsa-empty">
+          <div style="font-size:30px">👋</div>
+          <p>Hi! I'm the VPNsterr assistant.<br>
+             Questions about the free extension, Premium plans, or your account — fire away.</p>
+        </div>
+      </div>
+      <button id="vsa-jump" class="vsa-jump" hidden>↓ new</button>
+    </div>
+
+    <div class="vsa-inputrow">
+      <textarea id="vsa-input" rows="1" maxlength="2000"
+                placeholder="Type a message…"></textarea>
+      <button id="vsa-send" aria-label="Send">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Balon -->
+  <button id="vsa-fab" aria-label="Chat with the VPNsterr assistant">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <span id="vsa-badge" hidden>0</span>
+  </button>
+</div>
+
+<style>
+  /* Widget stilleri bilerek kendi içinde: Tailwind taramasına ve app.css
+     yeniden derlemesine bağımlı olmasın, her sayfada aynı görünsün. */
+  #vsa-root{position:fixed;right:18px;bottom:18px;z-index:9990;font-family:Inter,system-ui,sans-serif}
+  #vsa-fab{position:relative;display:grid;place-content:center;width:56px;height:56px;border:0;border-radius:9999px;
+    cursor:pointer;color:#fff;background:linear-gradient(120deg,var(--vs-500,#1090c0),#6366f1 55%,#d946ef);
+    box-shadow:0 10px 28px rgba(16,144,192,.4);transition:transform .15s ease}
+  #vsa-fab:hover{transform:scale(1.06)}
+  #vsa-badge{position:absolute;top:-4px;right:-4px;min-width:20px;height:20px;padding:0 5px;border-radius:9999px;
+    background:#e11d48;border:2px solid #fff;color:#fff;font-size:11px;font-weight:800;line-height:16px}
+  /* KRİTİK: display:flex, [hidden]'ın UA display:none'unu ezer — panel her
+     sayfada açık sızıyordu. hidden her zaman kazanmalı. */
+  #vsa-panel[hidden]{display:none!important}
+  #vsa-panel{display:flex;flex-direction:column;overflow:hidden;margin-bottom:12px;
+    width:min(372px,calc(100vw - 32px));height:min(560px,calc(100vh - 120px));
+    border-radius:18px;border:1px solid var(--vs-line,#dbe7f0);background:var(--vs-card,#fff);
+    /* --vs-card sitede camsı (yarı saydam) olabildiği için arkadaki içerik
+       panelden görünüyordu — blur ile buzlu cama çevrilir, navbar pill ile
+       aynı estetik. */
+    backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+    box-shadow:0 24px 60px rgba(8,35,53,.25);transform-origin:bottom right;
+    animation:vsa-pop .18s ease}
+  @keyframes vsa-pop{from{opacity:0;transform:translateY(10px) scale(.96)}to{opacity:1;transform:none}}
+  .vsa-head{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--vs-line,#dbe7f0);
+    background:linear-gradient(120deg,color-mix(in srgb,var(--vs-500,#1090c0) 10%,transparent),color-mix(in srgb,#d946ef 8%,transparent))}
+  .vsa-ava{display:grid;place-content:center;width:36px;height:36px;border-radius:10px;
+    background:color-mix(in srgb,var(--vs-500,#1090c0) 12%,transparent);
+    border:1px solid color-mix(in srgb,var(--vs-500,#1090c0) 30%,transparent)}
+  .vsa-headtxt{flex:1;min-width:0}
+  .vsa-title{font-size:14px;font-weight:800;color:var(--vs-text,#0c2233)}
+  .vsa-sub{font-size:11px;font-weight:600;color:var(--vs-500,#1090c0);margin-top:2px}
+  #vsa-close{border:0;background:none;cursor:pointer;font-size:16px;color:var(--vs-text-2,#5b7183);padding:6px}
+  #vsa-close:hover{color:var(--vs-text,#0c2233)}
+  .vsa-bodywrap{position:relative;flex:1;min-height:0}
+  .vsa-msgs{position:absolute;inset:0;overflow-y:auto;display:flex;flex-direction:column;gap:8px;
+    padding:14px;scrollbar-width:thin}
+  .vsa-empty{margin:auto;text-align:center;max-width:240px;color:var(--vs-text-2,#5b7183);font-size:13px;line-height:1.6}
+  .vsa-row{display:flex;flex-direction:column;max-width:86%}
+  .vsa-row.user{align-self:flex-end;align-items:flex-end}
+  .vsa-row.bot{align-self:flex-start;align-items:flex-start}
+  .vsa-who{font-size:10px;font-weight:800;color:#d946ef;padding:0 4px;margin-bottom:2px}
+  .vsa-bub{padding:9px 12px;font-size:13px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere;
+    box-shadow:0 1px 2px rgba(8,35,53,.07)}
+  .vsa-row.user .vsa-bub{border-radius:14px 14px 4px 14px;color:#fff;
+    background:linear-gradient(120deg,var(--vs-500,#1090c0),#6366f1)}
+  .vsa-row.bot .vsa-bub{border-radius:14px 14px 14px 4px;color:var(--vs-text,#0c2233);
+    background:var(--vs-card-2,#f2f7fb);border:1px solid var(--vs-line,#dbe7f0)}
+  .vsa-bub a{text-decoration:underline;text-underline-offset:2px}
+  .vsa-time{font-size:10px;color:var(--vs-text-2,#8aa0b2);padding:2px 4px;font-variant-numeric:tabular-nums}
+  .vsa-typing{display:flex;gap:4px;align-self:flex-start;padding:12px 14px;border-radius:14px 14px 14px 4px;
+    background:var(--vs-card-2,#f2f7fb);border:1px solid var(--vs-line,#dbe7f0)}
+  .vsa-typing i{width:6px;height:6px;border-radius:50%;background:var(--vs-text-2,#5b7183);opacity:.4;
+    animation:vsa-td 1.2s infinite ease-in-out}
+  .vsa-typing i:nth-child(2){animation-delay:.15s}.vsa-typing i:nth-child(3){animation-delay:.3s}
+  @keyframes vsa-td{0%,60%,100%{transform:translateY(0);opacity:.35}30%{transform:translateY(-4px);opacity:.9}}
+  .vsa-jump{position:absolute;bottom:10px;right:10px;border-radius:9999px;border:1px solid var(--vs-line,#dbe7f0);
+    background:var(--vs-card,#fff);color:var(--vs-text,#0c2233);font-size:12px;font-weight:700;
+    padding:6px 12px;cursor:pointer;box-shadow:0 6px 18px rgba(8,35,53,.18)}
+  .vsa-inputrow{display:flex;align-items:flex-end;gap:8px;padding:10px 12px;border-top:1px solid var(--vs-line,#dbe7f0);
+    background:var(--vs-card-2,#f7fafc)}
+  #vsa-input{flex:1;resize:none;max-height:120px;min-height:40px;padding:9px 12px;font-size:13px;line-height:1.5;
+    border-radius:12px;border:1px solid var(--vs-line,#dbe7f0);background:var(--vs-card,#fff);
+    color:var(--vs-text,#0c2233);outline:none;font-family:inherit}
+  #vsa-input:focus{border-color:color-mix(in srgb,var(--vs-500,#1090c0) 60%,transparent)}
+  #vsa-send{display:grid;place-content:center;width:40px;height:40px;border:0;border-radius:12px;cursor:pointer;
+    color:#fff;background:linear-gradient(120deg,var(--vs-500,#1090c0),#6366f1 60%,#d946ef)}
+  #vsa-send:disabled{opacity:.4;cursor:default}
+  .dark #vsa-panel,[data-theme="dark"] #vsa-panel{background:var(--vs-card,#0e1d2a);border-color:var(--vs-line,#1e3446)}
+  @media (prefers-reduced-motion:reduce){#vsa-panel{animation:none}.vsa-typing i{animation:none}}
+  @media (max-width:480px){#vsa-root{right:12px;bottom:12px}}
+</style>
+
+<script>
+(function () {
+  var API = '/api/assistant/';
+  var $ = function (id) { return document.getElementById(id); };
+  var panel = $('vsa-panel'), fab = $('vsa-fab'), msgsEl = $('vsa-msgs'),
+      input = $('vsa-input'), sendBtn = $('vsa-send'), badge = $('vsa-badge'),
+      jumpBtn = $('vsa-jump'), statusEl = $('vsa-status'), emptyEl = $('vsa-empty');
+  if (!panel || !fab) return;
+
+  /* ---------- Zil sesleri: Web Audio sentezi (dosya yok) ----------
+     'sparkle' = yeni AI/ekip cevabı (dört nota tırmanış);
+     'soft'    = widget açılışında yumuşak çan. Tarayıcı ilk kullanıcı
+     jestine kadar sesi kilitler; ilk tıkta sessiz buffer'la kilidi açarız. */
+  var actx = null, armed = false;
+  function ctx() {
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return null;
+    if (!actx) actx = new AC();
+    if (actx.state === 'suspended') actx.resume().catch(function(){});
+    return actx;
+  }
+  function arm() {
+    if (armed) return; armed = true;
+    var unlock = function () {
+      var c = ctx(); if (!c) return;
+      try { var b = c.createBuffer(1, 1, 22050), s = c.createBufferSource();
+            s.buffer = b; s.connect(c.destination); s.start(0); } catch (e) {}
+    };
+    ['pointerdown','click','keydown','touchstart'].forEach(function (ev) {
+      window.addEventListener(ev, unlock, { once: true, passive: true });
+    });
+  }
+  arm();
+  function osc(c, out, type, freq, at, dur, gain) {
+    var o = c.createOscillator(), g = c.createGain();
+    o.type = type; o.frequency.setValueAtTime(freq, at);
+    g.gain.setValueAtTime(0.0001, at);
+    g.gain.exponentialRampToValueAtTime(gain, at + 0.005);
+    g.gain.exponentialRampToValueAtTime(0.0001, at + dur);
+    o.connect(g); g.connect(out); o.start(at); o.stop(at + dur + 0.05);
+  }
+  function chime(name) {
+    var c = ctx(); if (!c) return;
+    var fire = function () {
+      /* 80ms ileriye planla: arka plandan dönen context'in saati sıçrar,
+         currentTime'a sabitlenen notaların yarısı geçmişte kalırdı. */
+      var t = c.currentTime + 0.08;
+      var out = c.createGain(); out.gain.value = 0.5;
+      var lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 8500;
+      out.connect(lp); lp.connect(c.destination);
+      if (name === 'soft') {
+        osc(c, out, 'sine', 783.99, t, 0.95, 0.30);
+        osc(c, out, 'sine', 1567.98, t, 0.70, 0.10);
+      } else { /* sparkle */
+        [783.99, 1046.5, 1318.51, 1567.98].forEach(function (f, i) {
+          var at = t + i * 0.065;
+          osc(c, out, 'sine', f, at, 0.42, 0.24);
+          osc(c, out, 'sine', f * 2, at, 0.28, 0.05);
+        });
+      }
+    };
+    if (c.state === 'running') fire();
+    else c.resume().then(fire).catch(function(){});
+  }
+
+  /* ---------- yardımcılar ---------- */
+  function csrf() {
+    var m = document.cookie.match(/csrftoken=([^;]+)/);
+    return m ? m[1] : '';
+  }
+  function esc(s) {
+    /* Tırnaklar da kaçırılır: linkify href="..." niteliği ürettiği için
+       kaçmamış bir " ile attribute injection (XSS) mümkün olurdu. */
+    return String(s == null ? '' : s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+  function fmt(s) {
+    s = esc(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    /* esc() ham tırnak bırakmadığı için URL eşleşmesi attribute'tan kaçamaz;
+       & serbest kalır ki ?a=1&b=2 gibi query'ler link olarak bütün kalsın. */
+    return s.replace(/(https?:\/\/[^\s<]+)/g, function (m) {
+      var tail = '', p = m.match(/[.,!?;:)\]]+$/);
+      if (p) { tail = p[0]; m = m.slice(0, -tail.length); }
+      return '<a href="' + m + '" target="_blank" rel="noopener noreferrer nofollow">' + m + '</a>' + tail;
+    });
+  }
+  function timeOf(iso) {
+    try { return new Date(iso).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}); }
+    catch (e) { return ''; }
+  }
+  var atBottom = true;
+  msgsEl.addEventListener('scroll', function () {
+    atBottom = msgsEl.scrollHeight - msgsEl.scrollTop - msgsEl.clientHeight < 60;
+    jumpBtn.hidden = atBottom;
+  });
+  function scrollBottom(smooth) {
+    requestAnimationFrame(function () {
+      msgsEl.scrollTo({ top: msgsEl.scrollHeight, behavior: smooth ? 'smooth' : 'auto' });
+      atBottom = true; jumpBtn.hidden = true;
+    });
+  }
+  jumpBtn.addEventListener('click', function () { scrollBottom(true); });
+
+  var msgs = [], typing = false;
+  function render() {
+    emptyEl.hidden = msgs.length > 0;
+    var html = '';
+    msgs.forEach(function (m) {
+      var mine = m.role === 'user';
+      html += '<div class="vsa-row ' + (mine ? 'user' : 'bot') + '">';
+      if (m.role === 'owner') html += '<span class="vsa-who">👤 VPNsterr team</span>';
+      html += '<div class="vsa-bub">' + fmt(m.content) + '</div>';
+      if (m.created_at) html += '<span class="vsa-time">' + timeOf(m.created_at) + '</span>';
+      html += '</div>';
+    });
+    if (typing) html += '<div class="vsa-typing"><i></i><i></i><i></i></div>';
+    // boş-durum düğümünü koru
+    var keep = emptyEl.outerHTML;
+    msgsEl.innerHTML = keep + html;
+    emptyEl = $('vsa-empty');
+    emptyEl.hidden = msgs.length > 0;
+  }
+  function setStatus(conv) {
+    if (conv && conv.owner_joined) statusEl.innerHTML = '🟢 A human from the team is here';
+    else statusEl.innerHTML = '⚡ AI online — ask anything';
+  }
+
+  /* ---------- durum + poll ritmi ---------- */
+  var openState = false, loading = false, hasConv = false;
+  var lastNotified = 0, timer = null, closedTimer = null;
+  var CLOSED_BASE = 60000;
+
+  function api(method, body) {
+    var opts = { method: method, credentials: 'same-origin', headers: {} };
+    if (body) {
+      opts.headers['Content-Type'] = 'application/json';
+      opts.headers['X-CSRFToken'] = csrf();
+      opts.body = JSON.stringify(body);
+    }
+    var url = API + (method === 'GET' && openState ? '?seen=1' : '');
+    return fetch(url, opts).then(function (r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    });
+  }
+  function absorb(conv, allowSound) {
+    if (!conv) return;
+    hasConv = !!conv.id;
+    setStatus(conv);
+    var unread = conv.unread || 0;
+    if (!openState) {
+      badge.hidden = unread === 0;
+      badge.textContent = unread > 9 ? '9+' : String(unread);
+      if (allowSound && unread > lastNotified) {
+        chime('sparkle');
+        if (document.visibilityState === 'visible') lastNotified = unread;
+      } else if (!allowSound) {
+        lastNotified = unread;
+      }
+    } else {
+      badge.hidden = true; lastNotified = 0;
+    }
+    if (conv.messages) {
+      var grew = conv.messages.length !== msgs.length;
+      msgs = conv.messages;
+      /* Sadece yeni mesaj varsa yeniden çiz: her poll'da innerHTML tazelemek
+         geçmişi okuyan kullanıcının scroll'unu zıplatıyordu. */
+      if (grew) {
+        render();
+        if (atBottom) scrollBottom(true);
+        if (openState && msgs.length && msgs[msgs.length - 1].role !== 'user') chime('soft');
+      }
+    }
+  }
+  function scheduleOpen() {
+    if (timer) clearTimeout(timer);
+    if (!openState || document.visibilityState !== 'visible') return;
+    timer = setTimeout(function () {
+      api('GET').then(function (c) { absorb(c, false); }).catch(function(){}).then(scheduleOpen);
+    }, 6000);
+  }
+  function scheduleClosed() {
+    if (closedTimer) clearTimeout(closedTimer);
+    if (openState || !hasConv) return;   // konuşması olmayan ziyaretçi hiç poll'lamaz
+    closedTimer = setTimeout(function () {
+      api('GET').then(function (c) { absorb(c, true); }).catch(function(){}).then(scheduleClosed);
+    }, CLOSED_BASE + Math.floor(Math.random() * 15000));
+  }
+
+  /* ---------- aç/kapat ---------- */
+  function openPanel() {
+    openState = true;
+    panel.hidden = false;
+    fab.style.display = 'none';
+    try { window.vsTrack && vsTrack('assistant_open'); } catch (e) {}
+    if (closedTimer) clearTimeout(closedTimer);
+    api('GET').then(function (c) { absorb(c, false); scrollBottom(false); }).catch(function(){});
+    scheduleOpen();
+    setTimeout(function () { input.focus(); }, 60);
+  }
+  function closePanel() {
+    openState = false;
+    panel.hidden = true;
+    fab.style.display = '';
+    if (timer) clearTimeout(timer);
+    scheduleClosed();
+  }
+  fab.addEventListener('click', openPanel);
+  $('vsa-close').addEventListener('click', closePanel);
+
+  /* ---------- gönder ---------- */
+  function send() {
+    var text = (input.value || '').trim();
+    if (!text || loading) return;
+    msgs.push({ role: 'user', content: text, created_at: new Date().toISOString() });
+    input.value = ''; autoGrow();
+    loading = true; typing = true; sendBtn.disabled = true;
+    render(); scrollBottom(false);
+    api('POST', { message: text }).then(function (c) {
+      typing = false; absorb(c, false);
+    }).catch(function (e) {
+      typing = false;
+      msgs.push({ role: 'assistant',
+        content: String(e).indexOf('429') > -1
+          ? 'Whoa, that\'s a lot of messages — give me a minute and try again 🙏'
+          : 'Connection hiccup — please try again in a moment.' });
+      render();
+    }).then(function () {
+      loading = false; sendBtn.disabled = false;
+      render(); scrollBottom(true);
+    });
+  }
+  sendBtn.addEventListener('click', send);
+  input.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+  });
+  function autoGrow() {
+    input.style.height = 'auto';
+    input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+  }
+  input.addEventListener('input', autoGrow);
+
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible' && openState) scheduleOpen();
+  });
+
+  /* İlk yük: sessiz taban çizgisi (var olan unread için zil çalma),
+     sonra kapalı-durum döngüsü başlar (yalnız konuşması olanlarda). */
+  api('GET').then(function (c) { absorb(c, false); }).catch(function(){}).then(scheduleClosed);
+})();
+</script>

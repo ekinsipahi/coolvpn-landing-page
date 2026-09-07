@@ -5,7 +5,15 @@ from django.utils import timezone
 from django.urls import reverse
 from django.conf import settings
 
-from .models import Order, Subscription, Device
+from .models import (
+    AssistantConversation,
+    AssistantMessage,
+    Device,
+    Order,
+    Subscription,
+    SupportTicket,
+    TicketMessage,
+)
 
 
 # =========================
@@ -296,3 +304,122 @@ class DeviceAdmin(admin.ModelAdmin):
         self.message_user(request, f"{updated} cihaz pasif edildi.")
 
     deactivate_devices.short_description = "Deactivate selected devices"
+
+
+# =========================
+# SUPPORT TICKETS — cevabı buradan yaz: inline'a yeni mesaj ekle,
+# kaydedince kullanıcıya "yeni cevap" maili otomatik gider.
+# =========================
+class TicketMessageInline(admin.StackedInline):
+    model = TicketMessage
+    extra = 1
+    fields = ("role", "body", "created_at")
+    readonly_fields = ("created_at",)
+
+
+@admin.register(SupportTicket)
+class SupportTicketAdmin(admin.ModelAdmin):
+    list_display = ("ref", "user_link", "subject", "category", "status_badge", "updated_at")
+    list_filter = ("status", "category", "updated_at")
+    search_fields = ("ref", "subject", "user__email", "user__username", "messages__body")
+    readonly_fields = ("ref", "user", "created_at", "updated_at")
+    inlines = [TicketMessageInline]
+    date_hierarchy = "created_at"
+
+    def user_link(self, obj):
+        try:
+            url = reverse(
+                f"admin:{obj.user._meta.app_label}_{obj.user._meta.model_name}_change",
+                args=[obj.user_id],
+            )
+            return format_html('<a href="{}">{}</a>', url, obj.user.email or obj.user.get_username())
+        except Exception:
+            return obj.user_id
+
+    user_link.short_description = "User"
+
+    def status_badge(self, obj):
+        colors = {"open": "#f59e0b", "answered": "#16a34a", "closed": "#6b7280"}
+        return format_html(
+            '<span style="padding:2px 8px;border-radius:8px;background:{};color:#fff;">{}</span>',
+            colors.get(obj.status, "#6b7280"), obj.get_status_display(),
+        )
+
+    status_badge.short_description = "Status"
+
+    def save_formset(self, request, form, formset, change):
+        """Admin'den eklenen YENİ mesaj tanım gereği EKİP mesajıdır: rol ne
+        seçilirse seçilsin staff'a çevrilir (rol 'user' kalırsa mail gitmez ve
+        durum güncellenmezdi — sessiz kayıp). Sonra kullanıcıya cevap maili +
+        ticket 'answered'."""
+        instances = formset.save(commit=False)
+        for obj in formset.deleted_objects:
+            obj.delete()
+        new_replies = []
+        for m in instances:
+            if m.pk is None:
+                m.role = TicketMessage.ROLE_STAFF
+                new_replies.append(m)
+            m.save()
+        formset.save_m2m()
+        if new_replies:
+            ticket = form.instance
+            ticket.status = SupportTicket.STATUS_ANSWERED
+            ticket.save(update_fields=["status", "updated_at"])
+            from landing.helpers.mailer import send_ticket_replied_email
+            for m in new_replies:
+                send_ticket_replied_email(ticket, m.body)
+
+
+# =========================
+# ASSISTANT — canlı gelen kutusu. "owner_joined" işaretle + inline'a
+# role=Operator mesaj ekle → widget'ta "Team" balonu olarak düşer,
+# kullanıcının rozeti/zili çalar (user_unread burada artırılır).
+# =========================
+class AssistantMessageInline(admin.StackedInline):
+    model = AssistantMessage
+    extra = 1
+    fields = ("role", "content", "intent", "created_at")
+    readonly_fields = ("created_at",)
+
+
+@admin.register(AssistantConversation)
+class AssistantConversationAdmin(admin.ModelAdmin):
+    list_display = ("short_id", "who", "status", "intent_flags", "owner_joined",
+                    "user_unread", "updated_at")
+    list_filter = ("status", "owner_joined", "updated_at")
+    search_fields = ("id", "user__email", "session_key", "messages__content")
+    readonly_fields = ("id", "user", "session_key", "created_at", "updated_at")
+    inlines = [AssistantMessageInline]
+
+    def short_id(self, obj):
+        return str(obj.id)[:8]
+
+    short_id.short_description = "Conv"
+
+    def who(self, obj):
+        return obj.user.email if obj.user_id else f"anon:{obj.session_key[:10]}"
+
+    who.short_description = "Visitor"
+
+    def save_formset(self, request, form, formset, change):
+        """Admin'den eklenen YENİ mesaj operatör mesajıdır ('user' seçilmişse
+        bile — yoksa rozet/zil tetiklenmezdi). Unread artar → widget'ın bir
+        sonraki poll'unda rozet + sparkle zili çalar; owner_joined = AI susar."""
+        instances = formset.save(commit=False)
+        for obj in formset.deleted_objects:
+            obj.delete()
+        new_operator_msgs = []
+        for m in instances:
+            if m.pk is None and m.role != AssistantMessage.ROLE_ASSISTANT:
+                m.role = AssistantMessage.ROLE_OWNER
+            if m.pk is None:
+                new_operator_msgs.append(m)
+            m.save()
+        formset.save_m2m()
+        if new_operator_msgs:
+            conv = form.instance
+            conv.user_unread = (conv.user_unread or 0) + len(new_operator_msgs)
+            if any(m.role == AssistantMessage.ROLE_OWNER for m in new_operator_msgs):
+                conv.owner_joined = True
+            conv.save(update_fields=["user_unread", "owner_joined", "updated_at"])

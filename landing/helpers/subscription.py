@@ -65,6 +65,16 @@ def grant_subscription(user, plan_key: str, order=None):
         ends_at=ends_at,
         order=order  # None olabilir
     )
+
+    # Premium aktifleşti maili — transaction commit OLDUKTAN sonra gönder ki
+    # e-posta gidip de kayıt rollback olursa yalancı çıkmayalım. Gönderim zaten
+    # arka plan thread'inde, isteği bekletmez.
+    try:
+        from django.db import transaction as _tx
+        from landing.helpers.mailer import send_premium_activated_email
+        _tx.on_commit(lambda: send_premium_activated_email(user, sub))
+    except Exception:  # noqa: BLE001 - mail hiçbir koşulda grant'ı bozamaz
+        pass
     return sub
 
 

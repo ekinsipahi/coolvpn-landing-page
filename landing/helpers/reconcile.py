@@ -93,4 +93,16 @@ def run_reconcile(np_limit: int = 25, stripe_limit: int = 50) -> dict:
     cutoff = timezone.now() - timedelta(hours=24)
     n, _ = ExtensionLink.objects.filter(claimed=False, created_at__lt=cutoff).delete()
     out["links_purged"] = n
+
+    # ---- Bayat ANONİM asistan konuşmaları (kayıtsız ziyaretçi; 7 günden
+    # eski olanlar silinir ki spam/bot açtığı satırlar süresiz birikmesin.
+    # Girişli kullanıcının konuşmaları kalır — dashboard/admin geçmişi.) ----
+    try:
+        from landing.models import AssistantConversation
+        conv_cutoff = timezone.now() - timedelta(days=7)
+        n, _ = AssistantConversation.objects.filter(
+            user__isnull=True, updated_at__lt=conv_cutoff).delete()
+        out["anon_convs_purged"] = n
+    except Exception as exc:  # noqa: BLE001
+        out["errors"].append(f"conv purge: {exc}")
     return out

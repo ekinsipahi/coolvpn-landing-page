@@ -402,6 +402,11 @@ def google_finish(request):
         if created:
             user.set_unusable_password()
             user.save(update_fields=["password"])
+            try:
+                from landing.helpers.mailer import send_welcome_email
+                send_welcome_email(user)
+            except Exception:  # noqa: BLE001
+                pass
 
         backend_path = _pick_backend()
         auth_login(request, user, backend=backend_path)
@@ -480,6 +485,11 @@ def email_upsert_login(request):
         user = User.objects.create(username=username, email=email)
         user.set_password(password)
         user.save()
+        try:
+            from landing.helpers.mailer import send_welcome_email
+            send_welcome_email(user)
+        except Exception:  # noqa: BLE001
+            pass
         auth_login(request, user, backend=backend_path)
         return JsonResponse({"ok": True})
 
@@ -944,7 +954,7 @@ def dashboard(request):
         left_seconds = max(0, int((ends_at - _now).total_seconds()))
         pct = int(left_seconds * 100 / total_seconds)
         days_left = left_seconds // 86400
-        hours_left = (left_seconds % 8640000) // 3600
+        hours_left = (left_seconds % 86400) // 3600
         status_label = "Premium"
     else:
         plan_key = None
@@ -980,6 +990,9 @@ def dashboard(request):
         "devices": devices,
         "used_count": used_count,
         "remaining": remaining,
+        # Destek ticket'ları — dashboard'daki Support kartı
+        "tickets": request.user.tickets.all()[:8],
+        "open_ticket_count": request.user.tickets.exclude(status="closed").count(),
     }
     return render(request, "landing/dashboard.html", ctx)
 
@@ -1220,13 +1233,21 @@ def _grant_stripe_subscription(user, plan_key, stripe_sub):
 
     # Kriptodan kalan süre varsa Stripe trial zaten onu bekletiyor; yerel kayıt
     # Stripe periyoduna birebir bağlanır.
-    return Subscription.objects.create(
+    local = Subscription.objects.create(
         user=user, plan_key=plan_key,
         starts_at=starts_at, ends_at=ends_at,
         source="stripe",
         stripe_customer_id=str(customer or ""),
         stripe_subscription_id=str(sub_id or ""),
     )
+    # Premium aktifleşti maili — sadece YENİ abonelikte (periyot uzatmaları
+    # yukarıdaki update dalından döner, her ay mail atılmaz).
+    try:
+        from landing.helpers.mailer import send_premium_activated_email
+        send_premium_activated_email(user, local)
+    except Exception:  # noqa: BLE001
+        pass
+    return local
 
 
 @csrf_exempt
@@ -1621,6 +1642,11 @@ def extension_login(request):
     user = User.objects.create(username=username, email=email)
     user.set_password(password)
     user.save()
+    try:
+        from landing.helpers.mailer import send_welcome_email
+        send_welcome_email(user)
+    except Exception:  # noqa: BLE001
+        pass
     auth_login(request, user, backend=backend_path)
     return JsonResponse({"ok": True, "email": email, "created": True})
 

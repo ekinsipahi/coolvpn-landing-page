@@ -134,6 +134,9 @@
     {% block footer %}{% endblock %}
   </footer>
 
+  {# AI asistan chatbox'ı — blokların DIŞINDA: scripts'i override eden sayfada da görünür. #}
+  {% include "partials/assistant_widget.html" %}
+
   {% block scripts %}
   <script src="{% static 'js/app.js' %}"></script>
   {% endblock %}

@@ -41,13 +41,15 @@
           <span class="block text-xs" style="color:var(--vs-text-2)">{% if active_sub %}{% trans "Renew or change term" %}{% else %}{% trans "Max speed, ad-free — from" %} {{ ui_currency_symbol|default:"$" }}4.99{% endif %}</span>
         </span>
       </a>
-      <a href="mailto:support@vpnsterr.com" class="vs-card vs-card-hover !p-4 flex items-center gap-3">
+      <a href="#support" class="vs-card vs-card-hover !p-4 flex items-center gap-3">
         <span class="vs-icon !h-10 !w-10 shrink-0 bg-teal-500/10 text-teal-600 dark:text-teal-400 border-teal-500/20">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5Zm18 0h-3a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-5Z"/><path d="M21 11a9 9 0 0 0-18 0"/></svg>
         </span>
         <span>
           <span class="block text-sm font-bold" style="color:var(--vs-text)">{% trans "24/7 support" %}</span>
-          <span class="block text-xs" style="color:var(--vs-text-2)">support@vpnsterr.com</span>
+          <span class="block text-xs" style="color:var(--vs-text-2)">
+            {% if open_ticket_count %}{{ open_ticket_count }} {% trans "open ticket" %}{{ open_ticket_count|pluralize }}{% else %}{% trans "Open a ticket · instant chat" %}{% endif %}
+          </span>
         </span>
       </a>
     </div>
@@ -282,6 +284,76 @@
           </div>
         </div>
 
+        <!-- Destek: ticket'lar — mail yerine kayıtlı, takipli süreç -->
+        <div class="vs-card !p-6 md:!p-7" id="support">
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <h3 class="text-sm font-bold uppercase tracking-wider" style="color:var(--vs-text-2)">{% trans "Support tickets" %}</h3>
+              <p class="mt-1.5 text-xs" style="color:var(--vs-text-2)">
+                {% trans "We reply by email — usually within a few hours. For quick questions, try the chat bubble in the corner." %}
+              </p>
+            </div>
+            <button type="button" id="btn-ticket-open" class="vs-btn vs-btn-primary !px-4 !py-2 !text-xs shrink-0">
+              {% trans "New ticket" %}
+            </button>
+          </div>
+
+          <div class="mt-4 space-y-2">
+            {% for t in tickets %}
+              <a href="{% url 'ticket_detail' t.ref %}"
+                 class="flex items-center gap-3 rounded-xl p-3 transition hover:-translate-y-px"
+                 style="background:var(--vs-card); border:1px solid var(--vs-line)">
+                <span class="text-[10px] font-bold px-2 py-1 rounded-md shrink-0
+                  {% if t.status == 'open' %}text-amber-700 dark:text-amber-400{% elif t.status == 'answered' %}text-emerald-700 dark:text-emerald-400{% else %}opacity-60{% endif %}"
+                  style="border:1px solid var(--vs-line); background:var(--vs-card-2)">
+                  {{ t.get_status_display|upper }}
+                </span>
+                <span class="min-w-0 flex-1">
+                  <span class="block truncate text-sm font-semibold" style="color:var(--vs-text)">{{ t.subject }}</span>
+                  <span class="block text-[11px]" style="color:var(--vs-text-2)">{{ t.ref }} · {{ t.get_category_display }} · {{ t.updated_at|date:"M d, H:i" }}</span>
+                </span>
+                <svg class="h-4 w-4 shrink-0 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+              </a>
+            {% empty %}
+              <div class="rounded-xl p-4 text-center text-xs" style="background:var(--vs-card); border:1px dashed var(--vs-line); color:var(--vs-text-2)">
+                {% trans "No tickets yet. If anything ever goes sideways, open one — every ticket gets a human reply." %}
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Yeni ticket modalı -->
+        <div id="ticket-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4"
+             role="dialog" aria-modal="true">
+          <div id="ticket-modal-backdrop" class="absolute inset-0" style="background:rgba(8,25,38,.55); backdrop-filter:blur(4px)"></div>
+          <div class="vs-card relative w-full max-w-md !p-6" style="box-shadow:var(--vs-shadow-lg)">
+            <h3 class="text-base font-bold" style="color:var(--vs-text)">{% trans "Open a support ticket" %}</h3>
+            <p class="mt-1 text-xs" style="color:var(--vs-text-2)">{% trans "You'll get a confirmation email right away, and our reply lands in the same thread." %}</p>
+            <form id="ticket-form" class="mt-4 space-y-3">
+              {% csrf_token %}
+              <input name="subject" maxlength="140" required placeholder="{% trans 'Subject' %}"
+                     class="w-full rounded-xl px-3 py-2.5 text-sm outline-none"
+                     style="background:var(--vs-card-2); border:1px solid var(--vs-line); color:var(--vs-text)">
+              <select name="category"
+                      class="w-full rounded-xl px-3 py-2.5 text-sm outline-none"
+                      style="background:var(--vs-card-2); border:1px solid var(--vs-line); color:var(--vs-text)">
+                <option value="technical">{% trans "Technical problem" %}</option>
+                <option value="billing">{% trans "Billing & payments" %}</option>
+                <option value="account">{% trans "Account" %}</option>
+                <option value="other" selected>{% trans "Other" %}</option>
+              </select>
+              <textarea name="body" rows="5" maxlength="5000" required placeholder="{% trans 'Describe the issue — the more detail, the faster the fix.' %}"
+                        class="w-full rounded-xl px-3 py-2.5 text-sm outline-none resize-y"
+                        style="background:var(--vs-card-2); border:1px solid var(--vs-line); color:var(--vs-text)"></textarea>
+              <p id="ticket-err" class="hidden text-xs text-rose-500"></p>
+              <div class="flex gap-2 pt-1">
+                <button type="button" id="btn-ticket-cancel" class="vs-btn vs-btn-ghost flex-1 !py-2.5 !text-xs">{% trans "Cancel" %}</button>
+                <button type="submit" id="btn-ticket-send" class="vs-btn vs-btn-primary flex-1 !py-2.5 !text-xs">{% trans "Send ticket" %}</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
         <!-- Tehlikeli bölge: hesap silme (mağaza zorunluluğu + GDPR) -->
         <div class="vs-card !p-6 md:!p-7" style="border-color:rgba(225,29,72,.25)">
           <h3 class="text-sm font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400">{% trans "Danger zone" %}</h3>
@@ -404,6 +476,51 @@
     backdrop.addEventListener('click', close);
     document.addEventListener('keydown', e => { if(e.key === 'Escape') close(); });
     check.addEventListener('change', sync);
+  })();
+
+  // ---- Destek: yeni ticket modalı ----
+  (function(){
+    const openBtn  = document.getElementById('btn-ticket-open');
+    const modal    = document.getElementById('ticket-modal');
+    if(!openBtn || !modal) return;
+    const backdrop = document.getElementById('ticket-modal-backdrop');
+    const cancel   = document.getElementById('btn-ticket-cancel');
+    const form     = document.getElementById('ticket-form');
+    const sendBtn  = document.getElementById('btn-ticket-send');
+    const errEl    = document.getElementById('ticket-err');
+
+    function open(){ modal.classList.remove('hidden'); errEl.classList.add('hidden'); }
+    function close(){ modal.classList.add('hidden'); }
+    openBtn.addEventListener('click', open);
+    cancel.addEventListener('click', close);
+    backdrop.addEventListener('click', close);
+    document.addEventListener('keydown', e => { if(e.key === 'Escape') close(); });
+
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      errEl.classList.add('hidden');
+      sendBtn.disabled = true; sendBtn.textContent = 'Sending…';
+      fetch("{% url 'ticket_create' %}", {
+        method: 'POST',
+        credentials: 'same-origin',
+        body: new FormData(form)
+      }).then(r => r.json()).then(d => {
+        if(d && d.ok){
+          window.vsTrack && vsTrack('ticket_created', { item_id: d.ref });
+          window.location.href = d.url;   // ticket sayfasına git — onay maili yolda
+          return;
+        }
+        sendBtn.disabled = false; sendBtn.textContent = 'Send ticket';
+        errEl.textContent = d?.error === 'too_many_open_tickets'
+          ? 'You have too many open tickets — please wait for a reply first.'
+          : 'Could not send the ticket. Check the fields and try again.';
+        errEl.classList.remove('hidden');
+      }).catch(() => {
+        sendBtn.disabled = false; sendBtn.textContent = 'Send ticket';
+        errEl.textContent = 'Network error — please try again.';
+        errEl.classList.remove('hidden');
+      });
+    });
   })();
 
     // Copy helper

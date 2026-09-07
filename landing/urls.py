@@ -2,6 +2,7 @@
 from django.urls import path, reverse_lazy
 from django.contrib.auth import views as auth_views
 from . import views
+from . import views_support
 from django.views.generic import TemplateView
 
 
@@ -18,6 +19,11 @@ urlpatterns = [
     path("payment/", views.payment, name="payment"),
     path("login/", views.login_view, name="login"),
     path("dashboard/", views.dashboard, name="dashboard"),
+
+    # Destek: ticket sistemi + AI asistan chatbox'ı
+    path("support/<str:ref>/", views_support.ticket_detail, name="ticket_detail"),
+    path("api/tickets/create/", views_support.ticket_create, name="ticket_create"),
+    path("api/assistant/", views_support.assistant_api, name="assistant_api"),
 
     # device apis
     path("api/devices/register/", views.device_register, name="device_register"),
