@@ -20,7 +20,8 @@ urlpatterns = [
     path("login/", views.login_view, name="login"),
     path("dashboard/", views.dashboard, name="dashboard"),
 
-    # Destek: ticket sistemi + AI asistan chatbox'ı
+    # Destek: halka açık merkez + ticket sistemi + AI asistan chatbox'ı
+    path("support/", views_support.support_home, name="support"),
     path("support/<str:ref>/", views_support.ticket_detail, name="ticket_detail"),
     path("api/tickets/create/", views_support.ticket_create, name="ticket_create"),
     path("api/assistant/", views_support.assistant_api, name="assistant_api"),

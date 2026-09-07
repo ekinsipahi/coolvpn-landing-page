@@ -298,6 +298,7 @@
 
         <a href="{% url 'pricing' %}" class="block py-2.5 font-medium" style="color:var(--vs-text)">{% trans "Pricing" %}</a>
         <a href="{% url 'faq' %}" class="block py-2.5 font-medium" style="color:var(--vs-text)">{% trans "FAQ" %}</a>
+        <a href="{% url 'support' %}" class="block py-2.5 font-medium" style="color:var(--vs-text)">{% trans "Support" %}</a>
         <a href="{% url 'blog:index' %}" class="block py-2.5 font-medium" style="color:var(--vs-text)">{% trans "Blog" %}</a>
 
         {% if not request.user.is_authenticated %}

@@ -89,8 +89,9 @@ def _shell(preheader: str, body_html: str, footer_note: str = "") -> str:
     site = getattr(settings, "SITE_URL", "https://vpnsterr.com").rstrip("/")
     year_note = footer_note or (
         "You're receiving this because you have a VPNsterr account. "
-        "This mailbox isn't monitored — need help? Open a ticket from your "
-        f'<a href="{site}/dashboard/" style="color:#1090c0">dashboard</a> or use the chat on the site.'
+        "This mailbox isn't monitored — need help? Visit "
+        f'<a href="{site}/support/" style="color:#1090c0">vpnsterr.com/support</a> '
+        "to chat with us, open a ticket or email the team."
     )
     return f"""<!doctype html>
 <html><body style="margin:0;padding:0;background:#f2f6fa;font-family:Inter,-apple-system,Segoe UI,Roboto,Arial,sans-serif">

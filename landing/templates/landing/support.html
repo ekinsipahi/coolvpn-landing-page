@@ -1,0 +1,256 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{% trans "Support — get help with VPNsterr" %} — {{ site_name }}{% endblock %}
+{% block meta_description %}{% trans "Get help with VPNsterr: chat with our assistant instantly, open a support ticket from your dashboard, or email support@vpnsterr.com. Real answers from real people." %}{% endblock %}
+
+{% block schema_jsonld %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ContactPage",
+  "name": "VPNsterr Support",
+  "url": "{{ canonical_url }}",
+  "publisher": {
+    "@type": "Organization",
+    "name": "Sterr Technologies",
+    "email": "support@vpnsterr.com",
+    "contactPoint": [{
+      "@type": "ContactPoint",
+      "contactType": "customer support",
+      "email": "support@vpnsterr.com",
+      "availableLanguage": ["English"]
+    }]
+  }
+}
+</script>
+{% endblock %}
+
+{% block header %}
+  {% include "partials/navbar.html" %}
+{% endblock %}
+
+{% block content %}
+<section class="vs-section !pt-12">
+  <div class="vs-shell">
+
+    <!-- Başlık -->
+    <div class="max-w-2xl">
+      <span class="vs-eyebrow">{% trans "Support" %}</span>
+      <h1 class="vs-h2">{% trans "How can we help?" %}</h1>
+      <p class="mt-3 text-[15px] leading-7" style="color:var(--vs-text-2)">
+        {% trans "Three ways to reach us — pick whichever suits you. The chat answers instantly, tickets are tracked and answered by a human, and email always works." %}
+      </p>
+    </div>
+
+    <!-- Üç kanal -->
+    <div class="mt-10 grid gap-5 lg:grid-cols-3">
+
+      <!-- 1. Anlık sohbet -->
+      <div class="vs-card !p-6 flex flex-col">
+        <span class="vs-icon !h-12 !w-12 bg-fuchsia-500/10 text-fuchsia-600 dark:text-fuchsia-400 border-fuchsia-500/20">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </span>
+        <h2 class="mt-4 text-lg font-bold tracking-tight" style="color:var(--vs-text)">{% trans "Chat with us" %}</h2>
+        <p class="mt-1.5 text-sm leading-6 flex-1" style="color:var(--vs-text-2)">
+          {% trans "The fastest option. Our assistant answers questions about the free extension, Premium plans and your account right away — and pulls in a human when something needs one. No account required." %}
+        </p>
+        <p class="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold" style="color:#12b76a">
+          <span class="h-1.5 w-1.5 rounded-full" style="background:#12b76a"></span>
+          {% trans "Online now · instant reply" %}
+        </p>
+        <button type="button" id="btn-open-chat" class="vs-btn vs-btn-primary mt-4 w-full !py-2.5 !text-sm"
+                data-ga-event="support_chat_open">
+          {% trans "Start a chat" %}
+        </button>
+        <p class="mt-2 text-center text-[11px]" style="color:var(--vs-text-2)">
+          {% trans "Or use the chat bubble in the bottom-right corner of any page." %}
+        </p>
+      </div>
+
+      <!-- 2. Ticket -->
+      <div class="vs-card !p-6 flex flex-col" style="border-color:color-mix(in srgb, var(--vs-500) 35%, transparent)">
+        <span class="vs-icon !h-12 !w-12 bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/20">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-6a2 2 0 0 0 0-4Z"/><path d="M13 5v2"/><path d="M13 11v2"/><path d="M13 17v2"/></svg>
+        </span>
+        <h2 class="mt-4 text-lg font-bold tracking-tight" style="color:var(--vs-text)">{% trans "Open a support ticket" %}</h2>
+        <p class="mt-1.5 text-sm leading-6 flex-1" style="color:var(--vs-text-2)">
+          {% trans "For anything that needs tracking — billing, refunds for unused subscriptions, a bug we need to dig into. You get a reference number, we reply by email, and the whole thread stays in your dashboard." %}
+        </p>
+        <p class="mt-3 text-xs font-semibold" style="color:var(--vs-text-2)">
+          {% trans "Tickets live in your dashboard, under" %} <b style="color:var(--vs-text)">{% trans "Support tickets" %}</b>.
+        </p>
+        {% if user.is_authenticated %}
+          <a href="{% url 'dashboard' %}#support" class="vs-btn vs-btn-primary mt-4 w-full !py-2.5 !text-sm"
+             data-ga-event="support_ticket_cta">{% trans "Open a ticket" %}</a>
+        {% else %}
+          {% comment %}
+            next'e URL fragment'i KOYMA: Django onu path'in parçası sayar,
+            girişten sonra /dashboard/%23support'a yönlendirir ve 404 olur.
+            Dashboard zaten Support kartıyla birlikte açılıyor.
+          {% endcomment %}
+          <a href="{% url 'login' %}?next={% url 'dashboard' %}" class="vs-btn vs-btn-primary mt-4 w-full !py-2.5 !text-sm"
+             data-ga-event="support_ticket_cta">{% trans "Sign in to open a ticket" %}</a>
+          <p class="mt-2 text-center text-[11px]" style="color:var(--vs-text-2)">
+            {% trans "No account? Email us instead — it works just as well." %}
+          </p>
+        {% endif %}
+      </div>
+
+      <!-- 3. E-posta -->
+      <div class="vs-card !p-6 flex flex-col">
+        <span class="vs-icon !h-12 !w-12 bg-teal-500/10 text-teal-600 dark:text-teal-400 border-teal-500/20">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+        </span>
+        <h2 class="mt-4 text-lg font-bold tracking-tight" style="color:var(--vs-text)">{% trans "Email us" %}</h2>
+        <p class="mt-1.5 text-sm leading-6 flex-1" style="color:var(--vs-text-2)">
+          {% trans "Locked out of your account, or simply prefer email? Write to us directly — same team, same inbox. Include your account email so we can find you." %}
+        </p>
+        <p class="mt-3 text-xs font-semibold" style="color:var(--vs-text-2)">
+          {% trans "Best for account-access problems." %}
+        </p>
+        <a href="mailto:support@vpnsterr.com" class="vs-btn vs-btn-ghost mt-4 w-full !py-2.5 !text-sm"
+           data-ga-event="support_email_click">support@vpnsterr.com</a>
+        <p class="mt-2 text-center text-[11px]" style="color:var(--vs-text-2)">
+          {% trans "Replies land in your inbox, usually within a few hours." %}
+        </p>
+      </div>
+    </div>
+
+    {% if user.is_authenticated and tickets %}
+      <!-- Kullanıcının kendi ticket'ları -->
+      <div class="vs-card mt-8 !p-6 md:!p-7">
+        <div class="flex items-center justify-between gap-3">
+          <h2 class="text-sm font-bold uppercase tracking-wider" style="color:var(--vs-text-2)">{% trans "Your recent tickets" %}</h2>
+          <a href="{% url 'dashboard' %}#support" class="text-xs font-semibold underline underline-offset-2" style="color:var(--vs-500)">
+            {% trans "See all in dashboard" %}
+          </a>
+        </div>
+        <div class="mt-4 space-y-2">
+          {% for t in tickets %}
+            <a href="{% url 'ticket_detail' t.ref %}"
+               class="flex items-center gap-3 rounded-xl p-3 transition hover:-translate-y-px"
+               style="background:var(--vs-card); border:1px solid var(--vs-line)">
+              <span class="text-[10px] font-bold px-2 py-1 rounded-md shrink-0
+                {% if t.status == 'open' %}text-amber-700 dark:text-amber-400{% elif t.status == 'answered' %}text-emerald-700 dark:text-emerald-400{% else %}opacity-60{% endif %}"
+                style="border:1px solid var(--vs-line); background:var(--vs-card-2)">
+                {{ t.get_status_display|upper }}
+              </span>
+              <span class="min-w-0 flex-1">
+                <span class="block truncate text-sm font-semibold" style="color:var(--vs-text)">{{ t.subject }}</span>
+                <span class="block text-[11px]" style="color:var(--vs-text-2)">{{ t.ref }} · {{ t.updated_at|date:"M d, H:i" }}</span>
+              </span>
+              <svg class="h-4 w-4 shrink-0 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+            </a>
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+
+    <!-- Hızlı cevaplar -->
+    <div class="mt-14">
+      <h2 class="text-2xl md:text-3xl font-bold tracking-tight" style="color:var(--vs-text)">{% trans "Quick answers" %}</h2>
+      <p class="mt-2 text-sm" style="color:var(--vs-text-2)">
+        {% trans "Most questions we get are answered right here — usually faster than waiting for a reply." %}
+      </p>
+
+      <div class="mt-6 grid gap-4 md:grid-cols-2">
+
+        <div class="vs-card !p-5">
+          <h3 class="text-sm font-bold" style="color:var(--vs-text)">{% trans "Is the extension really free?" %}</h3>
+          <p class="mt-1.5 text-sm leading-6" style="color:var(--vs-text-2)">
+            {% trans "Yes — 100% free and genuinely unlimited, with no sign-up. It's funded by non-intrusive ads. Premium removes the ads and adds maximum speed and location choice." %}
+          </p>
+          <a href="{% url 'vpn_extension' %}" class="mt-2 inline-block text-xs font-semibold underline underline-offset-2" style="color:var(--vs-500)">{% trans "About the extension" %} →</a>
+        </div>
+
+        <div class="vs-card !p-5">
+          <h3 class="text-sm font-bold" style="color:var(--vs-text)">{% trans "How do I turn on Premium in my browser?" %}</h3>
+          <p class="mt-1.5 text-sm leading-6" style="color:var(--vs-text-2)">
+            {% trans "Open the VPNsterr extension, hit Sign in and use the same email as your account. Premium unlocks instantly and the device shows up in your dashboard, where you can revoke it any time." %}
+          </p>
+          <a href="{% url 'dashboard' %}" class="mt-2 inline-block text-xs font-semibold underline underline-offset-2" style="color:var(--vs-500)">{% trans "Go to dashboard" %} →</a>
+        </div>
+
+        <div class="vs-card !p-5">
+          <h3 class="text-sm font-bold" style="color:var(--vs-text)">{% trans "Can I get a refund?" %}</h3>
+          <p class="mt-1.5 text-sm leading-6" style="color:var(--vs-text-2)">
+            {% trans "If you bought Premium and never used it, yes — we refund unused subscriptions in full. Once the service has been used, the term runs to its end. Open a ticket with your order ID and we'll sort it." %}
+          </p>
+          <a href="{% url 'refund_policy' %}" class="mt-2 inline-block text-xs font-semibold underline underline-offset-2" style="color:var(--vs-500)">{% trans "Refund policy" %} →</a>
+        </div>
+
+        <div class="vs-card !p-5">
+          <h3 class="text-sm font-bold" style="color:var(--vs-text)">{% trans "How do I cancel or change my plan?" %}</h3>
+          <p class="mt-1.5 text-sm leading-6" style="color:var(--vs-text-2)">
+            {% trans "Card subscriptions: use “Manage / cancel subscription” in your dashboard — access continues to the end of the paid period. Paid with crypto? You can extend, or switch to card without losing your remaining days." %}
+          </p>
+          <a href="{% url 'dashboard' %}" class="mt-2 inline-block text-xs font-semibold underline underline-offset-2" style="color:var(--vs-500)">{% trans "Manage your plan" %} →</a>
+        </div>
+
+        <div class="vs-card !p-5">
+          <h3 class="text-sm font-bold" style="color:var(--vs-text)">{% trans "Do you keep logs of what I do?" %}</h3>
+          <p class="mt-1.5 text-sm leading-6" style="color:var(--vs-text-2)">
+            {% trans "No. Zero activity logs — we can't hand over, sell or lose what we never store. That's the whole point of VPNsterr, free tier included." %}
+          </p>
+          <a href="{% url 'feature_detail' 'no-logs' %}" class="mt-2 inline-block text-xs font-semibold underline underline-offset-2" style="color:var(--vs-500)">{% trans "Our no-logs policy" %} →</a>
+        </div>
+
+        <div class="vs-card !p-5">
+          <h3 class="text-sm font-bold" style="color:var(--vs-text)">{% trans "Something isn't connecting" %}</h3>
+          <p class="mt-1.5 text-sm leading-6" style="color:var(--vs-text-2)">
+            {% trans "Try another location first, then reload the page. If it persists, open a ticket and tell us your browser, the location you picked and what you saw — that's usually enough for us to fix it on our side." %}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ne beklemeli -->
+    <div class="vs-card mt-12 !p-6 md:!p-8">
+      <div class="grid gap-6 md:grid-cols-3">
+        <div>
+          <h3 class="text-sm font-bold" style="color:var(--vs-text)">{% trans "Response time" %}</h3>
+          <p class="mt-1.5 text-sm leading-6" style="color:var(--vs-text-2)">
+            {% trans "The chat answers immediately. Tickets and emails are usually answered within a few hours — always by a person, never a canned macro." %}
+          </p>
+        </div>
+        <div>
+          <h3 class="text-sm font-bold" style="color:var(--vs-text)">{% trans "What to include" %}</h3>
+          <p class="mt-1.5 text-sm leading-6" style="color:var(--vs-text-2)">
+            {% trans "Your account email, what you expected, what happened instead — and your order ID for anything billing-related. Never send us passwords: we will never ask for one." %}
+          </p>
+        </div>
+        <div>
+          <h3 class="text-sm font-bold" style="color:var(--vs-text)">{% trans "Report abuse" %}</h3>
+          <p class="mt-1.5 text-sm leading-6" style="color:var(--vs-text-2)">
+            {% trans "Abuse reports and legal requests go to the same address — mark them clearly in the subject line." %}
+          </p>
+          <a href="{% url 'acceptable_use' %}" class="mt-2 inline-block text-xs font-semibold underline underline-offset-2" style="color:var(--vs-500)">{% trans "Acceptable Use Policy" %} →</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+{% endblock %}
+
+{% block footer %}
+  {% include "partials/footer.html" %}
+{% endblock %}
+
+{% block scripts %}
+  {{ block.super }}
+  <script>
+    // "Start a chat" → köşedeki asistan balonunu aç (widget her sayfada var).
+    (function () {
+      var btn = document.getElementById('btn-open-chat');
+      if (!btn) return;
+      btn.addEventListener('click', function () {
+        var fab = document.getElementById('vsa-fab');
+        if (fab) { fab.click(); return; }
+        // Widget beklenmedik şekilde yoksa kullanıcı boşa tıklamasın:
+        window.location.href = 'mailto:support@vpnsterr.com';
+      });
+    })();
+  </script>
+{% endblock %}

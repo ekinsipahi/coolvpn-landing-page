@@ -26,6 +26,7 @@ class StaticViewSitemap(Sitemap):
         ("best_vpn",              "weekly",  0.8),
         ("best_free_vpn_extension", "weekly", 0.8),
         ("faq",                   "monthly", 0.6),
+        ("support",               "monthly", 0.6),
         ("blog:index",            "weekly",  0.5),
         ("products:desktop",      "monthly", 0.5),
         ("products:mobile",       "monthly", 0.5),

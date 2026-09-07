@@ -42,6 +42,20 @@ MAX_OPEN_TICKETS = 10       # bir kullanıcının aynı anda açık tutabileceğ
 TICKET_BODY_MAX = 5000
 
 
+def support_home(request):
+    """/support/ — halka açık destek merkezi.
+
+    Üç kanalı da tek sayfada anlatır: köşedeki anlık sohbet (hesap gerekmez),
+    dashboard'daki ticket sistemi (takip numaralı, e-postayla yürür) ve son
+    çare olarak support@vpnsterr.com. Girişli kullanıcıya kendi ticket'ları
+    da burada gösterilir ki "nereden bakacağım" sorusu hiç doğmasın.
+    """
+    tickets = []
+    if request.user.is_authenticated:
+        tickets = list(request.user.tickets.all()[:5])
+    return render(request, "landing/support.html", {"tickets": tickets})
+
+
 @login_required
 @require_POST
 def ticket_create(request):
