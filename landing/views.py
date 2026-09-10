@@ -2,6 +2,7 @@
 import hashlib
 import hmac
 import json
+import logging
 import time
 import uuid
 from datetime import timedelta
@@ -1250,6 +1251,37 @@ def _grant_stripe_subscription(user, plan_key, stripe_sub):
     return local
 
 
+logger = logging.getLogger(__name__)
+
+# --- Kart deneme (card-testing) frenleri -----------------------------------
+# 2026-09-09'da tek kullanici 7 dakikada 16 FARKLI Amex kartiyla denedi
+# (klasik carding). Radar 14'unu blokladi ama her taranan islem 0.05 EUR Radar
+# ucreti yazdi ve bu tur trafik hesabin askiya alinmasina yol acabiliyor.
+# Checkout oturumu acmayi sinirlamak, saldirganin deneme yuzeyini daraltir.
+_CHECKOUT_MAX_PER_USER_H = 6
+_CHECKOUT_MAX_PER_IP_H = 12
+
+
+def _client_ip(request) -> str:
+    return ((request.META.get("HTTP_X_FORWARDED_FOR", "").split(",")[0].strip()
+             or request.META.get("REMOTE_ADDR", "")) or "?")
+
+
+def _checkout_throttled(request) -> bool:
+    """Kullanici ve IP basina saatlik checkout oturumu tavani."""
+    from django.core.cache import cache
+    slot = now().strftime("%Y%m%d%H")
+    for key, cap in ((f"cko:u{request.user.id}:{slot}", _CHECKOUT_MAX_PER_USER_H),
+                     (f"cko:i{_client_ip(request)}:{slot}", _CHECKOUT_MAX_PER_IP_H)):
+        try:
+            cache.get_or_set(key, 0, 3700)
+            if cache.incr(key) > cap:
+                return True
+        except Exception:  # noqa: BLE001 - cache yoksa odeme akisi durmasin
+            return False
+    return False
+
+
 @csrf_exempt
 @require_POST
 def stripe_checkout_create(request):
@@ -1263,6 +1295,11 @@ def stripe_checkout_create(request):
         return JsonResponse({"ok": False, "error": "stripe_disabled"}, status=503)
     if not request.user.is_authenticated:
         return JsonResponse({"ok": False, "error": "login_required"}, status=401)
+    if _checkout_throttled(request):
+        logger.warning("checkout throttled: user=%s ip=%s", request.user.id, _client_ip(request))
+        return JsonResponse({"ok": False, "error": "rate_limited",
+                             "detail": "Too many payment attempts. Please wait a few minutes "
+                                       "or contact support@vpnsterr.com."}, status=429)
 
     try:
         data = json.loads(request.body.decode("utf-8") or "{}")

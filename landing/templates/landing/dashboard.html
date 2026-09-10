@@ -246,7 +246,10 @@
               </div>
               <p class="text-sm font-semibold" style="color:var(--vs-text)">{% trans "No devices linked yet" %}</p>
               <p class="mt-1 text-xs" style="color:var(--vs-text-2)">{% trans "Install the extension or app, sign in, and your first device links automatically." %}</p>
-              <a href="{% url 'vpn_extension' %}" class="vs-btn vs-btn-primary mt-4 !px-5 !py-2 !text-xs">{% trans "Get the free extension" %}</a>
+              <a href="{{ chrome_store_url|default:'' }}{% if not chrome_store_url %}{% url 'vpn_extension' %}{% endif %}"
+                 {% if chrome_store_url %}target="_blank" rel="noopener"{% endif %}
+                 class="vs-btn vs-btn-primary mt-4 !px-5 !py-2 !text-xs"
+                 data-ga-event="extension_install_click" data-ga-label="dashboard_no_devices">{% trans "Get the free extension" %}</a>
             </div>
             {% endfor %}
           </div>

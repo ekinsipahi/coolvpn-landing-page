@@ -71,4 +71,7 @@ def seo(request):
         "hreflang_urls": hreflang_urls,
         "og_locale": og_locale,
         "org_schema_json": org_schema_json,
+        # Uzantı kurulum CTA'ları her sayfada var; view'dan view'a
+        # taşımak yerine global veriyoruz (dashboard build_ui_context kullanmıyor).
+        "chrome_store_url": getattr(settings, "CHROME_STORE_URL", ""),
     }

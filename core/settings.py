@@ -36,8 +36,11 @@ GA_MEASUREMENT_ID = os.environ.get("GA_MEASUREMENT_ID", "")
 SITE_NAME = "VPNsterr"
 COMPANY_LEGAL_NAME = "Sterr Technologies"
 SUPPORT_EMAIL = "support@vpnsterr.com"
-# Chrome Web Store yayın linki gelince doldur:
-CHROME_STORE_URL = ""
+# Chrome Web Store — yayında (2026-09-10). Env ile override edilebilir.
+CHROME_STORE_URL = os.environ.get(
+    "CHROME_STORE_URL",
+    "https://chromewebstore.google.com/detail/free-vpn-for-chrome-vpn-p/llmhkchghidfojlbdelkebgohjfjijmg",
+)
 
 # ---- Site URL (dev/prod’a göre ayarla)
 SITE_URL = os.environ.get("SITE_URL", "http://127.0.0.1:8000")
