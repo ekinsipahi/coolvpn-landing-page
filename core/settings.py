@@ -42,6 +42,38 @@ CHROME_STORE_URL = os.environ.get(
     "https://chromewebstore.google.com/detail/free-vpn-for-chrome-vpn-p/llmhkchghidfojlbdelkebgohjfjijmg",
 )
 
+# ---- Sentry (hata + performans izleme)
+# DSN'i .env'e koy: SENTRY_DSN=https://...@...ingest.de.sentry.io/...
+# DSN boşsa Sentry hiç başlatılmaz — dev'de gürültü yapmaz, deploy'u bozmaz.
+# NOT: Sentry "auth token" ile DSN AYNI ŞEY DEĞİL; auth token release/sourcemap
+# yüklemek için sentry-cli'nin kullandığı şey, uygulamanın ihtiyacı olan DSN'dir.
+SENTRY_DSN = os.environ.get("SENTRY_DSN", "").strip()
+SENTRY_ENVIRONMENT = os.environ.get("SENTRY_ENVIRONMENT", "production" if not DEBUG else "development")
+SENTRY_TRACES_SAMPLE_RATE = float(os.environ.get("SENTRY_TRACES_SAMPLE_RATE", "0.1"))
+
+if SENTRY_DSN:
+    try:
+        import sentry_sdk
+        from sentry_sdk.integrations.django import DjangoIntegration
+        from sentry_sdk.integrations.logging import LoggingIntegration
+
+        sentry_sdk.init(
+            dsn=SENTRY_DSN,
+            environment=SENTRY_ENVIRONMENT,
+            integrations=[
+                DjangoIntegration(),
+                # WARNING+ olay olarak gider; INFO'lar breadcrumb kalır.
+                LoggingIntegration(level=None, event_level="WARNING"),
+            ],
+            traces_sample_rate=SENTRY_TRACES_SAMPLE_RATE,
+            # PII gönderme: kullanıcı e-postası/IP'si Sentry'ye taşınmasın.
+            # "Zero logs" sözü veren bir üründe bu pazarlama değil, zorunluluk.
+            send_default_pii=False,
+            max_request_body_size="never",
+        )
+    except Exception:  # noqa: BLE001 - izleme aracı uygulamayı düşüremez
+        pass
+
 # ---- Site URL (dev/prod’a göre ayarla)
 SITE_URL = os.environ.get("SITE_URL", "http://127.0.0.1:8000")
 

@@ -71,8 +71,20 @@ def grant_subscription(user, plan_key: str, order=None):
     # arka plan thread'inde, isteği bekletmez.
     try:
         from django.db import transaction as _tx
-        from landing.helpers.mailer import send_premium_activated_email
-        _tx.on_commit(lambda: send_premium_activated_email(user, sub))
+        from landing.helpers.mailer import (
+            send_owner_new_subscription,
+            send_premium_activated_email,
+        )
+        amount = ""
+        if order is not None:
+            amount = f"{getattr(order, 'price_amount', '')} {getattr(order, 'price_currency', '')}".strip()
+
+        def _notify():
+            send_premium_activated_email(user, sub)
+            # Sahibe "dınk": her yeni abonelik anında gelen kutusuna düşer.
+            send_owner_new_subscription(user, sub, amount=amount)
+
+        _tx.on_commit(_notify)
     except Exception:  # noqa: BLE001 - mail hiçbir koşulda grant'ı bozamaz
         pass
     return sub

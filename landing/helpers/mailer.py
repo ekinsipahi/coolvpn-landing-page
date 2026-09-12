@@ -305,3 +305,63 @@ def send_assistant_escalation(conv_id: str, who: str, last_text: str, flags) -> 
     """
     send_email_bg(admin_to, f"🤖 Assistant escalation [{tag}] — {who}",
                   _shell("A chat needs a human.", body, footer_note="Internal notification."))
+
+
+# ------------------------------------------------------------------ #
+# 7) Operatör bildirimi — HER yeni abonelikte "dınk"
+#    Stripe de kripto da aynı kapıdan geçer; sahibi satışı anında görsün.
+# ------------------------------------------------------------------ #
+_SOURCE_LABELS = {
+    "stripe": "💳 Stripe (card)",
+    "crypto": "🪙 Crypto (NOWPayments)",
+    "google_play": "🤖 Google Play",
+    "manual": "🛠️ Manual (admin)",
+}
+
+
+def send_owner_new_subscription(user, sub, *, amount: str = "", extra: str = "") -> None:
+    """Yeni abonelik düşünce sahibine anında haber ver.
+
+    Ödeme kaynağı ne olursa olsun (kart / kripto / Play / manuel) tek
+    bildirim: gelen kutusunda satışların tam listesi birikir.
+    """
+    to = getattr(settings, "SUPPORT_FORWARD_EMAIL", "")
+    if not to:
+        return
+    site = getattr(settings, "SITE_URL", "https://vpnsterr.com").rstrip("/")
+    plan_key = (getattr(sub, "plan_key", "") or "").lower()
+    plan = _PLAN_LABELS.get(plan_key, plan_key.title() or "Premium")
+    source = _SOURCE_LABELS.get((getattr(sub, "source", "") or "").lower(),
+                                getattr(sub, "source", "") or "unknown")
+    ends = getattr(sub, "ends_at", None)
+    ends_txt = ends.strftime("%b %d, %Y") if ends else "—"
+    email = getattr(user, "email", "") or getattr(user, "username", "?")
+
+    rows = [
+        ("Customer", email),
+        ("Plan", plan),
+        ("Source", source),
+        ("Amount", amount or "—"),
+        ("Runs until", ends_txt),
+    ]
+    if extra:
+        rows.append(("Note", extra))
+    table = "".join(
+        f'<tr><td style="padding:4px 14px 4px 0;font-size:13px;color:#7b8ba0">{k}</td>'
+        f'<td style="padding:4px 0;font-size:14px;font-weight:600;color:#0c2233">{v}</td></tr>'
+        for k, v in rows
+    )
+    body = f"""
+      <p style="margin:0 0 4px;font-size:13px;font-weight:700;letter-spacing:1.5px;color:#12b76a;text-transform:uppercase">
+        New subscription</p>
+      <h1 style="margin:0 0 14px;font-size:22px;line-height:1.3">💰 Yeni abone — {plan}</h1>
+      <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 20px">{table}</table>
+      <p style="margin:0 0 22px">{_btn(site + "/admin/landing/subscription/", "Open in admin")}</p>
+    """
+    text = (f"New VPNsterr subscription\n"
+            f"Customer : {email}\nPlan     : {plan}\nSource   : {source}\n"
+            f"Amount   : {amount or '-'}\nUntil    : {ends_txt}\n")
+    send_email_bg(to, f"💰 New VPNsterr subscription — {plan} ({email})",
+                  _shell(f"New {plan} subscription from {email}", body,
+                         footer_note="Operator notification — sent for every new subscription."),
+                  text)

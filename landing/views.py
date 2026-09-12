@@ -1213,6 +1213,27 @@ def cron_reconcile(request):
 from landing.helpers.stripe_gw import stripe_enabled, ensure_price, get_or_create_customer, _api as _stripe
 
 
+def _stripe_amount_label(stripe_sub) -> str:
+    """Stripe abonelik nesnesinden "4.99 USD" gibi okunur bir tutar uretir.
+
+    Nesne hem dict hem StripeObject olabildigi icin iki erisim de denenir;
+    cikarilamazsa bos doner (bildirim mailinde "-" gorunur).
+    """
+    try:
+        items = getattr(stripe_sub, "items", None) or stripe_sub.get("items") or {}
+        data = getattr(items, "data", None) or items.get("data") or []
+        if not data:
+            return ""
+        price = getattr(data[0], "price", None) or data[0].get("price") or {}
+        cents = getattr(price, "unit_amount", None) or price.get("unit_amount")
+        ccy = (getattr(price, "currency", None) or price.get("currency") or "").upper()
+        if cents is None:
+            return ""
+        return f"{int(cents) / 100:.2f} {ccy}".strip()
+    except Exception:  # noqa: BLE001 - tutar sadece bilgi amacli, akisi bozamaz
+        return ""
+
+
 def _grant_stripe_subscription(user, plan_key, stripe_sub):
     """Stripe aboneliğini yerel Subscription'a yazar/günceller (idempotent)."""
     from datetime import datetime, timezone as dt_tz
@@ -1244,8 +1265,13 @@ def _grant_stripe_subscription(user, plan_key, stripe_sub):
     # Premium aktifleşti maili — sadece YENİ abonelikte (periyot uzatmaları
     # yukarıdaki update dalından döner, her ay mail atılmaz).
     try:
-        from landing.helpers.mailer import send_premium_activated_email
+        from landing.helpers.mailer import (
+            send_owner_new_subscription,
+            send_premium_activated_email,
+        )
         send_premium_activated_email(user, local)
+        send_owner_new_subscription(user, local,
+                                    amount=_stripe_amount_label(stripe_sub))
     except Exception:  # noqa: BLE001
         pass
     return local
