@@ -1828,16 +1828,88 @@ def extension_auth_token(request):
 
 @login_required
 @require_POST
+def _cancel_stripe_subscriptions(user) -> int:
+    """Hesap silinmeden ÖNCE Stripe aboneliklerini iptal et.
+
+    Yerel kaydı silmek Stripe'ta hiçbir şeyi durdurmaz: hesabını silen
+    kullanıcıdan kart çekilmeye devam eder ve artık iptal edebileceği bir
+    panel de kalmaz. Bu, doğrudan chargeback demek. Silmeden önce iptal
+    etmek tek dürüst davranış.
+
+    Ağ hatası silmeyi engellememeli — kullanıcının silme hakkı, bizim
+    Stripe'a ulaşabilmemize bağlı olamaz; başarısızlık loglanır.
+    """
+    ids = list(
+        Subscription.objects
+        .filter(user=user, source="stripe")
+        .exclude(stripe_subscription_id="")
+        .values_list("stripe_subscription_id", flat=True)
+    )
+    if not ids or not stripe_enabled():
+        return 0
+    cancelled = 0
+    api = _stripe()
+    for sub_id in set(ids):
+        try:
+            try:
+                api.Subscription.cancel(sub_id)
+            except AttributeError:  # eski stripe-python
+                api.Subscription.delete(sub_id)
+            cancelled += 1
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("account delete: stripe cancel failed sub=%s: %s", sub_id, exc)
+    return cancelled
+
+
 def account_delete(request):
-    """Hesabı kalıcı sil (mağaza zorunluluğu + GDPR). Cascade: cihazlar/abonelikler."""
-    if request.POST.get("confirm") != "yes":
-        messages.error(request, "Please confirm account deletion.")
-        return redirect("dashboard")
-    user = request.user
-    from django.contrib.auth import logout as auth_logout
-    auth_logout(request)
-    user.delete()
-    return redirect("home")
+    """
+    GET  /account/delete/  -> herkese açık açıklama sayfası
+    POST                   -> hesabı kalıcı siler (giriş + onay şart)
+
+    GET NEDEN HERKESE AÇIK: Google Play'in Data safety formu, veri silme
+    talebi için giriş yapmadan ve uygulamayı kurmadan açılabilen bir URL
+    istiyor. Silme işlemi yine kimlik doğrulamalı; herkese açık olan sadece
+    açıklama.
+    """
+    if request.method == "POST":
+        if not request.user.is_authenticated:
+            # Giriş yoksa SİLME YOK: kimin hesabı olduğunu bilmeden silemeyiz.
+            return redirect(f"{reverse('login')}?next={reverse('account_delete')}")
+        if request.POST.get("confirm") != "yes":
+            messages.error(request, _("Please confirm that you want to delete your account."))
+            return redirect("account_delete")
+
+        user = request.user
+        email = user.email or user.get_username()
+        cancelled = _cancel_stripe_subscriptions(user)
+
+        from django.contrib.auth import logout as auth_logout
+        auth_logout(request)
+        user.delete()
+        logger.info("account deleted: %s (stripe subs cancelled: %d)", email, cancelled)
+
+        if cancelled:
+            messages.success(request, _(
+                "Your account and all data attached to it have been deleted, and your "
+                "card subscription has been cancelled — you will not be charged again."))
+        else:
+            messages.success(request, _(
+                "Your account and all data attached to it have been deleted."))
+        return redirect("home")
+
+    # --- GET: sayfa. Girişliyse ne silineceğini somut olarak göster. ---
+    ctx = {}
+    if request.user.is_authenticated:
+        _now = now()
+        active = (Subscription.objects
+                  .filter(user=request.user, ends_at__gte=_now)
+                  .order_by("-ends_at").first())
+        ctx = {
+            "active_sub": active,
+            "device_count": request.user.devices.filter(is_active=True).count(),
+            "ticket_count": request.user.tickets.count(),
+        }
+    return render(request, "landing/account_delete.html", ctx)
 
 
 @csrf_exempt
