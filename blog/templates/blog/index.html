@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{{ seo_title }} — {{ site_name }}{% endblock %}
+{% block meta_description %}{{ seo_description }}{% endblock %}
+
+{% block schema_jsonld %}
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Blog","name":"VPNsterr Blog",
+ "url":"{{ canonical_url }}","description":"{{ seo_description }}",
+ "publisher":{"@type":"Organization","name":"Sterr Technologies"}}
+</script>
+{% endblock %}
+
+{% block header %}{% include "partials/navbar.html" %}{% endblock %}
+
+{% block content %}
+<!-- Aurora başlık -->
+<section class="relative overflow-hidden vs-section !pt-14 !pb-10">
+  <div class="pointer-events-none absolute inset-0 -z-10" aria-hidden="true"
+       style="background:
+         radial-gradient(38rem 22rem at 15% -10%, color-mix(in srgb, var(--vs-500) 14%, transparent), transparent 60%),
+         radial-gradient(34rem 20rem at 85% 0%, color-mix(in srgb, var(--vs-fuchsia) 12%, transparent), transparent 62%)"></div>
+
+  <div class="vs-shell">
+    <div class="max-w-2xl">
+      <span class="vs-eyebrow">{% trans "VPNsterr Blog" %}</span>
+      <h1 class="vs-h2">{% trans "Privacy, explained without the fog" %}</h1>
+      <p class="mt-3 text-[15px] leading-7" style="color:var(--vs-text-2)">
+        {% trans "Honest guides on how VPNs actually work, what no-logs really means, and what we're shipping next. No fear-mongering, no fake speed charts." %}
+      </p>
+    </div>
+
+    <!-- Arama + kategori pilleri -->
+    <div class="mt-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <form method="get" action="{% url 'blog:index' %}" class="relative w-full max-w-md" role="search">
+        <svg class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 opacity-45"
+             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="search" name="q" value="{{ q }}" placeholder="{% trans 'Search articles & keywords…' %}"
+               class="w-full rounded-xl py-2.5 ps-10 pe-4 text-sm outline-none transition"
+               style="background:var(--vs-card); border:1px solid var(--vs-line); color:var(--vs-text)"
+               aria-label="{% trans 'Search articles' %}">
+      </form>
+
+      {% if categories %}
+      <div class="flex flex-wrap gap-2">
+        <a href="{% url 'blog:index' %}"
+           class="rounded-full px-3.5 py-1.5 text-xs font-semibold transition"
+           style="background:var(--vs-card); border:1px solid var(--vs-line); color:var(--vs-text)">
+          {% trans "All" %} <span class="opacity-50">{{ total }}</span>
+        </a>
+        {% for c in categories %}
+          <a href="{{ c.absolute_url }}"
+             class="rounded-full px-3.5 py-1.5 text-xs font-semibold transition bg-{{ c.accent }}-500/10 text-{{ c.accent }}-700 dark:text-{{ c.accent }}-400"
+             style="border:1px solid transparent">{{ c.name }} <span class="opacity-50">{{ c.n }}</span></a>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<section class="vs-section !pt-2">
+  <div class="vs-shell">
+
+    {% if q %}
+      <p class="mb-6 text-sm" style="color:var(--vs-text-2)">
+        {% blocktrans count n=page_obj.paginator.count %}<b>{{ n }}</b> result for “{{ q }}”{% plural %}<b>{{ n }}</b> results for “{{ q }}”{% endblocktrans %}
+        · <a href="{% url 'blog:index' %}" class="underline" style="color:var(--vs-500)">{% trans "clear" %}</a>
+      </p>
+    {% endif %}
+
+    {% if featured %}
+    <!-- Öne çıkan yazı -->
+    <a href="{{ featured.absolute_url }}" class="vs-card vs-card-hover group mb-10 grid gap-0 overflow-hidden !p-0 lg:grid-cols-2">
+      <span class="relative block aspect-[16/10] lg:aspect-auto lg:h-full min-h-[240px] overflow-hidden"
+            style="background:linear-gradient(135deg, color-mix(in srgb, var(--vs-500) 22%, transparent), color-mix(in srgb, var(--vs-fuchsia) 18%, transparent))">
+        {% if featured.featured_image_url %}
+          <img src="{{ featured.featured_image_url }}" alt="{{ featured.title }}"
+               class="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105">
+        {% endif %}
+        <span class="absolute left-4 top-4 rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-white"
+              style="background:var(--vs-grad-hot)">{% trans "Featured" %}</span>
+      </span>
+      <span class="flex flex-col justify-center p-7 lg:p-9">
+        <span class="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider">
+          <span class="rounded-md px-2 py-0.5 bg-{{ featured.category.accent }}-500/10 text-{{ featured.category.accent }}-600 dark:text-{{ featured.category.accent }}-400">{{ featured.category.name }}</span>
+          <span style="color:var(--vs-text-2)">{{ featured.reading_time }} {% trans "min read" %}</span>
+        </span>
+        <span class="mt-3 block text-2xl font-bold leading-tight tracking-tight transition-colors group-hover:text-[var(--vs-600)]"
+              style="color:var(--vs-text)">{{ featured.title }}</span>
+        <span class="mt-3 text-sm leading-7" style="color:var(--vs-text-2)">{{ featured.effective_excerpt }}</span>
+        <span class="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold" style="color:var(--vs-500)">
+          {% trans "Read the guide" %}
+          <svg class="h-4 w-4 transition-transform group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </span>
+      </span>
+    </a>
+    {% endif %}
+
+    {% if posts %}
+      <div class="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+        {% for post in posts %}{% include "blog/_card.html" %}{% endfor %}
+      </div>
+      {% include "blog/_pagination.html" %}
+    {% elif not featured %}
+      <div class="vs-card !p-12 text-center">
+        <div class="mx-auto mb-4 grid h-14 w-14 place-content-center rounded-full"
+             style="background:color-mix(in srgb, var(--vs-500) 10%, transparent); color:var(--vs-600)">
+          <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        </div>
+        <p class="text-base font-bold" style="color:var(--vs-text)">
+          {% if q %}{% trans "Nothing matched that search" %}{% else %}{% trans "First articles are on the way" %}{% endif %}
+        </p>
+        <p class="mt-1.5 text-sm" style="color:var(--vs-text-2)">
+          {% if q %}{% trans "Try a broader term — or browse the categories above." %}
+          {% else %}{% trans "We're writing them now. In the meantime, the extension is free and unlimited." %}{% endif %}
+        </p>
+        <a href="{% url 'vpn_extension' %}" class="vs-btn vs-btn-primary mt-6 !px-5 !py-2.5 !text-sm">{% trans "Get the free extension" %}</a>
+      </div>
+    {% endif %}
+
+    <!-- Alt CTA -->
+    <div class="vs-card mt-14 !p-8 text-center md:!p-10"
+         style="background:linear-gradient(135deg, color-mix(in srgb, var(--vs-500) 8%, var(--vs-card)), color-mix(in srgb, var(--vs-fuchsia) 7%, var(--vs-card)))">
+      <h2 class="text-xl font-bold tracking-tight md:text-2xl" style="color:var(--vs-text)">
+        {% trans "Reading about privacy is good. Having it is better." %}</h2>
+      <p class="mx-auto mt-2 max-w-xl text-sm leading-7" style="color:var(--vs-text-2)">
+        {% trans "The VPNsterr extension is 100% free and genuinely unlimited — no sign-up, no data caps, and zero activity logs." %}</p>
+      <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
+        <a href="{{ chrome_store_url|default:'' }}{% if not chrome_store_url %}{% url 'vpn_extension' %}{% endif %}"
+           {% if chrome_store_url %}target="_blank" rel="noopener"{% endif %}
+           class="vs-btn vs-btn-primary" data-ga-event="extension_install_click" data-ga-label="blog_footer">
+          {% trans "Add to Chrome — It's Free" %}</a>
+        <a href="{% url 'pricing' %}" class="vs-btn vs-btn-ghost">{% trans "See Premium" %}</a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block footer %}{% include "partials/footer.html" %}{% endblock %}

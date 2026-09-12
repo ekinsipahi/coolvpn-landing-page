@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{{ seo_title }} — {{ site_name }}{% endblock %}
+{% block meta_description %}{{ seo_description }}{% endblock %}
+
+{% block schema_jsonld %}
+<script type="application/ld+json">{{ faq_schema_json|safe }}</script>
+{% endblock %}
+
+{% block header %}{% include "partials/navbar.html" %}{% endblock %}
+
+{% block content %}
+<section class="relative overflow-hidden vs-section !pt-14 !pb-8">
+  <div class="pointer-events-none absolute inset-0 -z-10" aria-hidden="true"
+       style="background:radial-gradient(36rem 20rem at 20% -10%, color-mix(in srgb, var(--vs-500) 13%, transparent), transparent 62%),
+                         radial-gradient(30rem 18rem at 82% 0%, color-mix(in srgb, var(--vs-fuchsia) 11%, transparent), transparent 62%)"></div>
+  <div class="vs-shell max-w-3xl">
+    <div>
+      <span class="vs-eyebrow">{% trans "Frequently asked questions" %}</span>
+      <h1 class="vs-h2">{% trans "Everything, answered straight" %}</h1>
+      <p class="mt-3 text-[15px] leading-7" style="color:var(--vs-text-2)">
+        {% blocktrans with n=faq_total %}{{ n }} honest answers about the free plan, Premium, privacy and setup. If yours isn't here, the chat in your dashboard replies instantly.{% endblocktrans %}
+      </p>
+    </div>
+
+    <!-- Bölüm kısayolları -->
+    <div class="mt-7 flex flex-wrap gap-2">
+      {% for group, accent, items in faq_groups %}
+        <a href="#{{ group|slugify }}"
+           class="rounded-full px-3.5 py-1.5 text-xs font-semibold bg-{{ accent }}-500/10 text-{{ accent }}-700 dark:text-{{ accent }}-400">
+          {{ group }} <span class="opacity-50">{{ items|length }}</span>
+        </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="vs-section !pt-4">
+  <div class="vs-shell max-w-3xl">
+    {% for group, accent, items in faq_groups %}
+      <div id="{{ group|slugify }}" class="{% if not forloop.first %}mt-14{% endif %} scroll-mt-28">
+        <h2 class="flex items-center gap-2.5 text-xl font-bold tracking-tight" style="color:var(--vs-text)">
+          <span class="h-2 w-2 rounded-full bg-{{ accent }}-500"></span>{{ group }}
+        </h2>
+        <div class="mt-5 space-y-3">
+          {% for q, a in items %}
+            <details class="vs-card group !p-0 overflow-hidden">
+              <summary class="flex cursor-pointer list-none items-center justify-between gap-4 p-5">
+                <span class="text-[15px] font-semibold leading-snug" style="color:var(--vs-text)">{{ q }}</span>
+                <svg class="h-4 w-4 shrink-0 opacity-50 transition-transform group-open:rotate-180"
+                     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+              </summary>
+              <div class="px-5 pb-5 -mt-1 text-sm leading-7" style="color:var(--vs-text-2)">{{ a|safe }}</div>
+            </details>
+          {% endfor %}
+        </div>
+      </div>
+    {% endfor %}
+
+    <div class="vs-card mt-14 !p-8 text-center"
+         style="background:linear-gradient(135deg, color-mix(in srgb, var(--vs-500) 8%, var(--vs-card)), color-mix(in srgb, var(--vs-fuchsia) 7%, var(--vs-card)))">
+      <h2 class="text-xl font-bold tracking-tight" style="color:var(--vs-text)">{% trans "Still stuck?" %}</h2>
+      <p class="mx-auto mt-2 max-w-lg text-sm leading-7" style="color:var(--vs-text-2)">
+        {% trans "Chat with us from your dashboard, open a tracked support ticket, or just email the team." %}</p>
+      <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
+        <a href="{% url 'support' %}" class="vs-btn vs-btn-primary">{% trans "Get support" %}</a>
+        <a href="{{ chrome_store_url|default:'' }}{% if not chrome_store_url %}{% url 'vpn_extension' %}{% endif %}"
+           {% if chrome_store_url %}target="_blank" rel="noopener"{% endif %}
+           class="vs-btn vs-btn-ghost" data-ga-event="extension_install_click" data-ga-label="faq_page">
+          {% trans "Get the free extension" %}</a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block footer %}{% include "partials/footer.html" %}{% endblock %}

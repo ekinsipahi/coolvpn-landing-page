@@ -56,25 +56,10 @@ products_patterns = (
     "products",
 )
 
-blog_patterns = (
-    [
-        path(
-            "",
-            Stub(
-                template_name="stubs/simple.html",
-                extra_context={
-                    "title": "Blog",
-                    "subtitle": "Guides, updates, transparency notes",
-                },
-            ),
-            name="index",
-        ),
-    ],
-    "blog",
-)
-
 from django.contrib.sitemaps.views import sitemap as sitemap_view
 from core.sitemaps import SITEMAPS
+from landing.views_faq import faq as faq_view
+from landing.views_changelog import changelog as changelog_view
 
 urlpatterns = [
     path("i18n/", include("django.conf.urls.i18n")),  # dil değişimi
@@ -114,18 +99,12 @@ urlpatterns += i18n_patterns(
         name="account_settings",
     ),
     # marketing
-    path(
-        "faq/",
-        Stub(
-            template_name="stubs/simple.html",
-            extra_context={"title": "FAQ", "subtitle": "Answers to common questions"},
-        ),
-        name="faq",
-    ),
+    path("faq/", faq_view, name="faq"),
+    path("changelog/", changelog_view, name="changelog"),
     # namespaced groups
     path("features/", include(features_patterns, namespace="features")),
     path("advantages/", include(advantages_patterns, namespace="advantages")),
     path("products/", include(products_patterns, namespace="products")),
-    path("blog/", include(blog_patterns, namespace="blog")),
+    path("blog/", include("blog.urls")),
     prefix_default_language=False,
 )

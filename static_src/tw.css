@@ -346,3 +346,54 @@ html.dark body::before {
     .vs-float, .vs-float-slow, .vs-spin-slower, .vs-pulse-ring { animation: none; }
   }
 }
+
+/* ---------- Blog makale gövdesi ----------
+   Yazılar admin'den HAM HTML olarak giriliyor; burada tek yerden
+   biçimleniyorlar ki her yazıda inline stil yazmak gerekmesin. */
+@layer components {
+  .vs-prose {
+    @apply text-[16px] leading-8;
+    color: var(--vs-text-2);
+  }
+  .vs-prose > * + * { @apply mt-5; }
+  .vs-prose h2 {
+    @apply mt-12 text-2xl font-bold tracking-tight;
+    color: var(--vs-text);
+  }
+  .vs-prose h3 {
+    @apply mt-9 text-lg font-bold tracking-tight;
+    color: var(--vs-text);
+  }
+  .vs-prose p  { @apply leading-8; }
+  .vs-prose a  {
+    @apply font-medium underline underline-offset-2;
+    color: var(--vs-600);
+  }
+  .vs-prose ul { @apply list-disc ps-6 space-y-2; }
+  .vs-prose ol { @apply list-decimal ps-6 space-y-2; }
+  .vs-prose li { @apply leading-7; }
+  .vs-prose strong { color: var(--vs-text); @apply font-semibold; }
+  .vs-prose img { @apply rounded-xl; border: 1px solid var(--vs-line); }
+  .vs-prose blockquote {
+    @apply ps-5 py-1 italic;
+    border-inline-start: 3px solid var(--vs-500);
+    color: var(--vs-text);
+  }
+  .vs-prose code {
+    @apply rounded px-1.5 py-0.5 text-[13px];
+    background: color-mix(in srgb, var(--vs-500) 10%, transparent);
+    color: var(--vs-text);
+  }
+  .vs-prose pre {
+    @apply overflow-x-auto rounded-xl p-4 text-[13px];
+    background: var(--vs-card-2);
+    border: 1px solid var(--vs-line);
+  }
+  .vs-prose pre code { @apply bg-transparent p-0; }
+  .vs-prose table { @apply w-full text-sm; }
+  .vs-prose th, .vs-prose td {
+    @apply px-3 py-2 text-start;
+    border-bottom: 1px solid var(--vs-line);
+  }
+  .vs-prose th { color: var(--vs-text); @apply font-semibold; }
+}

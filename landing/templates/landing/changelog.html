@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{{ seo_title }} — {{ site_name }}{% endblock %}
+{% block meta_description %}{{ seo_description }}{% endblock %}
+
+{% block header %}{% include "partials/navbar.html" %}{% endblock %}
+
+{% block content %}
+<section class="relative overflow-hidden vs-section !pt-14 !pb-8">
+  <div class="pointer-events-none absolute inset-0 -z-10" aria-hidden="true"
+       style="background:radial-gradient(34rem 20rem at 18% -10%, color-mix(in srgb, var(--vs-500) 13%, transparent), transparent 62%),
+                         radial-gradient(28rem 17rem at 80% 0%, color-mix(in srgb, var(--vs-fuchsia) 11%, transparent), transparent 62%)"></div>
+  <div class="vs-shell max-w-3xl">
+    <div>
+      <span class="vs-eyebrow">{% trans "Changelog" %}</span>
+      <h1 class="vs-h2">{% trans "What we shipped" %}</h1>
+      <p class="mt-3 text-[15px] leading-7" style="color:var(--vs-text-2)">
+        {% trans "Every release, including the bugs we caused and fixed. Roadmap items live at the bottom, clearly marked — we don't list plans as if they were features." %}
+      </p>
+    </div>
+  </div>
+</section>
+
+<section class="vs-section !pt-4">
+  <div class="vs-shell max-w-3xl">
+    <ol class="relative space-y-12">
+      <!-- dikey çizgi -->
+      <span class="pointer-events-none absolute left-[7px] top-2 bottom-2 w-px hidden sm:block"
+            style="background:linear-gradient(180deg, var(--vs-500), color-mix(in srgb, var(--vs-fuchsia) 60%, transparent), transparent)"></span>
+
+      {% for rel in releases %}
+      <li class="relative sm:ps-9">
+        <span class="absolute left-0 top-1.5 hidden h-[15px] w-[15px] rounded-full sm:block"
+              style="background:var(--vs-card); border:3px solid var(--vs-500)"></span>
+
+        <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+          <h2 class="text-xl font-bold tracking-tight" style="color:var(--vs-text)">
+            {% trans "Version" %} {{ rel.version }}
+          </h2>
+          <time class="text-xs font-semibold" style="color:var(--vs-text-2)">{{ rel.date }}</time>
+          {% if forloop.first %}
+            <span class="rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white"
+                  style="background:var(--vs-grad-hot)">{% trans "Latest" %}</span>
+          {% endif %}
+        </div>
+        <p class="mt-1 text-sm font-medium" style="color:var(--vs-text-2)">{{ rel.title }}</p>
+
+        <ul class="mt-5 space-y-3">
+          {% for e in rel.entries %}
+            <li class="vs-card flex gap-3 !p-4">
+              <span class="mt-0.5 shrink-0 rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-{{ e.accent }}-500/10 text-{{ e.accent }}-600 dark:text-{{ e.accent }}-400">
+                {{ e.label }}
+              </span>
+              <span class="text-sm leading-6" style="color:var(--vs-text-2)">{{ e.text }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      </li>
+      {% endfor %}
+    </ol>
+
+    <!-- Yol haritası: tarihsiz, ayrı, söz verilmemiş -->
+    <div class="vs-card mt-16 !p-7">
+      <h2 class="text-base font-bold tracking-tight" style="color:var(--vs-text)">{% trans "Coming next" %}</h2>
+      <p class="mt-1 text-xs" style="color:var(--vs-text-2)">
+        {% trans "Being worked on — no dates, because dates we can't keep are worse than none." %}</p>
+      <ul class="mt-4 space-y-2.5">
+        {% for item in coming_next %}
+          <li class="flex items-center gap-2.5 text-sm" style="color:var(--vs-text-2)">
+            <span class="h-1.5 w-1.5 shrink-0 rounded-full" style="background:var(--vs-500)"></span>{{ item }}
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="mt-12 text-center">
+      <a href="{{ chrome_store_url|default:'' }}{% if not chrome_store_url %}{% url 'vpn_extension' %}{% endif %}"
+         {% if chrome_store_url %}target="_blank" rel="noopener"{% endif %}
+         class="vs-btn vs-btn-primary" data-ga-event="extension_install_click" data-ga-label="changelog">
+        {% trans "Get the latest version" %}</a>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block footer %}{% include "partials/footer.html" %}{% endblock %}

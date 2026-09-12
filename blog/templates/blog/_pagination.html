@@ -1,0 +1,16 @@
+{% load i18n %}
+{% if page_obj.paginator.num_pages > 1 %}
+<nav class="mt-12 flex items-center justify-center gap-2" aria-label="{% trans 'Pagination' %}">
+  {% if page_obj.has_previous %}
+    <a href="?{% if q %}q={{ q|urlencode }}&{% endif %}page={{ page_obj.previous_page_number }}"
+       class="vs-btn vs-btn-ghost !px-4 !py-2 !text-xs">← {% trans "Previous" %}</a>
+  {% endif %}
+  <span class="px-3 text-xs font-semibold" style="color:var(--vs-text-2)">
+    {% blocktrans with n=page_obj.number t=page_obj.paginator.num_pages %}Page {{ n }} of {{ t }}{% endblocktrans %}
+  </span>
+  {% if page_obj.has_next %}
+    <a href="?{% if q %}q={{ q|urlencode }}&{% endif %}page={{ page_obj.next_page_number }}"
+       class="vs-btn vs-btn-ghost !px-4 !py-2 !text-xs">{% trans "Next" %} →</a>
+  {% endif %}
+</nav>
+{% endif %}

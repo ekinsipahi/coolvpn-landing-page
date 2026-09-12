@@ -106,6 +106,7 @@ INSTALLED_APPS = [
     "allauth.socialaccount.providers.google",
 
     "landing",
+    "blog",
 ]
 
 SITE_ID = 1  # <-- Sites framework

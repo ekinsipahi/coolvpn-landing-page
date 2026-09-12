@@ -27,6 +27,7 @@ class StaticViewSitemap(Sitemap):
         ("best_free_vpn_extension", "weekly", 0.8),
         ("faq",                   "monthly", 0.6),
         ("support",               "monthly", 0.6),
+        ("changelog",             "weekly",  0.5),
         ("blog:index",            "weekly",  0.5),
         ("products:desktop",      "monthly", 0.5),
         ("products:mobile",       "monthly", 0.5),
@@ -57,4 +58,50 @@ class StaticViewSitemap(Sitemap):
         return dict((n, p) for n, _, p in self.PAGES).get(item, 0.5)
 
 
-SITEMAPS = {"static": StaticViewSitemap}
+class BlogPostSitemap(Sitemap):
+    """Yayınlanmış blog yazıları.
+
+    i18n=False: blog tek dilde (İngilizce) yazılıyor, statik sayfalardaki
+    gibi 20 dillik alternate üretmek yanlış olurdu.
+    """
+    changefreq = "monthly"
+    priority = 0.6
+    protocol = "https"
+
+    def items(self):
+        from django.utils import timezone
+
+        from blog.models import BlogPost
+        return (BlogPost.objects
+                .filter(status=BlogPost.STATUS_PUBLISHED,
+                        published_at__lte=timezone.now())
+                .select_related("category")
+                .order_by("-published_at"))
+
+    def location(self, obj):
+        return obj.absolute_url
+
+    def lastmod(self, obj):
+        return obj.updated_at
+
+
+class BlogCategorySitemap(Sitemap):
+    changefreq = "weekly"
+    priority = 0.5
+    protocol = "https"
+
+    def items(self):
+        from blog.models import BlogCategory, BlogPost
+        return [c for c in BlogCategory.objects.all()
+                if c.posts.filter(status=BlogPost.STATUS_PUBLISHED).exists()]
+
+    def location(self, obj):
+        return obj.absolute_url
+
+
+SITEMAPS = {
+    "static": StaticViewSitemap,
+    "blog": BlogPostSitemap,
+    "blog-categories": BlogCategorySitemap,
+}
+

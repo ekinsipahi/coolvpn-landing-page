@@ -59,6 +59,7 @@
           <li><a href="{% url 'blog:index' %}">{% trans "Blog" %}</a></li>
           <li><a href="{% url 'faq' %}">{% trans "FAQ" %}</a></li>
           <li><a href="{% url 'feature_detail' 'no-logs' %}">{% trans "No-Logs Policy" %}</a></li>
+          <li><a href="{% url 'changelog' %}">{% trans "Changelog" %}</a></li>
           <li><a href="{% url 'support' %}">{% trans "Support & Contact" %}</a></li>
           <li><a href="mailto:support@vpnsterr.com">support@vpnsterr.com</a></li>
         </ul>
@@ -72,6 +73,13 @@
           <li><a href="/terms/">{% trans "Terms of Service" %}</a></li>
           <li><a href="{% url 'refund_policy' %}">{% trans "Refund Policy" %}</a></li>
           <li><a href="{% url 'acceptable_use' %}">{% trans "Acceptable Use" %}</a></li>
+          {% comment %}
+            Google Play'in Data safety formu, silme talebi icin herkese acik ve
+            kolay bulunur bir baglanti bekliyor.
+            NOT: {# ... #} tek satirliktir; cok satirli kullanilinca Django onu
+            yorum saymaz ve metin footer'da HAM olarak gorunur.
+          {% endcomment %}
+          <li><a href="{% url 'account_delete' %}">{% trans "Delete your account" %}</a></li>
         </ul>
         <div class="mt-6 inline-flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium"
              style="background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1); color:#c5d7e2">

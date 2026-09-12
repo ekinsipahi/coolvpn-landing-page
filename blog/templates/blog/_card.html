@@ -1,0 +1,30 @@
+{% load i18n %}
+{# Tek yazı kartı — index, kategori ve ilgili yazılar aynı kartı kullanır. #}
+<a href="{{ post.absolute_url }}" class="vs-card vs-card-hover group flex flex-col !p-0 overflow-hidden">
+  <span class="block aspect-[16/9] w-full overflow-hidden"
+        style="background:linear-gradient(135deg, color-mix(in srgb, var(--vs-500) 16%, transparent), color-mix(in srgb, var(--vs-fuchsia) 14%, transparent))">
+    {% if post.featured_image_url %}
+      <img src="{{ post.featured_image_url }}" alt="{{ post.title }}" loading="lazy"
+           class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105">
+    {% else %}
+      <span class="grid h-full w-full place-content-center opacity-40">
+        <svg class="h-10 w-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" style="color:var(--vs-600)"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      </span>
+    {% endif %}
+  </span>
+  <span class="flex flex-1 flex-col p-5">
+    <span class="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider">
+      <span class="rounded-md px-2 py-0.5 bg-{{ post.category.accent }}-500/10 text-{{ post.category.accent }}-600 dark:text-{{ post.category.accent }}-400">
+        {{ post.category.name }}
+      </span>
+      <span style="color:var(--vs-text-2)">{{ post.reading_time }} {% trans "min read" %}</span>
+    </span>
+    <span class="mt-2.5 block text-base font-bold leading-snug tracking-tight transition-colors group-hover:text-[var(--vs-600)]"
+          style="color:var(--vs-text)">{{ post.title }}</span>
+    <span class="mt-2 flex-1 text-sm leading-6" style="color:var(--vs-text-2)">{{ post.effective_excerpt }}</span>
+    <span class="mt-4 flex items-center gap-1.5 text-xs font-semibold" style="color:var(--vs-500)">
+      {% trans "Read article" %}
+      <svg class="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+    </span>
+  </span>
+</a>
