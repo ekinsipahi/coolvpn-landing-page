@@ -57,6 +57,8 @@ if SENTRY_DSN:
         from sentry_sdk.integrations.django import DjangoIntegration
         from sentry_sdk.integrations.logging import LoggingIntegration
 
+        from core.sentry_scrub import scrub as _sentry_scrub
+
         sentry_sdk.init(
             dsn=SENTRY_DSN,
             environment=SENTRY_ENVIRONMENT,
@@ -70,6 +72,11 @@ if SENTRY_DSN:
             # "Zero logs" sözü veren bir üründe bu pazarlama değil, zorunluluk.
             send_default_pii=False,
             max_request_body_size="never",
+            # Sentry'nin varsayilan filtresi Authorization/Cookie basliklarini
+            # temizler ama QUERY STRING'e dokunmaz; bizde sir orada dolasiyor
+            # (/api/cron/reconcile/?key=...). Ayrintili gerekce: core/sentry_scrub.py
+            before_send=_sentry_scrub,
+            before_send_transaction=_sentry_scrub,
         )
     except Exception:  # noqa: BLE001 - izleme aracı uygulamayı düşüremez
         pass
