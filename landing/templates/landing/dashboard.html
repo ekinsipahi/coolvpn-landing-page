@@ -119,6 +119,22 @@
           <p class="mt-1.5 text-center text-[11px]" style="color:var(--vs-text-2)">
             {% trans "Renews automatically · manage card, invoices & cancellation in the secure portal" %}
           </p>
+        {% elif active_sub.source == "google_play" %}
+          {% comment %}
+            Play aboneligini YALNIZCA Google iptal edebilir ve kendiliginden
+            yenilenir. Buraya kripto "Extend" ya da "Switch to card" koymak,
+            zaten para cekilen bir aboneligin ustune ikinci bir odeme rayi
+            acmak olurdu -- kullanici iki kere oder. Tek dogru eylem: Play'e
+            yonlendirmek.
+          {% endcomment %}
+          <a href="https://play.google.com/store/account/subscriptions" target="_blank" rel="noopener"
+             class="vs-btn vs-btn-ghost mt-5 flex w-full items-center justify-center !py-2.5 !text-xs"
+             data-ga-event="play_subscriptions_open">
+            {% trans "Manage in Google Play" %}
+          </a>
+          <p class="mt-1.5 text-center text-[11px]" style="color:var(--vs-text-2)">
+            {% trans "Renews automatically through Google Play. Cancelling and refunds are handled there — we can't change it from here." %}
+          </p>
         {% else %}
           <div class="mt-5 grid grid-cols-2 gap-2">
             <a href="{% url 'payment' %}?plan={{ plan_key|default:'annual' }}" class="vs-btn vs-btn-ghost !py-2.5 !text-xs"

@@ -1,0 +1,187 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static admin_dashboard %}
+
+{% comment %}
+  Django'nun kendi admin/index.html'inin uzerine yazar. Uygulama listesi
+  aynen korunuyor ({% include "admin/app_list.html" %}) — sadece ustune
+  ozet panel ve son hareketler ekleniyor.
+
+  Renkler admin'in KENDI CSS degiskenlerinden geliyor (--body-bg, --hairline
+  -color, --primary...). Sabit renk yazsaydik, admin'in koyu temasinda panel
+  okunmaz hale gelirdi.
+{% endcomment %}
+
+{% block extrastyle %}{{ block.super }}
+<link rel="stylesheet" href="{% static "admin/css/dashboard.css" %}">
+<style>
+  /* Admin'in ana sutunu flex icinde buyumedigi icin genis ekranda 600px'de
+     kaliyor ve panelin yarisi bos duruyordu. Sadece dashboard sayfasinda
+     buyumesine izin veriyoruz; diger admin sayfalari etkilenmiyor. */
+  .dashboard #content{flex:1 1 auto;width:auto;max-width:none}
+  .vs-grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));margin-bottom:18px}
+  .vs-card{background:var(--body-bg);border:1px solid var(--hairline-color);border-radius:10px;padding:14px 16px}
+  .vs-card .k{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--body-quiet-color);font-weight:700}
+  .vs-card .v{font-size:26px;font-weight:700;line-height:1.15;margin-top:6px;color:var(--body-fg)}
+  .vs-card .s{font-size:12px;color:var(--body-quiet-color);margin-top:4px}
+  .vs-card.hot{border-color:var(--primary)}
+  .vs-split{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));margin-bottom:22px}
+  .vs-list{background:var(--body-bg);border:1px solid var(--hairline-color);border-radius:10px;overflow:hidden}
+  .vs-list h3{margin:0;padding:10px 14px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;
+              border-bottom:1px solid var(--hairline-color);background:var(--darkened-bg)}
+  .vs-list table{width:100%;border-collapse:collapse;font-size:12.5px}
+  .vs-list td{padding:7px 14px;border-bottom:1px solid var(--hairline-color)}
+  .vs-list tr:last-child td{border-bottom:0}
+  .vs-list td.r{text-align:right;color:var(--body-quiet-color);white-space:nowrap}
+  .vs-none{padding:12px 14px;color:var(--body-quiet-color);font-size:12.5px}
+  .vs-pill{display:inline-block;padding:1px 7px;border-radius:8px;font-size:11px;font-weight:600;
+           background:var(--darkened-bg);color:var(--body-quiet-color)}
+</style>
+{% endblock %}
+
+{% block coltype %}colMS{% endblock %}
+{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
+{% block nav-breadcrumbs %}{% endblock %}
+{% block nav-sidebar %}{% endblock %}
+
+{% block content %}
+{% vpn_dashboard as d %}
+{% vpn_recent as r %}
+<div id="content-main">
+
+  <div class="vs-grid">
+    <div class="vs-card">
+      <div class="k">Kullanıcı</div>
+      <div class="v">{{ d.users.total }}</div>
+      <div class="s">+{{ d.users.new_7d }} bu hafta · +{{ d.users.new_30d }} bu ay</div>
+    </div>
+    <div class="vs-card hot">
+      <div class="k">Premium</div>
+      <div class="v">{{ d.subs.active_users }}</div>
+      <div class="s">{{ d.free_users }} ücretsiz · {{ d.subs.new_30d }} yeni abonelik (30g)</div>
+    </div>
+    <div class="vs-card">
+      <div class="k">7 gün içinde bitecek</div>
+      <div class="v">{{ d.subs.expiring_7d }}</div>
+      <div class="s">yenilenmeyenler için hatırlatma fırsatı</div>
+    </div>
+    <div class="vs-card">
+      <div class="k">Cihaz</div>
+      <div class="v">{{ d.devices.seen_24h }}</div>
+      <div class="s">son 24 saatte · {{ d.devices.active }} aktif / {{ d.devices.total }} toplam</div>
+    </div>
+    <div class="vs-card">
+      <div class="k">Açık destek</div>
+      <div class="v">{{ d.tickets.open }}</div>
+      <div class="s">{{ d.tickets.answered }} cevaplandı · {{ d.assistant.escalated }} sohbet operatör bekliyor</div>
+    </div>
+    <div class="vs-card">
+      <div class="k">Son 30 günün tahsilatı</div>
+      <div class="v">
+        {% for row in d.revenue_30d %}{{ row.total }} {{ row.price_currency }}{% if not forloop.last %} · {% endif %}{% empty %}—{% endfor %}
+      </div>
+      <div class="s">{% for row in d.revenue_30d %}{{ row.n }} ödeme{% if not forloop.last %} · {% endif %}{% empty %}ödeme yok{% endfor %}</div>
+    </div>
+  </div>
+
+  <div class="vs-split">
+    <div class="vs-list">
+      <h3>Aktif abonelikler — ödeme kaynağı</h3>
+      {% if d.by_source %}
+      <table>
+        {% for s in d.by_source %}
+        <tr><td>{{ s.label }}{% if s.key == "stripe" %} <span class="vs-pill">otomatik yenilenir</span>{% elif s.key == "manual" %} <span class="vs-pill">yenilenmez</span>{% endif %}</td><td class="r">{{ s.n }}</td></tr>
+        {% endfor %}
+      </table>
+      {% else %}<div class="vs-none">Aktif abonelik yok.</div>{% endif %}
+    </div>
+
+    <div class="vs-list">
+      <h3>Aktif cihazlar — platform</h3>
+      {% if d.by_platform %}
+      <table>
+        {% for p in d.by_platform %}
+        <tr><td>{{ p.platform }}</td><td class="r">{{ p.n }}</td></tr>
+        {% endfor %}
+      </table>
+      {% else %}<div class="vs-none">Kayıtlı cihaz yok.</div>{% endif %}
+    </div>
+
+    <div class="vs-list">
+      <h3>Bekleyen destek</h3>
+      {% if r.tickets %}
+      <table>
+        {% for t in r.tickets %}
+        <tr>
+          <td><a href="{% url 'admin:landing_supportticket_change' t.pk %}">{{ t.subject|truncatechars:38 }}</a><br>
+              <span class="vs-pill">{{ t.get_status_display }}</span> {{ t.user.email|default:t.user.username }}</td>
+          <td class="r">{{ t.updated_at|date:"d.m H:i" }}</td>
+        </tr>
+        {% endfor %}
+      </table>
+      {% else %}<div class="vs-none">Bekleyen talep yok.</div>{% endif %}
+    </div>
+  </div>
+
+  <div class="vs-split">
+    <div class="vs-list">
+      <h3>Son kayıt olanlar</h3>
+      <table>
+        {% for u in r.signups %}
+        <tr>
+          <td><a href="{% url 'admin:auth_user_change' u.pk %}">{{ u.email|default:u.username }}</a></td>
+          <td class="r">{{ u.date_joined|date:"d.m.Y H:i" }}</td>
+        </tr>
+        {% empty %}<tr><td class="vs-none">—</td></tr>{% endfor %}
+      </table>
+    </div>
+
+    <div class="vs-list">
+      <h3>Son abonelikler</h3>
+      <table>
+        {% for s in r.subs %}
+        <tr>
+          <td><a href="{% url 'admin:auth_user_change' s.user_id %}">{{ s.user.email|default:s.user.username }}</a><br>
+              <span class="vs-pill">{{ s.plan_key }} · {{ s.source }}</span></td>
+          <td class="r">bitiş {{ s.ends_at|date:"d.m.Y" }}</td>
+        </tr>
+        {% empty %}<tr><td class="vs-none">—</td></tr>{% endfor %}
+      </table>
+    </div>
+
+    <div class="vs-list">
+      <h3>Son bağlanan cihazlar</h3>
+      <table>
+        {% for dv in r.devices %}
+        <tr>
+          <td><a href="{% url 'admin:landing_device_change' dv.pk %}">{{ dv.name|default:dv.platform }}</a><br>
+              <span class="vs-pill">{{ dv.platform }}</span> {{ dv.user.email|default:dv.user.username }}</td>
+          <td class="r">{{ dv.created_at|date:"d.m.Y H:i" }}</td>
+        </tr>
+        {% empty %}<tr><td class="vs-none">—</td></tr>{% endfor %}
+      </table>
+    </div>
+  </div>
+
+  {% include "admin/app_list.html" with app_list=app_list show_changelinks=True %}
+</div>
+{% endblock %}
+
+{% block sidebar %}
+<div id="content-related">
+  <div class="module" id="recent-actions-module">
+    <h2>{% translate 'Recent actions' %}</h2>
+    {% load log %}
+    {% get_admin_log 10 as admin_log for_user user %}
+    {% if not admin_log %}<p>{% translate 'None available' %}</p>{% else %}
+    <ul class="actionlist">
+      {% for entry in admin_log %}
+      <li class="{% if entry.is_addition %}addlink{% endif %}{% if entry.is_change %}changelink{% endif %}{% if entry.is_deletion %}deletelink{% endif %}">
+        {% if entry.is_deletion or not entry.get_admin_url %}{{ entry.object_repr }}
+        {% else %}<a href="{{ entry.get_admin_url }}">{{ entry.object_repr }}</a>{% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

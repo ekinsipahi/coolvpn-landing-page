@@ -423,3 +423,8 @@ class AssistantConversationAdmin(admin.ModelAdmin):
             if any(m.role == AssistantMessage.ROLE_OWNER for m in new_operator_msgs):
                 conv.owner_joined = True
             conv.save(update_fields=["user_unread", "owner_joined", "updated_at"])
+
+
+# Kullanici odakli admin (kullanici sayfasi, cihaz/abonelik inline lari,
+# ExtensionLink + PlayPurchase kayitlari). Ayri dosyada: bkz. admin_extra.py
+from . import admin_extra  # noqa: E402,F401
