@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Something broke — VPNsterr</title>
+{% comment %}
+  DELIBERATELY SELF-CONTAINED -- and this note is a comment tag, not an HTML
+  comment, because Django parses template tags INSIDE <!-- --> too: the first
+  draft of this file mentioned the extends tag in an HTML comment and the
+  template refused to compile.
+
+  Django renders 500.html with NO request and NO context processors
+  (django.views.defaults.server_error calls template.render() with nothing),
+  so site_name, user, chrome_store_url and friends do not exist here. It also
+  runs while something is already broken: every extra dependency is another
+  way for the ERROR PAGE ITSELF to raise a second exception and hand the
+  visitor a blank white screen. So: no extends, no static, no url, no trans --
+  no template tags at all in the body. Inline CSS, inline SVG, hardcoded
+  paths. Keep it that way.
+
+  Light/dark comes from prefers-color-scheme because the site's theme switch
+  needs JS and localStorage, neither of which we are going to rely on here.
+{% endcomment %}
+<style>
+  :root{
+    --page:#f6f9fc; --card:#ffffff; --line:rgba(4,26,43,.10);
+    --text:#0b2233; --text-2:#3e586b; --brand:#1090c0; --brand-2:#3fa6d6;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --page:#050e17; --card:rgba(255,255,255,.045); --line:rgba(255,255,255,.10);
+      --text:#e8f1f7; --text-2:#9fb6c5; --brand:#3fa6d6; --brand-2:#7fc5e8;
+    }
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--page); color:var(--text); min-height:100vh;
+    display:flex; align-items:center; justify-content:center; padding:24px;
+    font:16px/1.6 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background-image:radial-gradient(48rem 24rem at 50% -12%, rgba(16,144,192,.16), transparent 70%);
+  }
+  .wrap{width:100%; max-width:560px; text-align:center}
+  .mark{
+    width:72px; height:72px; margin:0 auto; border-radius:22px; display:grid;
+    place-content:center; background:rgba(16,144,192,.10); border:1px solid var(--line);
+  }
+  .mark svg{width:34px;height:34px;color:var(--brand-2)}
+  .kicker{
+    margin:28px 0 0; font-size:12px; font-weight:700; letter-spacing:.18em;
+    text-transform:uppercase; color:var(--brand-2);
+  }
+  h1{margin:12px 0 0; font-size:clamp(28px,6vw,40px); line-height:1.15; letter-spacing:-.02em}
+  p{margin:18px auto 0; max-width:44ch; color:var(--text-2)}
+  .note{
+    margin-top:26px; padding:14px 16px; border-radius:14px; text-align:left;
+    background:var(--card); border:1px solid var(--line); font-size:14px; color:var(--text-2);
+  }
+  .note b{color:var(--text)}
+  .row{margin-top:28px; display:flex; flex-wrap:wrap; gap:12px; justify-content:center}
+  a.btn{
+    display:inline-block; padding:13px 26px; border-radius:16px; text-decoration:none;
+    font-weight:650; font-size:15px;
+  }
+  /* Ana sitedeki vs-btn-primary ile ayni gradyan. Duz --brand kullanmak
+     koyu temada #3fa6d6 demek; uzerindeki beyaz yazi 3.6:1'de kaliyor,
+     WCAG AA'nin altinda. Gradyan hem markayla ayni hem okunakli. */
+  a.primary{
+    background:linear-gradient(135deg,#1090c0 0%,#6366f1 62%,#d946ef 130%);
+    color:#fff; box-shadow:0 14px 38px -14px rgba(16,144,192,.5);
+  }
+  a.primary:hover{filter:brightness(1.08)}
+  a.ghost{color:var(--text); border:1px solid var(--line)}
+  a.ghost:hover{border-color:var(--brand)}
+  .foot{margin-top:34px; font-size:13px; color:var(--text-2)}
+  .foot a{color:var(--brand-2)}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="mark">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M12 2.5 4.5 5.8v5.6c0 4.6 3.2 8.9 7.5 10.1 4.3-1.2 7.5-5.5 7.5-10.1V5.8L12 2.5Z"
+              stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+        <path d="M12 8v4.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        <circle cx="12" cy="16" r="1.1" fill="currentColor"/>
+      </svg>
+    </div>
+
+    <p class="kicker">Error 500</p>
+    <h1>Something broke on our end.</h1>
+    <p>This one is on us, not on you. The error was reported to our engineers automatically the moment it happened — no need to write in.</p>
+
+    <div class="note">
+      <b>Your VPN is not affected.</b> The apps and the gateway run on separate
+      infrastructure from this website, so your connection stays up even while
+      this page is down.
+    </div>
+
+    <div class="row">
+      <a class="btn primary" href="/">Back to home</a>
+      <a class="btn ghost" href="/dashboard/">Your dashboard</a>
+    </div>
+
+    <p class="foot">
+      Still stuck? Write to <a href="mailto:support@vpnsterr.com">support@vpnsterr.com</a>
+      and tell us what you were doing.
+    </p>
+  </div>
+</body>
+</html>
