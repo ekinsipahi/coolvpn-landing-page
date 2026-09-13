@@ -20,10 +20,16 @@ from landing.models import (
     AssistantConversation,
     Device,
     Order,
-    PlayPurchase,
     Subscription,
     SupportTicket,
 )
+
+# Bkz. landing/admin_extra.py: bu model her zaman repoda olmayabilir ve
+# sert import panelin degil, TUM sitenin acilmamasina yol aciyordu.
+try:
+    from landing.models import PlayPurchase
+except ImportError:  # pragma: no cover
+    PlayPurchase = None
 
 register = template.Library()
 
@@ -88,9 +94,9 @@ def vpn_dashboard():
         escalated=Count("id", filter=Q(status=AssistantConversation.STATUS_ESCALATED)),
         open=Count("id", filter=Q(status=AssistantConversation.STATUS_OPEN)),
     )
-    play = PlayPurchase.objects.aggregate(
-        active=Count("id", filter=Q(state=PlayPurchase.STATE_ACTIVE)),
-    )
+    play = (PlayPurchase.objects.aggregate(
+        active=Count("id", filter=Q(state=PlayPurchase.STATE_ACTIVE)))
+        if PlayPurchase is not None else {"active": 0})
 
     return {
         "users": users, "subs": subs, "by_source": by_source,

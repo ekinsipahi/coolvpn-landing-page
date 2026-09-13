@@ -22,10 +22,19 @@ from .models import (
     Device,
     ExtensionLink,
     Order,
-    PlayPurchase,
     Subscription,
     SupportTicket,
 )
+
+# PlayPurchase baska bir ajanin uzerinde calistigi model: repoda BAZEN yok.
+# Sert import etmek, o model henuz commit edilmemisken sunucuda
+# "ImportError: cannot import name 'PlayPurchase'" verip UYGULAMANIN
+# TAMAMINI ayaga kaldirmiyordu -- admin'e bir sekme eklemek yuzunden site
+# komple duser. Bu modul artik o modelin yoklugunda da calisir.
+try:
+    from .models import PlayPurchase
+except ImportError:  # pragma: no cover - modelin oldugu ortamda calismaz
+    PlayPurchase = None
 
 User = get_user_model()
 
@@ -165,12 +174,13 @@ class UserTicketInline(ReadOnlyInline):
     ordering = ("-updated_at",)
 
 
-class UserPlayPurchaseInline(ReadOnlyInline):
-    model = PlayPurchase
-    fk_name = "user"
-    verbose_name_plural = "Google Play satın alımları"
-    fields = ("product_id", "plan_key", "state", "expires_at", "device_uuid", "updated_at")
-    readonly_fields = fields
+if PlayPurchase is not None:
+    class UserPlayPurchaseInline(ReadOnlyInline):
+        model = PlayPurchase
+        fk_name = "user"
+        verbose_name_plural = "Google Play satın alımları"
+        fields = ("product_id", "plan_key", "state", "expires_at", "device_uuid", "updated_at")
+        readonly_fields = fields
 
 
 # ============================================================
@@ -252,7 +262,9 @@ class VpnsterrUserAdmin(DjangoUserAdmin):
     date_hierarchy = "date_joined"
 
     inlines = [UserSubscriptionInline, UserDeviceInline, UserOrderInline,
-               UserPlayPurchaseInline, UserTicketInline]
+               UserTicketInline]
+    if PlayPurchase is not None:
+        inlines.insert(3, UserPlayPurchaseInline)
 
     actions = ["ver_1_ay", "ver_1_yil", "premiumu_bitir", "cihazlari_kapat"]
 
@@ -468,8 +480,9 @@ class ExtensionLinkAdmin(admin.ModelAdmin):
     nonce_kisa.short_description = "Nonce"
 
 
-@admin.register(PlayPurchase)
-class PlayPurchaseAdmin(admin.ModelAdmin):
+if PlayPurchase is not None:
+  @admin.register(PlayPurchase)
+  class PlayPurchaseAdmin(admin.ModelAdmin):
     list_display = ("product_id", "user", "plan_key", "state_rozeti", "expires_at",
                     "subscription", "updated_at")
     list_filter = ("state", "plan_key", "product_id", "updated_at")
