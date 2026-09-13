@@ -20,6 +20,61 @@
     window.vsTrack(el.dataset.gaEvent, params);
   }, { capture: true, passive: true });
 
+  /* ---------- Funnel: pricing viewed (top of the funnel) ---------- */
+  // Fire view_item_list once when the plans block scrolls into view. This is
+  // the "people looking to buy" step that sits ABOVE select_item ->
+  // begin_checkout -> add_payment_info -> purchase, so GA4 can show the full
+  // funnel (viewers -> selectors -> checkout -> buyers), not just buyers.
+  (function () {
+    const plans = document.getElementById('plans');
+    if (!plans || !('IntersectionObserver' in window)) return;
+    let sent = false;
+    const io = new IntersectionObserver(function (entries) {
+      for (const en of entries) {
+        if (en.isIntersecting && !sent) {
+          sent = true;
+          const items = Array.prototype.map.call(
+            plans.querySelectorAll('[data-ga-item]'),
+            function (el) {
+              return {
+                item_id: el.dataset.gaItem,
+                item_name: 'VPNsterr ' + el.dataset.gaItem,
+                price: parseFloat(el.dataset.gaValue) || undefined,
+              };
+            }
+          );
+          window.vsTrack('view_item_list', {
+            item_list_id: 'plans', item_list_name: 'Pricing', items: items,
+          });
+          io.disconnect();
+        }
+      }
+    }, { threshold: 0.4 });
+    io.observe(plans);
+  })();
+
+  /* ---------- Engagement: scroll depth ---------- */
+  // How far a visitor reads before leaving -- an engagement/interest signal for
+  // the "just looking" audience. One event per 25/50/75/100% mark, once each.
+  (function () {
+    const marks = [25, 50, 75, 100];
+    const hit = new Set();
+    function onScroll() {
+      const doc = document.documentElement;
+      const max = doc.scrollHeight - doc.clientHeight;
+      if (max <= 0) return;
+      const pct = Math.min(100, Math.round((window.scrollY / max) * 100));
+      for (const m of marks) {
+        if (pct >= m && !hit.has(m)) {
+          hit.add(m);
+          window.vsTrack('scroll_depth', { percent: m });
+        }
+      }
+      if (hit.size === marks.length) window.removeEventListener('scroll', onScroll);
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+  })();
+
   /* ---------- Theme ---------- */
   function applyTheme(next) {
     if (next === 'dark') {
