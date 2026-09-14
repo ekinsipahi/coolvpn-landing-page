@@ -89,11 +89,68 @@
       </div>
     </div>
 
+    {% comment %}
+      Tuzel kisilik kimligi. Bir VPN'de bu suslemeden ibaret degil: kullanici
+      butun trafigini emanet ediyor ve "bunlar kim, nerede kayitli, kime dava
+      acilir" sorusunun cevabini goremezse hakli olarak guvenmez. Rakamlar
+      settings.py'daki tek kaynaktan geliyor (context_processors.company), boylece
+      hukuki sayfalarla footer birbirinden ayrilamaz.
+
+      BILEREK YOK: yonetim kurulu uyesinin isikukood'u (kisisel kimlik no) ve
+      kurucunun sahsi e-posta adresi. Ikisi de sicilde gecse bile siteye
+      konmaz -- gereksiz ve kimlik hirsizligina davetiye.
+    {% endcomment %}
+    <div class="mt-14 pt-8" style="border-top:1px solid rgba(255,255,255,.08)">
+      <div class="rounded-2xl px-5 py-4 sm:px-6 sm:py-5"
+           style="background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.08)">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div class="min-w-0">
+            <div class="text-[11px] font-semibold uppercase tracking-[.14em]" style="color:#6f8698">
+              {% trans "Registered company" %}
+            </div>
+            <div class="mt-2 text-sm font-bold text-white">{{ company.legal_name }}</div>
+            <address class="mt-1 not-italic text-sm leading-6" style="color:#9fb6c5">
+              {{ company.address_line }}
+            </address>
+            {% if company.director %}
+            <div class="mt-1 text-xs" style="color:#7e97a8">
+              {% trans "Board member" %}: {{ company.director }}
+            </div>
+            {% endif %}
+          </div>
+
+          <dl class="grid gap-x-8 gap-y-2 text-sm sm:grid-cols-2 lg:text-right">
+            <div class="flex gap-2 lg:justify-end">
+              <dt style="color:#6f8698">{% trans "Registry code" %}</dt>
+              <dd class="font-semibold text-white">{{ company.reg_code }}</dd>
+            </div>
+            <div class="flex gap-2 lg:justify-end">
+              <dt style="color:#6f8698">D-U-N-S</dt>
+              <dd class="font-semibold text-white">{{ company.duns }}</dd>
+            </div>
+            <div class="flex gap-2 sm:col-span-2 lg:justify-end">
+              <dt style="color:#6f8698">{% trans "Contact" %}</dt>
+              <dd><a href="mailto:{{ company.support_email }}" style="color:#9fb6c5">{{ company.support_email }}</a></dd>
+            </div>
+          </dl>
+        </div>
+
+        <p class="mt-4 pt-4 text-xs leading-6" style="border-top:1px solid rgba(255,255,255,.06); color:#7e97a8">
+          {% blocktrans trimmed with form=company.legal_form registry=company.registry_name on=company.registered_on %}
+            {{ form }} entered in the {{ registry }} on {{ on }}.
+          {% endblocktrans %}
+          {% if company.registry_url %}
+          <a href="{{ company.registry_url }}" target="_blank" rel="noopener"
+             class="underline underline-offset-2" style="color:#9fb6c5">{% trans "Verify in the public register" %} &#8599;</a>
+          {% endif %}
+        </p>
+      </div>
+    </div>
+
     <!-- Alt şerit -->
-    <div class="mt-14 flex flex-col md:flex-row items-center justify-between gap-4 pt-6"
-         style="border-top:1px solid rgba(255,255,255,.08)">
+    <div class="mt-6 flex flex-col md:flex-row items-center justify-between gap-4">
       <div class="text-sm" style="color:#7e97a8">
-        &copy; {% now "Y" %} VPNsterr · Sterr Technologies · {% trans "All rights reserved." %}
+        &copy; {% now "Y" %} VPNsterr &mdash; {% trans "a product of" %} {{ company.legal_name }}. {% trans "All rights reserved." %}
       </div>
       <div class="flex flex-wrap justify-center gap-2">
         <span class="rounded-md px-2.5 py-1 text-xs" style="background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1); color:#9fb6c5">{% trans "No-logs" %}</span>

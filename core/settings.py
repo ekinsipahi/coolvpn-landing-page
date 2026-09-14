@@ -34,8 +34,30 @@ GA_MEASUREMENT_ID = os.environ.get("GA_MEASUREMENT_ID", "")
 
 # ---- Site kimliği
 SITE_NAME = "VPNsterr"
-COMPANY_LEGAL_NAME = "Sterr Technologies"
 SUPPORT_EMAIL = "support@vpnsterr.com"
+
+# ---- Tuzel kisilik bilgileri (Eesti ariregister ozeti, 04.09.2026)
+# Tek kaynak: footer, Organization JSON-LD ve hukuki sayfalar buradan besleniyor.
+# BILEREK BURADA OLMAYANLAR:
+#   * juhatuse liikme isikukood (kisisel kimlik no) -- kimlik hirsizligi
+#     malzemesi, hicbir yerde yayinlanmaz;
+#   * kurucunun sahsi gmail adresi -- yazisma support@ uzerinden yurur.
+COMPANY_LEGAL_NAME = "Sterr Technologies OÜ"
+COMPANY_LEGAL_FORM = "Private limited company (osaühing)"
+COMPANY_REG_CODE = "17591465"
+COMPANY_REGISTRY_NAME = "Estonian Business Register"
+COMPANY_REGISTRY_URL = "https://ariregister.rik.ee/eng/company/17591465"
+COMPANY_REGISTERED_ON = "4 September 2026"
+COMPANY_DUNS = "988022933"
+COMPANY_ADDRESS_STREET = "Tornimäe tn 5"
+COMPANY_ADDRESS_LOCALITY = "Tallinn"
+COMPANY_ADDRESS_REGION = "Harju maakond"
+COMPANY_ADDRESS_POSTAL = "10145"
+COMPANY_ADDRESS_COUNTRY = "Estonia"
+COMPANY_ADDRESS_LINE = ("Tornimäe tn 5, Kesklinna linnaosa, "
+                        "10145 Tallinn, Estonia")
+# Yonetim kurulu uyesi: ariregistrde herkese acik. Kaldirmak istersen bosalt.
+COMPANY_DIRECTOR = "Ekin Ahmed Sipahi"
 # Chrome Web Store — yayında (2026-09-10). Env ile override edilebilir.
 CHROME_STORE_URL = os.environ.get(
     "CHROME_STORE_URL",
