@@ -19,7 +19,8 @@ def run_reconcile(np_limit: int = 25, stripe_limit: int = 50) -> dict:
     aynı anda iki kez koşsa da çift abonelik doğmaz (grant order-bazlı kilitli).
     """
     out = {"np_checked": 0, "np_paid": 0, "np_failed": 0,
-           "stripe_synced": 0, "stripe_extended": 0, "links_purged": 0,
+           "stripe_synced": 0, "stripe_extended": 0, "stripe_revoked": 0,
+           "links_purged": 0,
            "errors": []}
 
     # ---- NOWPayments: bekleyenleri sorgula ----
@@ -63,7 +64,8 @@ def run_reconcile(np_limit: int = 25, stripe_limit: int = 50) -> dict:
                 order.save(update_fields=["np_raw"])
 
     # ---- Stripe: dönem sonu senkronu ----
-    from landing.helpers.stripe_gw import stripe_enabled, subscription_period, _api
+    from landing.helpers.stripe_gw import (stripe_enabled, sfield,
+                                            subscription_period, _api)
     if stripe_enabled():
         from datetime import datetime, timezone as dt_tz
         api = _api()
@@ -91,6 +93,31 @@ def run_reconcile(np_limit: int = 25, stripe_limit: int = 50) -> dict:
                     local.ends_at = new_end
                     local.save(update_fields=["ends_at"])
                     out["stripe_extended"] += 1
+
+            # ---- İPTAL / ÖDENMEMİŞ: premium'u düşür ----
+            # Aboneliği Stripe'ta biten birine premium açık kalmamalı. Ama bu
+            # ÖDENMİŞ erişimi elinden almak demek, o yüzden üç şart birden:
+            #   * Stripe kesin olarak ölü diyor,
+            #   * abonelik GERÇEKTEN bitmiş (ended_at geçmişte) — "dönem
+            #     sonunda iptal" işaretlemesi tek başına yetmez, o tarihe
+            #     kadar hakkı var,
+            #   * ve yerel bitiş, Stripe'ın dönem sonuyla UYUMLU. Elle
+            #     verilmiş bir telafi süresi (Stripe'ın çok ötesinde) varsa
+            #     ona dokunmuyoruz; sessizce geri almak en kötüsü olurdu.
+            status = sfield(remote, "status")
+            ended_at = sfield(remote, "ended_at")
+            if status in ("canceled", "incomplete_expired", "unpaid") and ended_at:
+                ends = datetime.fromtimestamp(int(ended_at), tz=dt_tz.utc)
+                if ends < timezone.now() < local.ends_at:
+                    drift = abs((local.ends_at - ends).total_seconds())
+                    if drift <= 2 * 86400:
+                        local.ends_at = ends
+                        local.save(update_fields=["ends_at"])
+                        out["stripe_revoked"] += 1
+                    else:
+                        out["errors"].append(
+                            f"stripe:{local.stripe_subscription_id}:iptal ama yerel "
+                            f"bitiş {local.ends_at:%Y-%m-%d} çok ileride, elle bakılmalı")
 
     # ---- Bayat bağlama nonce'ları ----
     cutoff = timezone.now() - timedelta(hours=24)

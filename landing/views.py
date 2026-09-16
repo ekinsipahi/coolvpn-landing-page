@@ -1255,6 +1255,17 @@ def _grant_stripe_subscription(user, plan_key, stripe_sub):
             local.save(update_fields=["ends_at"])
         return local
 
+    # Stripe BAŞARISIZ event'leri yeniden gönderir. 16.09'da webhook düzelince
+    # Stripe eski denemeleri tekrar yolladı ve İPTAL EDİLMİŞ bir abonelik için
+    # yeni bir yerel kayıt açıldı — müşteriye ikinci kez "premium aktif" maili
+    # gitti ve ölü müşteri kimliği hesabın en güncel kaydı oldu. Canlı olmayan
+    # bir abonelik için YENİ kayıt açmıyoruz (mevcut kayıt varsa yukarıdaki
+    # daldan zaten senkronlanıyor).
+    if _sf(stripe_sub, "status") not in ("active", "trialing", "past_due"):
+        logger.info("stripe: canlı olmayan abonelik için kayıt açılmadı sub=%s durum=%s",
+                    sub_id, _sf(stripe_sub, "status"))
+        return None
+
     # Kriptodan kalan süre varsa Stripe trial zaten onu bekletiyor; yerel kayıt
     # Stripe periyoduna birebir bağlanır.
     local = Subscription.objects.create(
@@ -1404,10 +1415,11 @@ def stripe_success(request):
             plan_key = _sf(sess, "metadata", "plan_key", default="monthly")
             local = _grant_stripe_subscription(request.user, plan_key, sess["subscription"])
             messages.success(request, "Payment confirmed — Premium is active. Welcome aboard!")
+            # local None olabilir: abonelik canlı değilse kayıt açılmaz.
             amount = (_sf(sess, "amount_total", default=0) or 0) / 100.0
             from urllib.parse import urlencode
             q = urlencode({"paid": "1", "plan": plan_key,
-                           "txn": local.stripe_subscription_id or session_id,
+                           "txn": getattr(local, "stripe_subscription_id", "") or session_id,
                            "amount": f"{amount:.2f}"})
             return redirect(f"/dashboard/?{q}")
     except Exception:
@@ -1463,6 +1475,82 @@ def stripe_webhook(request):
         pass
 
     return HttpResponse(status=200)
+
+
+def _live_stripe_subscription(user):
+    """Kullanıcının canlı Stripe aboneliği: (yerel kayıt, Stripe nesnesi)."""
+    local = (Subscription.objects
+             .filter(user=user, source="stripe", ends_at__gte=now())
+             .exclude(stripe_subscription_id="")
+             .order_by("-ends_at").first())
+    if not local:
+        return None, None
+    try:
+        remote = _stripe().Subscription.retrieve(local.stripe_subscription_id)
+    except Exception:  # noqa: BLE001
+        return local, None
+    return local, remote
+
+
+@login_required
+def stripe_billing_status(request):
+    """GET /api/billing/status/ — kart aboneliğinin güncel durumu.
+
+    Dashboard'ı render ederken Stripe'a gitmiyoruz: sayfa her açılışta bir
+    ağ çağrısı kadar yavaşlardı ve Stripe yavaşsa panel de yavaşlardı.
+    Sayfa açıldıktan sonra JS bunu bir kez çağırır.
+    """
+    if not stripe_enabled():
+        return JsonResponse({"ok": True, "has_subscription": False})
+    local, remote = _live_stripe_subscription(request.user)
+    if not local:
+        return JsonResponse({"ok": True, "has_subscription": False})
+    return JsonResponse({
+        "ok": True, "has_subscription": True,
+        "cancel_at_period_end": bool(_sf(remote, "cancel_at_period_end")),
+        "status": _sf(remote, "status", default="unknown"),
+        "access_until": local.ends_at.isoformat(),
+    })
+
+
+@login_required
+@require_POST
+def stripe_cancel_subscription(request):
+    """POST /api/billing/cancel/ — tek tıkla iptal (dönem sonunda).
+
+    DÖNEM SONUNDA iptal ediyoruz, hemen değil: kullanıcı o dönemin parasını
+    zaten ödedi. Anında kesmek, satın aldığı günleri elinden almak olurdu ve
+    iade talebi olarak geri gelirdi. {"resume": true} ile iptal geri alınır —
+    yanlışlıkla basan biri destek yazmak zorunda kalmasın.
+    """
+    if not stripe_enabled():
+        return JsonResponse({"ok": False, "error": "stripe_disabled"}, status=503)
+    local, remote = _live_stripe_subscription(request.user)
+    if not local:
+        return JsonResponse({"ok": False, "error": "no_subscription",
+                             "detail": "No active card subscription on this account."},
+                            status=404)
+    try:
+        data = json.loads(request.body.decode("utf-8") or "{}")
+    except Exception:  # noqa: BLE001
+        data = {}
+    resume = bool(data.get("resume"))
+    try:
+        sub = _stripe().Subscription.modify(local.stripe_subscription_id,
+                                            cancel_at_period_end=not resume)
+    except Exception as e:  # noqa: BLE001
+        logger.warning("stripe iptal basarisiz: user=%s sub=%s hata=%s",
+                       request.user.id, local.stripe_subscription_id, str(e)[:200])
+        return JsonResponse({"ok": False, "error": "stripe_error",
+                             "detail": "Could not reach Stripe. Please try again."},
+                            status=502)
+    return JsonResponse({
+        "ok": True,
+        "cancel_at_period_end": bool(_sf(sub, "cancel_at_period_end")),
+        # Erişim bitiş tarihi yerel kayıttan: elle verilmiş ek süre varsa
+        # Stripe'ın dönem sonundan ileride olabilir.
+        "access_until": local.ends_at.isoformat(),
+    })
 
 
 @login_required

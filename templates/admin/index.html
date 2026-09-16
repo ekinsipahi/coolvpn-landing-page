@@ -74,6 +74,17 @@
       <div class="v">{{ d.tickets.open }}</div>
       <div class="s">{{ d.tickets.answered }} cevaplandı · {{ d.assistant.escalated }} sohbet operatör bekliyor</div>
     </div>
+    {% comment %}
+      Canlı asistan konsolu Django admin'in model listesinde görünmez (model
+      değil, ayrı bir sayfa). Panelde bir giriş olmazsa adresi ezbere bilmek
+      gerekir — müşteri beklerken aranacak son şey bu.
+    {% endcomment %}
+    <a class="vs-card hot" href="{% url 'assistant_inbox' %}"
+       style="text-decoration:none;display:block">
+      <div class="k">Canlı asistan</div>
+      <div class="v">💬 Gelen kutusu</div>
+      <div class="s">{{ d.assistant.open }} açık sohbet · cevap yaz, devral, kapat</div>
+    </a>
     <div class="vs-card">
       <div class="k">Son 30 günün tahsilatı</div>
       <div class="v">

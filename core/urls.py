@@ -1,5 +1,7 @@
 # core/urls.py  (PROJE urls’i)
 from django.contrib import admin
+
+from landing import admin_assistant
 from django.urls import path, include
 from django.conf.urls.i18n import i18n_patterns
 from django.views.generic import TemplateView
@@ -69,6 +71,11 @@ urlpatterns = [
 ]
 
 urlpatterns += i18n_patterns(
+    # /admin/assistant/ — canlı operatör konsolu. admin.site.urls'DEN ÖNCE
+    # gelmeli: admin catch-all'u önce eşleşirse burası hiç çalışmaz.
+    path("admin/assistant/", admin_assistant.assistant_inbox, name="assistant_inbox"),
+    path("admin/assistant/data/", admin_assistant.assistant_inbox_data, name="assistant_inbox_data"),
+    path("admin/assistant/reply/", admin_assistant.assistant_reply, name="assistant_inbox_reply"),
     path("admin/", admin.site.urls),
     # KÖK: landing uygulamasını köke bağla
     path("", include("landing.urls")),

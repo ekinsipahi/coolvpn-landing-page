@@ -1,0 +1,248 @@
+{% load i18n %}<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>{{ title }}</title>
+{% comment %}
+  Operatör konsolu. Django admin şablonunu GENİŞLETMİYOR: bu tam ekran,
+  iki panelli bir çalışma aracı; admin'in başlık/breadcrumb yapısı burada
+  yalnızca yer kaplardı.
+
+  Zil sesi bir ses DOSYASI değil, WebAudio ile sentezleniyor — statik dosya
+  bağımlılığı yok ve tarayıcı otomatik oynatmayı engellediği için
+  operatörün ilk tıklamasında "unlock" ediliyor. Ses yalnızca YENİ bir
+  müşteri beklemeye başladığında çalar: operatörün kendi cevabı listeyi
+  değiştirdiğinde ya da sayfa ilk açıldığında çalmaz.
+{% endcomment %}
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#0b0e14;color:#e8edf5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;height:100vh;display:flex;flex-direction:column}
+  header{padding:12px 18px;border-bottom:1px solid #1c2330;display:flex;align-items:center;gap:12px;flex-shrink:0}
+  header h1{font-size:1rem;font-weight:800}
+  header a.back{color:#4a5568;font-size:.7rem;text-decoration:none}
+  header a.back:hover{color:#22d3ee}
+  .wait{font-family:ui-monospace,monospace;font-size:.7rem;font-weight:700;background:rgba(244,63,94,.15);color:#fb7185;border:1px solid rgba(244,63,94,.3);padding:3px 9px;border-radius:999px}
+  .wrap{flex:1;display:flex;min-height:0}
+  .list{width:320px;border-right:1px solid #1c2330;overflow-y:auto;flex-shrink:0}
+  .conv{padding:11px 14px;border-bottom:1px solid #151b26;cursor:pointer}
+  .conv:hover{background:#111725}
+  .conv.active{background:#0f2530;border-left:3px solid #22d3ee}
+  .conv .u{font-size:.78rem;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .conv .l{font-size:.68rem;color:#8a98b0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px}
+  .conv .meta{display:flex;gap:4px;align-items:center;margin-top:5px;flex-wrap:wrap}
+  .flag{font-family:ui-monospace,monospace;font-size:.56rem;font-weight:700;padding:1px 5px;border-radius:4px;color:#fff}
+  .dot{width:8px;height:8px;border-radius:50%;background:#22d3ee;flex-shrink:0;box-shadow:0 0 8px #22d3ee;display:inline-block}
+  .thread{flex:1;display:flex;flex-direction:column;min-width:0}
+  .thead{padding:10px 16px;border-bottom:1px solid #1c2330;display:flex;align-items:center;gap:10px;flex-shrink:0}
+  .thead .who{flex:1;font-size:.82rem;font-weight:700}
+  .btn{border:1px solid #2a3446;background:transparent;color:#aeb9cc;border-radius:8px;padding:6px 11px;font-size:.7rem;font-weight:700;cursor:pointer}
+  .btn:hover{border-color:#22d3ee;color:#22d3ee}
+  .btn.warn:hover{border-color:#fb7185;color:#fb7185}
+  .msgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
+  .m{max-width:78%;padding:8px 12px;border-radius:12px;font-size:.82rem;line-height:1.5;white-space:pre-wrap;word-break:break-word}
+  .m.user{align-self:flex-start;background:#1a2233;border:1px solid #263248}
+  .m.assistant{align-self:flex-end;background:#0f2733;border:1px solid #1c4152}
+  .m.owner{align-self:flex-end;background:#2a2140;border:1px solid #4a3a72}
+  .m .r{font-family:ui-monospace,monospace;font-size:.52rem;font-weight:700;opacity:.6;margin-bottom:3px;text-transform:uppercase}
+  .m a{color:#22d3ee;text-decoration:underline;word-break:break-all}
+  .composer{display:flex;gap:8px;padding:12px 16px;border-top:1px solid #1c2330;flex-shrink:0;align-items:flex-end}
+  .composer textarea{flex:1;background:#111725;border:1px solid #263248;border-radius:10px;color:#e8edf5;font-size:.85rem;padding:10px 13px;outline:none;font-family:inherit;line-height:1.45;resize:none;max-height:160px;overflow-y:auto}
+  .composer button{border:none;background:#22d3ee;color:#04121a;border-radius:10px;padding:0 18px;height:40px;font-weight:800;cursor:pointer;flex-shrink:0}
+  .empty{margin:auto;color:#4a5568;font-size:.85rem}
+  .ai-on{font-family:ui-monospace,monospace;font-size:.62rem;color:#22d3ee}
+  .ai-off{font-family:ui-monospace,monospace;font-size:.62rem;color:#a78bfa}
+  .thead .mob-back{display:none;border:none;background:transparent;color:#22d3ee;font-size:1.15rem;line-height:1;padding:4px 6px;cursor:pointer;flex-shrink:0}
+  @media (max-width:760px){
+    header{padding:10px 13px;gap:8px} header h1{font-size:.9rem}
+    .poll-note,header a.back{display:none}
+    .list{width:100%;border-right:none}
+    body.mob-thread .list{display:none}
+    .thread{display:none} body.mob-thread .thread{display:flex}
+    .thead .mob-back{display:inline-flex}
+    .thead{padding:8px 11px;gap:8px} .thead .who{font-size:.76rem}
+    .msgs{padding:12px} .m{max-width:88%;font-size:.85rem}
+    .composer{padding:10px 12px} .composer button{padding:0 15px}
+    .btn{padding:5px 9px;font-size:.66rem}
+  }
+</style>
+</head>
+<body>
+{% csrf_token %}
+<header>
+  <h1>💬 {{ title }}</h1>
+  <a class="back" href="/admin/">← admin</a>
+  <span class="wait" id="waitBadge" style="display:none"></span>
+  <button id="muteBtn" class="btn" onclick="toggleMute()" title="Yeni mesaj sesi (aç/kapat)"
+          style="margin-left:auto;font-size:.95rem;line-height:1;padding:5px 10px">🔔</button>
+  <span class="poll-note" style="font-family:ui-monospace,monospace;font-size:.6rem;color:#3d4a5c">canlı · 5sn</span>
+</header>
+<div class="wrap">
+  <div class="list" id="list"></div>
+  <div class="thread">
+    <div id="threadInner" style="flex:1;display:flex;flex-direction:column;min-height:0">
+      <div class="empty" id="threadEmpty">← Soldan bir konuşma seç</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const CSRF = document.querySelector('[name=csrfmiddlewaretoken]').value;
+// landing/helpers/assistant.py'deki _INTENT_KEYWORDS ile aynı isimler.
+const FLAG_COLORS = {bug:'#f87171', payment:'#22c55e', urgent:'#f59e0b',
+                     feature:'#a78bfa', human:'#38bdf8'};
+let currentId = null, threadTimer = null;
+
+// ── Yeni mesaj zili: ses dosyası yok, WebAudio ile sentezleniyor ──
+let _actx = null;
+function actx(){ try{ if(!_actx) _actx=new (window.AudioContext||window.webkitAudioContext)();
+  if(_actx.state==='suspended') _actx.resume(); }catch(e){} return _actx; }
+function muted(){ try{ return localStorage.getItem('inboxMute')==='1'; }catch(e){ return false; } }
+function playChime(){
+  if(muted()) return;
+  const c = actx(); if(!c || c.state!=='running') return;   // henüz unlock olmadı
+  const t = c.currentTime, f = 783.99;                      // G5, yumuşak çan
+  const out = c.createGain(); out.gain.value = 0.6;
+  const lp = c.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value = 8000;
+  out.connect(lp); lp.connect(c.destination);
+  const bell = (freq,dur,gain)=>{ const o=c.createOscillator(); o.type='sine';
+    const g=c.createGain(); o.frequency.setValueAtTime(freq,t);
+    g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(gain,t+0.006);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    o.connect(g); g.connect(out); o.start(t); o.stop(t+dur+0.05); };
+  bell(f,0.95,0.34); bell(f*2,0.70,0.11); bell(f*3,0.45,0.05);
+}
+// Tarayıcı, kullanıcı etkileşimi olmadan ses çalmaya izin vermiyor.
+['click','keydown','touchstart'].forEach(ev=>window.addEventListener(ev,()=>actx(),{once:true}));
+function refreshMute(){ const b=document.getElementById('muteBtn'); if(b) b.textContent = muted()?'🔕':'🔔'; }
+function toggleMute(){ try{ localStorage.setItem('inboxMute', muted()?'0':'1'); }catch(e){}
+  refreshMute(); if(!muted()){ actx(); playChime(); } }
+// Yalnız YENİ bekleyen konuşmada çal: operatörün kendi cevabı sayacı
+// düşürdüğünde ya da sayfa ilk yüklendiğinde çalmamalı.
+let _waitingIds = null;
+function maybeChime(convs){
+  const ids = new Set((convs||[]).filter(c=>c.needs_reply).map(c=>c.id));
+  if(_waitingIds !== null){ for(const id of ids){ if(!_waitingIds.has(id)){ playChime(); break; } } }
+  _waitingIds = ids;
+}
+
+function esc(s){ const d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
+// Zengin gösterim — ÖNCE kaçışlanır, sonra biçimlendirilir (XSS).
+function fmt(s){
+  return esc(s)
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+    .replace(/__(.+?)__/g,'<u>$1</u>')
+    .replace(/(https?:\/\/[^\s<]+)/g, m=>{ let u=m,t=''; const p=u.match(/[.,!?;:)\]]+$/);
+      if(p){t=p[0];u=u.slice(0,-t.length);} 
+      return `<a href="${u}" target="_blank" rel="noopener noreferrer nofollow">${u}</a>${t}`; });
+}
+function flagsHtml(f){ return (f||'').split(',').filter(Boolean)
+  .map(x=>`<span class="flag" style="background:${FLAG_COLORS[x]||'#666'}">${esc(x)}</span>`).join(''); }
+function timeago(iso){ try{ const d=(Date.now()-new Date(iso))/1000;
+  if(d<60) return 'şimdi'; if(d<3600) return Math.floor(d/60)+'dk';
+  if(d<86400) return Math.floor(d/3600)+'sa'; return Math.floor(d/86400)+'g'; }catch(e){ return ''; } }
+
+async function loadList(){
+  try{
+    const j = await (await fetch('data/', {credentials:'same-origin'})).json();
+    maybeChime(j.conversations);
+    const wb = document.getElementById('waitBadge');
+    if(j.waiting){ wb.style.display=''; wb.textContent = j.waiting + ' cevap bekliyor'; }
+    else wb.style.display='none';
+    // Sekme başlığında da sayaç: konsol arka plandayken bekleyen müşteri görünsün.
+    document.title = (j.waiting ? `(${j.waiting}) ` : '') + "{{ title|escapejs }}";
+    document.getElementById('list').innerHTML = (j.conversations||[]).map(c=>`
+      <div class="conv ${c.id===currentId?'active':''}" onclick="openConv('${c.id}')">
+        <div class="u">${c.needs_reply?'<span class="dot"></span> ':''}${esc(c.user)}</div>
+        <div class="l">${c.last_role==='user'?'👤 ':(c.last_role==='owner'?'🧑‍💼 ':'🤖 ')}${esc(c.last)}</div>
+        <div class="meta">${flagsHtml(c.flags)}<span style="font-size:.56rem;color:#4a5568;margin-left:auto">${timeago(c.updated_at)}</span></div>
+      </div>`).join('') || '<div class="empty" style="padding:30px">Konuşma yok</div>';
+  }catch(e){}
+}
+
+function aiStateHtml(j){ return j.owner_joined
+  ? '<span class="ai-off">🟣 Sen konuşuyorsun (AI susuyor)</span>'
+  : '<span class="ai-on">🤖 AI aktif</span>'; }
+function ctrlHtml(j){ return (j.owner_joined
+    ? '<button class="btn" onclick="ctrl(&quot;release&quot;)">AI&#39;ya bırak</button>' : '')
+  + '<button class="btn warn" onclick="ctrl(&quot;close&quot;)">Kapat</button>'; }
+
+// İskelet BİR KEZ kurulur. Poll bunu yeniden çizmez; yoksa operatörün
+// yazdığı metin her tazelemede silinirdi.
+function renderShell(j){
+  document.getElementById('threadInner').innerHTML = `
+    <div class="thead">
+      <button class="mob-back" onclick="backToList()" aria-label="Geri">←</button>
+      <div class="who">${esc(j.user)} ${flagsHtml(j.flags)}</div>
+      <div id="aiState" data-oj="${j.owner_joined}">${aiStateHtml(j)}</div>
+      <div id="theadCtrl" style="display:flex;gap:8px">${ctrlHtml(j)}</div>
+    </div>
+    <div class="msgs" id="msgs"></div>
+    <div class="composer">
+      <textarea id="reply" rows="1" placeholder="Cevap yaz…  (Enter = gönder · Shift+Enter = alt satır)"
+        onkeydown="onReplyKey(event)" oninput="autoGrow(this)"></textarea>
+      <button onclick="send()">➤</button>
+    </div>`;
+  const el=document.getElementById('reply'); if(el) el.focus();
+}
+// Sadece mesajlar. Değişmediyse dokunulmaz (kaydırma/imleç korunur).
+function renderMsgs(j){
+  const mm=document.getElementById('msgs'); if(!mm) return;
+  const sig=(j.messages||[]).map(m=>m.role+':'+m.content).join('|');
+  if(mm.dataset.sig===sig) return;
+  const nearBottom = mm.scrollHeight - mm.scrollTop - mm.clientHeight < 60;
+  mm.innerHTML=(j.messages||[]).map(m=>`
+    <div class="m ${esc(m.role)}"><div class="r">${m.role==='user'?'kullanıcı':(m.role==='owner'?'sen':'ai')}</div>${fmt(m.content)}</div>`).join('');
+  mm.dataset.sig=sig;
+  if(nearBottom) mm.scrollTop=mm.scrollHeight;
+}
+function updateThead(j){
+  const st=document.getElementById('aiState');
+  if(st && st.dataset.oj !== String(j.owner_joined)){
+    st.innerHTML=aiStateHtml(j); st.dataset.oj=String(j.owner_joined);
+    const c=document.getElementById('theadCtrl'); if(c) c.innerHTML=ctrlHtml(j);
+  }
+}
+async function loadThread(full){
+  if(!currentId) return;
+  try{
+    const j = await (await fetch('data/?conv='+encodeURIComponent(currentId),
+                                 {credentials:'same-origin'})).json();
+    if(j.error) return;
+    if(full || !document.getElementById('msgs')) renderShell(j); else updateThead(j);
+    renderMsgs(j);
+  }catch(e){}
+}
+function backToList(){ document.body.classList.remove('mob-thread'); }
+function openConv(id){
+  document.body.classList.add('mob-thread');
+  if(id===currentId) return;           // açıksa sıfırlama — yazılan metin kalsın
+  currentId=id;
+  const te=document.getElementById('threadEmpty'); if(te) te.style.display='none';
+  loadList(); loadThread(true);
+  if(threadTimer) clearInterval(threadTimer);
+  threadTimer=setInterval(()=>loadThread(false), 4000);
+}
+async function post(body){
+  const r=await fetch('reply/', {method:'POST', credentials:'same-origin',
+    headers:{'Content-Type':'application/json','X-CSRFToken':CSRF}, body:JSON.stringify(body)});
+  return r.json();
+}
+function onReplyKey(e){ if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); send(); } }
+function autoGrow(el){ el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,160)+'px'; }
+async function send(){
+  const el=document.getElementById('reply'); const t=(el.value||'').trim();
+  if(!t||!currentId) return;
+  el.value=''; el.style.height='auto';
+  await post({conv:currentId, message:t}); loadThread(); loadList();
+}
+async function ctrl(action){
+  if(!currentId) return;
+  if(action==='close' && !confirm('Konuşmayı kapat? (kullanıcıda yeni konuşma başlar)')) return;
+  await post({conv:currentId, action}); loadThread(); loadList();
+}
+refreshMute(); loadList(); setInterval(loadList, 5000);
+</script>
+</body>
+</html>

@@ -51,6 +51,8 @@ urlpatterns = [
     path("api/payment/stripe/webhook/", views.stripe_webhook, name="stripe_webhook"),
     path("api/cron/reconcile/", views.cron_reconcile, name="cron_reconcile"),
     path("api/billing/portal/", views.stripe_billing_portal, name="stripe_billing_portal"),
+    path("api/billing/cancel/", views.stripe_cancel_subscription, name="stripe_cancel_subscription"),
+    path("api/billing/status/", views.stripe_billing_status, name="stripe_billing_status"),
     path("api/payment/nowpayments/ipn/", views.nowpayments_ipn, name="nowpayments_ipn"),
     
     path("api/extension/handshake/", views.extension_handshake, name="extension_handshake"),

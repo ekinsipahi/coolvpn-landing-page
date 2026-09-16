@@ -14,7 +14,9 @@ from landing.models import Subscription
 
 User = get_user_model()
 
-MANAGE_STRIPE = "Manage / cancel subscription"
+# Kart abonesi artık portala gitmeden, panelden tek tıkla iptal ediyor.
+CANCEL_STRIPE = "Cancel subscription"
+CARD_INVOICES = "Card & invoices"
 MANAGE_PLAY = "Manage in Google Play"
 EXTEND_CRYPTO = "Extend (crypto)"
 SWITCH_CARD = "Switch to card"
@@ -34,9 +36,11 @@ class DashboardBillingBoxTests(TestCase):
         self.assertEqual(r.status_code, 200)
         return r.content.decode()
 
-    def test_stripe_shows_the_billing_portal_only(self):
+    def test_stripe_gets_one_click_cancel_and_the_portal(self):
         body = self._body(self._user_with("stripe", "kartli"))
-        self.assertIn(MANAGE_STRIPE, body)
+        self.assertIn(CANCEL_STRIPE, body)
+        self.assertIn("/api/billing/cancel/", body)
+        self.assertIn(CARD_INVOICES, body)      # kart/fatura yönetimi hâlâ portalda
         self.assertNotIn(EXTEND_CRYPTO, body)
 
     def test_google_play_sends_them_to_google_not_to_a_second_payment(self):
@@ -46,12 +50,12 @@ class DashboardBillingBoxTests(TestCase):
         # En onemlisi: ikinci bir odeme rayi TEKLIF EDILMEMELI.
         self.assertNotIn(EXTEND_CRYPTO, body)
         self.assertNotIn(SWITCH_CARD, body)
-        self.assertNotIn(MANAGE_STRIPE, body)
+        self.assertNotIn(CANCEL_STRIPE, body)
 
     def test_crypto_offers_extend(self):
         body = self._body(self._user_with("crypto", "kriptocu"))
         self.assertIn(EXTEND_CRYPTO, body)
-        self.assertNotIn(MANAGE_STRIPE, body)
+        self.assertNotIn(CANCEL_STRIPE, body)
         self.assertNotIn(MANAGE_PLAY, body)
 
     def test_manual_grant_behaves_like_crypto(self):
@@ -63,6 +67,6 @@ class DashboardBillingBoxTests(TestCase):
     def test_free_user_sees_no_management_box(self):
         u = User.objects.create_user(username="bedava2", email="b2@t.test", password="x")
         body = self._body(u)
-        for s in (MANAGE_STRIPE, MANAGE_PLAY, EXTEND_CRYPTO):
+        for s in (CANCEL_STRIPE, MANAGE_PLAY, EXTEND_CRYPTO):
             with self.subTest(s=s):
                 self.assertNotIn(s, body)

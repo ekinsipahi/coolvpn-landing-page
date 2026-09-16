@@ -9,11 +9,13 @@ Testler GERCEK StripeObject uretir (convert_to_stripe_object). Duz dict ile
 yazilsalardi hatanin hicbiri tekrar etmezdi: sorun tam olarak StripeObject'in
 artik dict GIBI davranmamasiydi.
 """
+import json
 from datetime import datetime, timezone as dt_tz
 from unittest import mock
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase, override_settings
+from django.urls import reverse
 from stripe._util import convert_to_stripe_object as to_stripe
 
 from landing.helpers.stripe_gw import (amount_label, invoice_subscription_id,
@@ -376,3 +378,144 @@ class CustomerSelectionTests(TestCase):
         api = self._api([("cus_OTHER", 1)], {})
         self.assertEqual(self._pick(api), "cus_LOCAL")
         api.Customer.search.assert_not_called()
+
+
+class WebhookReplayGuardTests(TestCase):
+    """Stripe başarısız event'leri YENİDEN GÖNDERİR.
+
+    16.09'da webhook düzelince Stripe eski denemeleri tekrar yolladı: iptal
+    edilmiş bir abonelik için yeni yerel kayıt açıldı, müşteriye ikinci kez
+    "premium aktif" maili gitti ve ölü müşteri kimliği hesabın en güncel
+    kaydı oldu (sonraki ödemede yanlış müşteri seçilirdi).
+    """
+
+    def setUp(self):
+        self.user = User.objects.create_user(username="tekrar", email="t@t.test",
+                                             password="x")
+
+    def _sub(self, status, sub_id="sub_DEAD"):
+        d = new_subscription(sub_id=sub_id).to_dict()
+        d["status"] = status
+        return to_stripe(d)
+
+    def test_cancelled_subscription_does_not_create_a_row_or_mail(self):
+        from landing.views import _grant_stripe_subscription
+        with MailCapture() as mc:
+            out = _grant_stripe_subscription(self.user, "monthly", self._sub("canceled"))
+        self.assertIsNone(out)
+        self.assertFalse(Subscription.objects.filter(user=self.user).exists())
+        self.assertEqual(mc.sent, [], "iptal edilmiş abonelik için mail gitti")
+
+    def test_incomplete_expired_is_also_ignored(self):
+        from landing.views import _grant_stripe_subscription
+        with MailCapture():
+            self.assertIsNone(_grant_stripe_subscription(
+                self.user, "monthly", self._sub("incomplete_expired")))
+        self.assertFalse(Subscription.objects.exists())
+
+    def test_an_existing_row_is_still_synced_even_if_now_cancelled(self):
+        """Var olan kaydın tarihi senkronlanmalı; engellenen sadece YENİ kayıt."""
+        from landing.views import _grant_stripe_subscription
+        local = Subscription.objects.create(
+            user=self.user, plan_key="monthly", source="stripe",
+            starts_at=datetime.fromtimestamp(P_START, dt_tz.utc),
+            ends_at=datetime.fromtimestamp(P_START, dt_tz.utc),
+            stripe_subscription_id="sub_DEAD", stripe_customer_id="cus_D")
+        with MailCapture():
+            out = _grant_stripe_subscription(self.user, "monthly", self._sub("canceled"))
+        self.assertEqual(out.pk, local.pk)
+        out.refresh_from_db()
+        self.assertEqual(out.ends_at, datetime.fromtimestamp(P_END, dt_tz.utc))
+
+    def test_active_subscription_still_creates_a_row(self):
+        from landing.views import _grant_stripe_subscription
+        with MailCapture() as mc:
+            out = _grant_stripe_subscription(self.user, "monthly", self._sub("active", "sub_OK"))
+        self.assertIsNotNone(out)
+        self.assertEqual(len(mc.sent), 2)
+
+
+class OneClickCancelTests(TestCase):
+    """Dashboard'dan tek tıkla iptal / geri alma."""
+
+    def setUp(self):
+        self.user = User.objects.create_user(username="iptalci", email="i@t.test",
+                                             password="x")
+        self.client.force_login(self.user)
+        self.local = Subscription.objects.create(
+            user=self.user, plan_key="monthly", source="stripe",
+            starts_at=datetime.fromtimestamp(P_START, dt_tz.utc),
+            ends_at=datetime.fromtimestamp(P_END, dt_tz.utc),
+            stripe_subscription_id="sub_C", stripe_customer_id="cus_C")
+
+    def _api(self, cancel_at_period_end=False, status="active"):
+        api = mock.MagicMock()
+        obj = to_stripe({"object": "subscription", "id": "sub_C", "status": status,
+                         "cancel_at_period_end": cancel_at_period_end})
+        api.Subscription.retrieve.return_value = obj
+        api.Subscription.modify.return_value = obj
+        return api
+
+    def _call(self, url, api, payload=None):
+        with mock.patch("landing.views._stripe", return_value=api), \
+             mock.patch("landing.views.stripe_enabled", return_value=True):
+            if payload is None:
+                return self.client.get(url)
+            return self.client.post(url, data=json.dumps(payload),
+                                    content_type="application/json")
+
+    def test_status_reports_the_live_state(self):
+        r = self._call(reverse("stripe_billing_status"), self._api(cancel_at_period_end=True))
+        j = r.json()
+        self.assertTrue(j["has_subscription"])
+        self.assertTrue(j["cancel_at_period_end"])
+
+    def test_cancel_sets_cancel_at_period_end(self):
+        api = self._api(cancel_at_period_end=True)
+        r = self._call(reverse("stripe_cancel_subscription"), api, {})
+        self.assertEqual(r.status_code, 200)
+        self.assertTrue(r.json()["cancel_at_period_end"])
+        # Hemen kesmiyoruz: ödenen günler alınmaz.
+        api.Subscription.modify.assert_called_once_with("sub_C", cancel_at_period_end=True)
+
+    def test_resume_undoes_it(self):
+        api = self._api(cancel_at_period_end=False)
+        r = self._call(reverse("stripe_cancel_subscription"), api, {"resume": True})
+        self.assertEqual(r.status_code, 200)
+        self.assertFalse(r.json()["cancel_at_period_end"])
+        api.Subscription.modify.assert_called_once_with("sub_C", cancel_at_period_end=False)
+
+    def test_access_until_comes_from_our_record_not_stripe(self):
+        # Elle verilmiş ek süre Stripe'ın dönem sonundan ileride olabilir.
+        far = datetime.fromtimestamp(P_END + 30 * 86400, dt_tz.utc)
+        Subscription.objects.filter(pk=self.local.pk).update(ends_at=far)
+        r = self._call(reverse("stripe_cancel_subscription"), self._api(True), {})
+        self.assertEqual(r.json()["access_until"][:10], far.date().isoformat())
+
+    def test_without_a_subscription_it_is_404(self):
+        Subscription.objects.all().delete()
+        r = self._call(reverse("stripe_cancel_subscription"), self._api(), {})
+        self.assertEqual(r.status_code, 404)
+
+    def test_stripe_failure_is_reported_not_swallowed(self):
+        api = self._api()
+        api.Subscription.modify.side_effect = RuntimeError("stripe down")
+        r = self._call(reverse("stripe_cancel_subscription"), api, {})
+        self.assertEqual(r.status_code, 502)
+        self.assertIn("detail", r.json())
+
+    def test_anonymous_cannot_cancel(self):
+        self.client.logout()
+        r = self.client.post(reverse("stripe_cancel_subscription"),
+                             data="{}", content_type="application/json")
+        self.assertEqual(r.status_code, 302)
+
+    def test_dashboard_shows_the_cancel_button_for_card_subscribers(self):
+        body = self.client.get("/dashboard/").content.decode()
+        self.assertIn("Cancel subscription", body)
+        self.assertIn("/api/billing/cancel/", body)
+
+    def test_crypto_subscriber_gets_no_cancel_button(self):
+        Subscription.objects.all().update(source="crypto", stripe_subscription_id="")
+        body = self.client.get("/dashboard/").content.decode()
+        self.assertNotIn("Cancel subscription", body)

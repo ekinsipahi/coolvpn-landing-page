@@ -109,15 +109,26 @@
 
         <!-- Abonelik yönetimi -->
         {% if active_sub.source == "stripe" %}
-          <form method="post" action="{% url 'stripe_billing_portal' %}" class="mt-5">
-            {% csrf_token %}
-            <button type="submit" class="vs-btn vs-btn-ghost w-full !py-2.5 !text-xs"
-                    data-ga-event="billing_portal_open">
-              {% trans "Manage / cancel subscription" %}
+          {% comment %}
+            İptal tek tıkla BURADA. Önceden tek yol Stripe portalıydı: site
+            dışına çıkıp orada aramak gerekiyordu. İptal etmek isteyen birini
+            zorlaştırmak iptali engellemez, sadece destek talebine ya da
+            chargeback'e dönüşür.
+          {% endcomment %}
+          <div class="mt-5 grid grid-cols-2 gap-2">
+            <button type="button" id="btn-cancel-sub" class="vs-btn vs-btn-ghost !py-2.5 !text-xs">
+              {% trans "Cancel subscription" %}
             </button>
-          </form>
-          <p class="mt-1.5 text-center text-[11px]" style="color:var(--vs-text-2)">
-            {% trans "Renews automatically · manage card, invoices & cancellation in the secure portal" %}
+            <form method="post" action="{% url 'stripe_billing_portal' %}">
+              {% csrf_token %}
+              <button type="submit" class="vs-btn vs-btn-ghost w-full !py-2.5 !text-xs"
+                      data-ga-event="billing_portal_open">
+                {% trans "Card & invoices" %}
+              </button>
+            </form>
+          </div>
+          <p id="billing-note" class="mt-1.5 text-center text-[11px]" style="color:var(--vs-text-2)">
+            {% trans "Renews automatically · you can cancel any time" %}
           </p>
         {% elif active_sub.source == "google_play" %}
           {% comment %}
@@ -462,6 +473,50 @@
   })();
 
   // ---- Kriptodan karta geçiş: Stripe Checkout (trial = mevcut bitiş) ----
+  {% if active_sub.source == "stripe" %}
+  {% comment %}
+    Bu blok yalnızca kart abonesi için basılıyor: kriptocuya ait olmayan bir
+    iptal butonunun metnini sayfaya koymak bile kafa karıştırır (ve ölü JS).
+  {% endcomment %}
+  // ---- Kart aboneliği: tek tıkla iptal / geri al ----
+  (function(){
+    const btn  = document.getElementById('btn-cancel-sub');
+    const note = document.getElementById('billing-note');
+    if(!btn || !note) return;
+    const csrf = () => (document.cookie.match(/csrftoken=([^;]+)/)||[])[1]||'';
+    const day  = iso => { try { return new Date(iso).toLocaleDateString(); } catch(e){ return ''; } };
+    let cancelling = false;   // true = zaten iptal edilmiş, buton "geri al" olur
+
+    function paint(st){
+      cancelling = !!st.cancel_at_period_end;
+      btn.textContent = cancelling ? '{% trans "Resume subscription" %}'
+                                   : '{% trans "Cancel subscription" %}';
+      note.textContent = cancelling
+        ? '{% trans "Cancelled — your Premium stays active until" %} ' + day(st.access_until)
+        : '{% trans "Renews automatically · you can cancel any time" %}';
+    }
+    // Durumu sayfa açıldıktan SONRA soruyoruz: render'ı Stripe'ın hızına
+    // bağlamak paneli yavaşlatırdı.
+    fetch('/api/billing/status/', {credentials:'same-origin'})
+      .then(r=>r.json()).then(d=>{ if(d && d.has_subscription) paint(d); }).catch(()=>{});
+
+    btn.addEventListener('click', async () => {
+      if(!cancelling && !confirm('{% trans "Cancel your subscription? You keep Premium until the end of the paid period." %}')) return;
+      btn.disabled = true;
+      try{
+        const r = await fetch('/api/billing/cancel/', {
+          method:'POST', credentials:'same-origin',
+          headers:{'Content-Type':'application/json','X-CSRFToken':csrf()},
+          body: JSON.stringify({resume: cancelling})});
+        const d = await r.json();
+        if(d && d.ok) paint(d);
+        else alert(d?.detail || d?.error || '{% trans "Could not update the subscription." %}');
+      }catch(e){ alert('{% trans "Network error." %}'); }
+      btn.disabled = false;
+    });
+  })();
+  {% endif %}
+
   (function(){
     const btn = document.getElementById('btn-switch-card');
     if(!btn) return;
