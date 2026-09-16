@@ -1210,7 +1210,11 @@ def cron_reconcile(request):
 # ============================================================
 # Stripe — kartla abonelik (checkout, success, webhook, portal)
 # ============================================================
-from landing.helpers.stripe_gw import stripe_enabled, ensure_price, get_or_create_customer, _api as _stripe
+from landing.helpers.stripe_gw import (stripe_enabled, ensure_price, get_or_create_customer,
+                                       amount_label as _stripe_amount_of,
+                                       invoice_subscription_id as _invoice_sub_id,
+                                       sfield as _sf, subscription_period as _sub_period,
+                                       _api as _stripe)
 
 
 def _stripe_amount_label(stripe_sub) -> str:
@@ -1220,16 +1224,7 @@ def _stripe_amount_label(stripe_sub) -> str:
     cikarilamazsa bos doner (bildirim mailinde "-" gorunur).
     """
     try:
-        items = getattr(stripe_sub, "items", None) or stripe_sub.get("items") or {}
-        data = getattr(items, "data", None) or items.get("data") or []
-        if not data:
-            return ""
-        price = getattr(data[0], "price", None) or data[0].get("price") or {}
-        cents = getattr(price, "unit_amount", None) or price.get("unit_amount")
-        ccy = (getattr(price, "currency", None) or price.get("currency") or "").upper()
-        if cents is None:
-            return ""
-        return f"{int(cents) / 100:.2f} {ccy}".strip()
+        return _stripe_amount_of(stripe_sub)
     except Exception:  # noqa: BLE001 - tutar sadece bilgi amacli, akisi bozamaz
         return ""
 
@@ -1238,17 +1233,24 @@ def _grant_stripe_subscription(user, plan_key, stripe_sub):
     """Stripe aboneliğini yerel Subscription'a yazar/günceller (idempotent)."""
     from datetime import datetime, timezone as dt_tz
 
-    period_end = getattr(stripe_sub, "current_period_end", None) or stripe_sub.get("current_period_end")
-    period_start = getattr(stripe_sub, "current_period_start", None) or stripe_sub.get("current_period_start")
-    customer = getattr(stripe_sub, "customer", None) or stripe_sub.get("customer")
-    sub_id = getattr(stripe_sub, "id", None) or stripe_sub.get("id")
+    # Dönem bilgisi yeni Stripe sürümlerinde aboneliğin ÜST seviyesinde değil,
+    # ilk kaleminde; eski kayıtlar için ikisine de bakılır (bkz. stripe_gw).
+    period_start, period_end = _sub_period(stripe_sub)
+    customer = _sf(stripe_sub, "customer")
+    sub_id = _sf(stripe_sub, "id")
+    if period_end is None or period_start is None:
+        # Süreyi bilmeden abonelik yazmak, yanlış tarihli premium demek.
+        # Sessizce "free" bırakmaktansa gürültü çıkarıp Sentry'ye düşsün.
+        raise ValueError(f"Stripe aboneliğinde dönem alanları yok: {sub_id}")
 
     ends_at = datetime.fromtimestamp(int(period_end), tz=dt_tz.utc)
     starts_at = datetime.fromtimestamp(int(period_start), tz=dt_tz.utc)
 
     local = Subscription.objects.filter(stripe_subscription_id=sub_id).first()
     if local:
-        if local.ends_at != ends_at:
+        # ASLA geriye alma: elle verilmiş jest süresi ya da mükerrer ödeme
+        # telafisi, rutin bir yenileme senkronunda silinmemeli.
+        if local.ends_at < ends_at:
             local.ends_at = ends_at
             local.save(update_fields=["ends_at"])
         return local
@@ -1333,9 +1335,34 @@ def stripe_checkout_create(request):
         data = {}
     plan_key = normalize_plan_slug(data.get("plan") or "monthly")
 
+    # ---- ÇİFT TAHSİLAT FRENİ ----------------------------------------------
+    # 2026-09-16: bir müşteri iki kez ödedi. Webhook çöktüğü için yerel kayıt
+    # hiç oluşmamıştı, o yüzden ikinci checkout'u durduran hiçbir şey yoktu.
+    # Ucuz kontrol önce yerelde; ama asıl güvenilir kaynak Stripe'ın kendisi,
+    # çünkü yerel kayıt tam da bu senaryoda eksik kalıyor.
+    if (Subscription.objects
+            .filter(user=request.user, source="stripe", ends_at__gte=now())
+            .exclude(stripe_subscription_id="").exists()):
+        return JsonResponse({"ok": False, "error": "already_subscribed",
+                             "detail": "You already have an active card subscription. "
+                                       "Manage it from your dashboard."}, status=409)
+
     try:
         price_id = ensure_price(plan_key)
         customer_id = get_or_create_customer(request.user)
+
+        # Tek çağrı: durum başına ayrı istek atmak checkout'a boşuna
+        # üç round-trip ekliyordu.
+        live = {"active", "trialing", "past_due", "unpaid"}
+        for _s in _stripe().Subscription.list(customer=customer_id, status="all",
+                                              limit=20).data:
+            if _sf(_s, "status") in live:
+                logger.warning("ikinci checkout engellendi: user=%s customer=%s durum=%s",
+                               request.user.id, customer_id, _sf(_s, "status"))
+                return JsonResponse({"ok": False, "error": "already_subscribed",
+                                     "detail": "You already have an active card "
+                                               "subscription. Manage it from your "
+                                               "dashboard."}, status=409)
 
         sub_data = {"metadata": {"user_id": str(request.user.id), "plan_key": plan_key}}
         # Kripto/manuel aktif abonelik varsa: kart aboneliği o bitişte başlasın
@@ -1372,11 +1399,12 @@ def stripe_success(request):
         return redirect("dashboard")
     try:
         sess = _stripe().checkout.Session.retrieve(session_id, expand=["subscription"])
-        if sess.get("payment_status") in ("paid", "no_payment_required") and sess.get("subscription"):
-            plan_key = (sess.get("metadata") or {}).get("plan_key") or "monthly"
+        if (_sf(sess, "payment_status") in ("paid", "no_payment_required")
+                and _sf(sess, "subscription")):
+            plan_key = _sf(sess, "metadata", "plan_key", default="monthly")
             local = _grant_stripe_subscription(request.user, plan_key, sess["subscription"])
             messages.success(request, "Payment confirmed — Premium is active. Welcome aboard!")
-            amount = (sess.get("amount_total") or 0) / 100.0
+            amount = (_sf(sess, "amount_total", default=0) or 0) / 100.0
             from urllib.parse import urlencode
             q = urlencode({"paid": "1", "plan": plan_key,
                            "txn": local.stripe_subscription_id or session_id,
@@ -1413,14 +1441,17 @@ def stripe_webhook(request):
     etype = event["type"]
     obj = event["data"]["object"]
 
-    if etype == "checkout.session.completed" and obj.get("subscription"):
-        user = User.objects.filter(id=(obj.get("metadata") or {}).get("user_id")).first()
+    # obj bir StripeObject: .get() YOK (stripe-python 15). _sf ile okunur.
+    if etype == "checkout.session.completed" and _sf(obj, "subscription"):
+        user = User.objects.filter(id=_sf(obj, "metadata", "user_id")).first()
         if user:
-            sub = _stripe().Subscription.retrieve(obj["subscription"])
-            _grant_stripe_subscription(user, (obj.get("metadata") or {}).get("plan_key") or "monthly", sub)
+            sub = _stripe().Subscription.retrieve(_sf(obj, "subscription"))
+            _grant_stripe_subscription(
+                user, _sf(obj, "metadata", "plan_key", default="monthly"), sub)
 
     elif etype in ("invoice.paid", "invoice.payment_succeeded"):
-        sub_id = obj.get("subscription")
+        # Yeni sürümde fatura üzerinde subscription alanı yok; parent'ta.
+        sub_id = _invoice_sub_id(obj)
         if sub_id:
             local = Subscription.objects.filter(stripe_subscription_id=sub_id).select_related("user").first()
             if local:

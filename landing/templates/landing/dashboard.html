@@ -476,7 +476,7 @@
       }).then(r=>r.json()).then(d=>{
         if (d?.redirect_url) { location.href = d.redirect_url; return; }
         btn.disabled = false;
-        alert(d?.error || 'Could not start card checkout.');
+        alert(d?.detail || d?.error || 'Could not start card checkout.');
       }).catch(()=>{ btn.disabled = false; alert('Network error.'); });
     });
   })();

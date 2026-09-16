@@ -63,7 +63,7 @@ def run_reconcile(np_limit: int = 25, stripe_limit: int = 50) -> dict:
                 order.save(update_fields=["np_raw"])
 
     # ---- Stripe: dönem sonu senkronu ----
-    from landing.helpers.stripe_gw import stripe_enabled, _api
+    from landing.helpers.stripe_gw import stripe_enabled, subscription_period, _api
     if stripe_enabled():
         from datetime import datetime, timezone as dt_tz
         api = _api()
@@ -81,7 +81,10 @@ def run_reconcile(np_limit: int = 25, stripe_limit: int = 50) -> dict:
                 out["errors"].append(f"stripe:{local.stripe_subscription_id}:{e}")
                 continue
             out["stripe_synced"] += 1
-            period_end = remote.get("current_period_end")
+            # remote bir StripeObject: .get() YOK ve dönem alanı artık
+            # aboneliğin kaleminde. Bu satır cron'u her turda düşürüyordu,
+            # yani hiçbir abonelik senkronlanmıyordu (bkz. stripe_gw).
+            period_end = subscription_period(remote)[1]
             if period_end:
                 new_end = datetime.fromtimestamp(int(period_end), tz=dt_tz.utc)
                 if new_end > local.ends_at:

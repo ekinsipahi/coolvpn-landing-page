@@ -70,8 +70,96 @@ def get_or_create_customer(user) -> str:
     if prev:
         return prev
     api = _api()
+    # Yerel kayit yoksa HEMEN yeni musteri acma: webhook bir kez bozuldugunda
+    # yerel satir hic olusmuyor ve ayni kisi icin HER odemede yeni bir Stripe
+    # musterisi yaratiliyor. 2026-09-16'da tam bu oldu: bir kullanicinin iki
+    # ayri customer'i ve iki ayri canli aboneligi olustu. Once Stripe'a sor.
+    try:
+        found = api.Customer.search(
+            query=f"metadata['user_id']:'{user.id}' AND metadata['app']:'vpnsterr'",
+            limit=1)
+        if found.data:
+            return found.data[0].id
+    except Exception:  # noqa: BLE001 - arama yoksa/yetkisizse asagida olusturulur
+        pass
     cust = api.Customer.create(
         email=user.email or None,
         metadata={"user_id": str(user.id), "app": "vpnsterr"},
     )
     return cust.id
+
+
+# ============================================================
+# Stripe nesne erisimi — SURUM UYUMLULUGU
+#
+# 2026-09-16'da bir musteri iki kez odedi ve premium HIC verilmedi. Sentry:
+#   AttributeError: 'get' is a dict method, but a Session is not a dict
+#   AttributeError: 'get' is a dict method, but a Invoice is not a dict
+# Webhook 500 veriyordu, dolayisiyla ne abonelik aciliyor ne de bildirim
+# maili gidiyordu. Uc ayri kirilma vardi, ucu de Stripe'in yeni surumlerinden:
+#
+#  1) stripe-python 15'te StripeObject ARTIK dict degil: .get() AttributeError
+#     atiyor. __getitem__ hala calisiyor ama olmayan alanda KeyError veriyor.
+#  2) Subscription.current_period_end UST SEVIYEDEN KALKTI; artik abonelik
+#     KALEMINDE: subscription["items"]["data"][0]["current_period_end"].
+#  3) Invoice.subscription UST SEVIYEDEN KALKTI; artik
+#     invoice["parent"]["subscription_details"]["subscription"].
+#
+# Asagidaki yardimcilar hem eski hem yeni bicimi karsilar, boylece Stripe bir
+# alani tasidiginda odeme akisi yine sessizce olmez.
+# ============================================================
+
+def sfield(obj, *path, default=None):
+    """``obj`` icinde ``path`` boyunca ilerler; bulamazsa ``default``.
+
+    Hem StripeObject hem duz dict ile calisir. Stripe nesnelerinde ``.get()``
+    YOK, ``[...]`` ise olmayan alanda KeyError atiyor -- ikisini de burada
+    yutuyoruz ki cagiran yerler try/except ile dolmasin.
+    """
+    cur = obj
+    for key in path:
+        if cur is None:
+            return default
+        try:
+            cur = cur[key]
+        except (KeyError, IndexError, TypeError):
+            # Sayisal indeks getattr ile okunamaz; denemek TypeError atar ve
+            # bu yardimcinin tek isi "asla patlamamak".
+            if not isinstance(key, str):
+                return default
+            try:
+                cur = getattr(cur, key)
+            except AttributeError:
+                return default
+    return default if cur is None else cur
+
+
+def subscription_period(stripe_sub):
+    """``(start_ts, end_ts)`` -- abonelik doneminin unix zaman damgalari.
+
+    Once ust seviyeye, sonra ilk kaleme bakar. Yeni API surumlerinde alan
+    yalnizca kalemde; eski kayitlar icin ust seviye fallback duruyor.
+    """
+    start = sfield(stripe_sub, "current_period_start")
+    end = sfield(stripe_sub, "current_period_end")
+    if start is None or end is None:
+        item = sfield(stripe_sub, "items", "data", 0)
+        start = start if start is not None else sfield(item, "current_period_start")
+        end = end if end is not None else sfield(item, "current_period_end")
+    return start, end
+
+
+def invoice_subscription_id(invoice):
+    """Faturanin bagli oldugu abonelik id'si (eski ve yeni bicim)."""
+    return (sfield(invoice, "subscription")
+            or sfield(invoice, "parent", "subscription_details", "subscription"))
+
+
+def amount_label(stripe_sub) -> str:
+    """Bildirim maili icin "4.99 USD" gibi okunur tutar; cikaramazsa bos."""
+    item = sfield(stripe_sub, "items", "data", 0)
+    cents = sfield(item, "price", "unit_amount")
+    ccy = (sfield(item, "price", "currency", default="") or "").upper()
+    if cents is None:
+        return ""
+    return f"{int(cents) / 100:.2f} {ccy}".strip()

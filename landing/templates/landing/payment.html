@@ -514,7 +514,9 @@
           showBanner(MSG.must_login_with_password || 'Please sign in first (email above or Google).', false);
           return;
         }
-        showBanner(d?.error || (MSG.pay_fail || 'Unable to start the payment. Try again.'));
+        // detail insan okunur mesaj; error makine kodu ('already_subscribed'
+        // gibi). Kullaniciya kodu gostermek destek talebi uretir.
+        showBanner(d?.detail || d?.error || (MSG.pay_fail || 'Unable to start the payment. Try again.'));
       }).catch(()=> showBanner(MSG.generic_err || 'Something went wrong. Please try again.'));
       return;
     }
