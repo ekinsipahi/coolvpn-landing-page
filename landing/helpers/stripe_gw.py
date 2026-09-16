@@ -77,9 +77,26 @@ def get_or_create_customer(user) -> str:
     try:
         found = api.Customer.search(
             query=f"metadata['user_id']:'{user.id}' AND metadata['app']:'vpnsterr'",
-            limit=1)
-        if found.data:
-            return found.data[0].id
+            limit=20)
+        # BIRDEN FAZLA eslesme olabilir: gecmiste mukerrer musteri olustuysa ya
+        # da Stripe'in arama indeksi (nihai tutarli) henuz guncellenmediyse.
+        # Ilkini secmek, iptal edilmis/bos bir musteriye abonelik acmak demek.
+        # Once CANLI aboneligi olani, yoksa EN YENISINI tercih ediyoruz.
+        live = {"active", "trialing", "past_due", "unpaid"}
+        best, best_created = None, -1
+        for cand in found.data:
+            cid = cand.id
+            try:
+                subs = api.Subscription.list(customer=cid, status="all", limit=20).data
+            except Exception:  # noqa: BLE001
+                subs = []
+            if any(sfield(sub, "status") in live for sub in subs):
+                return cid
+            created = sfield(cand, "created", default=0) or 0
+            if created > best_created:
+                best, best_created = cid, created
+        if best:
+            return best
     except Exception:  # noqa: BLE001 - arama yoksa/yetkisizse asagida olusturulur
         pass
     cust = api.Customer.create(

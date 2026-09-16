@@ -317,3 +317,62 @@ class ReconcileStripeTests(TestCase):
         self.assertEqual(local.ends_at, datetime.fromtimestamp(P_END, dt_tz.utc))
         self.assertEqual(out["stripe_extended"], 1)
         self.assertEqual([e for e in out["errors"] if "stripe" in e], [])
+
+
+class CustomerSelectionTests(TestCase):
+    """Aynı kullanıcı için birden fazla Stripe müşterisi bulunabilir.
+
+    16.09'da tam bu oldu: webhook bozuk olduğu için yerel kayıt oluşmadı ve
+    her ödemede yeni bir müşteri açıldı. Arama ikisini birden döndürünce
+    yanlışını seçmek, iptal edilmiş/boş bir müşteriye abonelik açmak demek.
+    Stripe'ın arama indeksi de nihai tutarlı — eski kayıt bir süre görünür.
+    """
+
+    def setUp(self):
+        self.user = User.objects.create_user(username="cok", email="cok@t.test",
+                                             password="x")
+
+    def _api(self, customers, subs_by_customer):
+        api = mock.MagicMock()
+        api.Customer.search.return_value = mock.MagicMock(data=[
+            to_stripe({"object": "customer", "id": cid, "created": created})
+            for cid, created in customers])
+        api.Subscription.list.side_effect = lambda customer, **kw: mock.MagicMock(
+            data=[to_stripe({"object": "subscription", "id": f"s_{customer}",
+                             "status": st})
+                  for st in subs_by_customer.get(customer, [])])
+        api.Customer.create.return_value = mock.MagicMock(id="cus_NEW")
+        return api
+
+    def _pick(self, api):
+        from landing.helpers import stripe_gw
+        with mock.patch.object(stripe_gw, "_api", return_value=api):
+            return stripe_gw.get_or_create_customer(self.user)
+
+    def test_prefers_the_customer_with_a_live_subscription(self):
+        api = self._api([("cus_OLD", 100), ("cus_LIVE", 50)],
+                        {"cus_OLD": ["canceled"], "cus_LIVE": ["active"]})
+        self.assertEqual(self._pick(api), "cus_LIVE")
+        api.Customer.create.assert_not_called()
+
+    def test_falls_back_to_the_newest_when_none_are_live(self):
+        api = self._api([("cus_A", 100), ("cus_B", 900)],
+                        {"cus_A": ["canceled"], "cus_B": ["canceled"]})
+        self.assertEqual(self._pick(api), "cus_B")
+        api.Customer.create.assert_not_called()
+
+    def test_creates_one_when_nothing_matches(self):
+        api = self._api([], {})
+        self.assertEqual(self._pick(api), "cus_NEW")
+        api.Customer.create.assert_called_once()
+
+    def test_local_record_still_wins_and_costs_no_api_call(self):
+        # Yerel kayıt varsa Stripe'a hiç gitmemeli: en sık yol bu.
+        Subscription.objects.create(
+            user=self.user, plan_key="monthly", source="stripe",
+            starts_at=datetime.fromtimestamp(P_START, dt_tz.utc),
+            ends_at=datetime.fromtimestamp(P_END, dt_tz.utc),
+            stripe_subscription_id="sub_L", stripe_customer_id="cus_LOCAL")
+        api = self._api([("cus_OTHER", 1)], {})
+        self.assertEqual(self._pick(api), "cus_LOCAL")
+        api.Customer.search.assert_not_called()
