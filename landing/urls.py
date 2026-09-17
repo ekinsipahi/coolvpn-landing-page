@@ -64,6 +64,9 @@ urlpatterns = [
     path("api/extension/link/refresh", views.extension_link_refresh, name="extension_link_refresh"),
     path("api/extension/link/revoke", views.extension_link_revoke, name="extension_link_revoke"),
     path("api/extension/logout/", views.extension_logout, name="extension_logout"),
+    # Server-to-server: the proxy pool asks "is this device UUID premium now?"
+    # before serving a dedicated exit (HMAC-authed with EXTENSION_SHARED_SECRET).
+    path("api/extension/entitlement", views.extension_entitlement, name="extension_entitlement"),
 
     # Mobile app: Play Store subscription verification (see helpers/play_billing.py)
     path("api/mobile/billing/verify", views.mobile_billing_verify, name="mobile_billing_verify"),

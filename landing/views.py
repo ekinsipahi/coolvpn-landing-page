@@ -1124,6 +1124,35 @@ def device_revoke(request):
         messages.error(request, "Cihaz bulunamadı.")
         return redirect("dashboard")
 
+    # Play'den alinan aboneligin SATIN ALINDIGI cihaz iptal edilemez.
+    #
+    # Abonelik Google'da o cihazin Play hesabina bagli. Cihazi iptal etmek
+    # aboneligi iptal etmiyor -- sadece kullanicinin parasini odedigi cihazda
+    # erisimi kesiyor. Sonuc: Play "abonelik aktif" derken uygulama "free"
+    # gosterir, kullanici ne Play'den ne bizden duzeltebilir, ve bu dogrudan
+    # bir iade/destek talebine donusur. Site uzerinden alinan aboneliklerde
+    # boyle bir bag yok; onlar serbestce iptal edilebilir.
+    #
+    # Hangi cihazin satin aldigini biliyoruz: mobile_billing_verify, dogrulama
+    # sirasinda gelen device_id'yi PlayPurchase.device_uuid'e yaziyor.
+    from landing.models import PlayPurchase
+
+    if device.client_uuid and PlayPurchase.objects.filter(
+        user=request.user,
+        device_uuid=device.client_uuid,
+        state=PlayPurchase.STATE_ACTIVE,
+        expires_at__gt=now(),
+    ).exists():
+        msg = (
+            "This device holds your Google Play subscription, so it cannot be "
+            "removed. Manage or cancel the subscription in the Play Store "
+            "instead."
+        )
+        if is_ajax:
+            return JsonResponse({"ok": False, "error": msg}, status=409)
+        messages.error(request, msg)
+        return redirect("dashboard")
+
     # Eğer zaten pasifse idempotent cevap ver
     if not device.is_active:
         if is_ajax:
@@ -1201,6 +1230,38 @@ def _resolve_premium_by_client_uuid(client_uuid: str):
 
     print(f"[_resolve_premium_by_client_uuid] RESOLVED user_id={resolved_user_id} device_uuid={device_uuid} sub_id={best['id']} ends_at={best['ends_at']}")
     return (True, resolved_user_id, device_uuid)
+
+
+@csrf_exempt
+@require_POST
+def extension_entitlement(request):
+    """Server-to-server: the proxy pool asks, by device UUID, "is this device
+    premium right now?" before it serves a dedicated (paid) exit.
+
+    Stateless device tokens can outlive entitlement, so the pool no longer
+    trusts the token alone -- it asks here on every premium request (cached
+    briefly on its side). We answer only ``{"premium": bool}``; no account
+    detail leaves the site.
+
+    Authenticated with an HMAC of the device_id under EXTENSION_SHARED_SECRET
+    (the same secret we sign account tokens with), so only the pool can ask and
+    the UUID cannot be swapped in flight. No secret travels on the wire.
+    """
+    secret = (getattr(settings, "EXTENSION_SHARED_SECRET", "") or "").encode()
+    if not secret:
+        return JsonResponse({"premium": False, "error": "not_configured"}, status=503)
+    try:
+        body = json.loads((request.body or b"").decode("utf-8") or "{}")
+    except ValueError:
+        return JsonResponse({"premium": False, "error": "bad_json"}, status=400)
+    device_id = str(body.get("device_id") or "").strip()
+    got = (request.headers.get("X-Pool-Sig") or "").strip()
+    want = hmac.new(secret, device_id.encode(), hashlib.sha256).hexdigest()
+    if not device_id or not hmac.compare_digest(got, want):
+        # One shape for every rejection -- an attacker learns nothing.
+        return JsonResponse({"premium": False, "error": "unauthorized"}, status=403)
+    is_premium, _uid, _dev = _resolve_premium_by_client_uuid(device_id)
+    return JsonResponse({"premium": bool(is_premium)})
 
 
 # ---- HTTP cron tetikleyici (cron-job.org) ----
