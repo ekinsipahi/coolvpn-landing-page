@@ -526,7 +526,9 @@
         method: 'POST',
         headers: {'Content-Type': 'application/json',
                   'X-CSRFToken': (document.cookie.match(/csrftoken=([^;]+)/)||[])[1]||''},
-        body: JSON.stringify({ plan: btn.dataset.plan || 'annual' }),
+        // Aynı checkout ucu; captcha jetonu burada da gerekiyor.
+        body: JSON.stringify({ plan: btn.dataset.plan || 'annual',
+                               captcha: (document.querySelector('[name="cf-turnstile-response"]')||{}).value || '' }),
         credentials: 'same-origin'
       }).then(r=>r.json()).then(d=>{
         if (d?.redirect_url) { location.href = d.redirect_url; return; }

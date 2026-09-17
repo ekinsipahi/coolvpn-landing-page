@@ -441,6 +441,17 @@ def email_upsert_login(request):
       - email kayıtlıysa: parola doğruysa login
       - email yoksa: user oluştur, parola ata, login
     """
+    # Bot freni: hesap açma botlara açık kalırsa saldırgan istediği kadar
+    # hesap üretip kullanıcı başına konulan checkout limitlerini anlamsız
+    # kılar. Turnstile anahtarı yoksa bu kontrol devre dışıdır (dev).
+    from landing.helpers import turnstile
+    if turnstile.enabled() and not turnstile.verify(
+            request.POST.get("cf-turnstile-response") or "", _client_ip(request)):
+        logger.warning("kayıt/giriş captcha reddi: ip=%s", _client_ip(request))
+        return JsonResponse({"ok": False, "error": "captcha_failed",
+                             "detail": "Please complete the verification and try again."},
+                            status=403)
+
     email = (request.POST.get("email") or "").strip().lower()
     password = request.POST.get("password") or ""
 
@@ -1345,6 +1356,19 @@ def stripe_checkout_create(request):
     except Exception:
         data = {}
     plan_key = normalize_plan_slug(data.get("plan") or "monthly")
+    # ---- KART DENEME (carding) FRENİ ----
+    # Asıl hedef burası: kart denemek isteyen biri kayıt akışını atlayabilir
+    # ama ödeme oturumu açmadan kart deneyemez. Stripe Radar TARANAN HER
+    # ödeme için 0.05 EUR yazıyor — 2026-09-09'da 16 deneme 0.80 EUR fatura
+    # etti. Bu yüzden fren Stripe'a gitmeden ÖNCE.
+    from landing.helpers import turnstile
+    if turnstile.enabled() and not turnstile.verify(data.get("captcha") or "",
+                                                    _client_ip(request)):
+        logger.warning("checkout captcha reddi: user=%s ip=%s",
+                       request.user.id, _client_ip(request))
+        return JsonResponse({"ok": False, "error": "captcha_failed",
+                             "detail": "Please complete the verification and try again."},
+                            status=403)
 
     # ---- ÇİFT TAHSİLAT FRENİ ----------------------------------------------
     # 2026-09-16: bir müşteri iki kez ödedi. Webhook çöktüğü için yerel kayıt
@@ -1388,11 +1412,20 @@ def stripe_checkout_create(request):
             sub_data["trial_end"] = int(current.ends_at.timestamp())
 
         base = settings.SITE_URL.rstrip("/")
+        # ---- 3D SECURE ----
+        # Kart deneme saldırısına karşı en sert önlem: ihraççı destekliyorsa
+        # her ödemede doğrulama istenir. Bot, çalıntı kart numarasıyla
+        # bankanın challenge'ını geçemez; geçen gerçek ödemede ise
+        # sahtecilik sorumluluğu ihraççıya geçer.
+        pm_options = {"card": {"request_three_d_secure":
+                               getattr(settings, "STRIPE_3DS_MODE", "challenge")}}
+
         session = _stripe().checkout.Session.create(
             mode="subscription",
             customer=customer_id,
             line_items=[{"price": price_id, "quantity": 1}],
             subscription_data=sub_data,
+            payment_method_options=pm_options,
             allow_promotion_codes=True,
             success_url=f"{base}/payment/stripe/success/?session_id={{CHECKOUT_SESSION_ID}}",
             cancel_url=f"{base}/payment/?plan={plan_key}",

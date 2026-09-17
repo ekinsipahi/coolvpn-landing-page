@@ -103,6 +103,21 @@ if SENTRY_DSN:
     except Exception:  # noqa: BLE001 - izleme aracı uygulamayı düşüremez
         pass
 
+# ---- 3D Secure zorunluluğu
+# "challenge": ihraççı destekliyorsa HER ödemede doğrulama istenir. Kart
+# deneyen biri bankanın doğrulamasını geçemez ve sahtecilik sorumluluğu
+# ihraççıya geçer. Not: her kart 3DS desteklemez (bazı ABD kartları);
+# desteklemeyende Stripe sürtünmesiz akışa düşer — bu bizim elimizde değil.
+# Dönüşüm belirgin düşerse "automatic" yaparak geri alabilirsin.
+STRIPE_3DS_MODE = os.environ.get("STRIPE_3DS_MODE", "challenge").strip() or "challenge"
+
+# ---- Cloudflare Turnstile (hesap açmada bot freni)
+# Anahtarlar: Cloudflare Dashboard > Turnstile > Add site.
+# Boşsa doğrulama KAPALI olur (dev'de rahat çalışılsın diye); canlıda
+# ikisini de doldur, yoksa kayıt formu korumasız kalır.
+TURNSTILE_SITE_KEY = os.environ.get("TURNSTILE_SITE_KEY", "").strip()
+TURNSTILE_SECRET_KEY = os.environ.get("TURNSTILE_SECRET_KEY", "").strip()
+
 # ---- Site URL (dev/prod’a göre ayarla)
 SITE_URL = os.environ.get("SITE_URL", "http://127.0.0.1:8000")
 
@@ -153,6 +168,9 @@ LOGOUT_REDIRECT_URL = "home"   # varsa home route’unun adı
 ACCOUNT_LOGOUT_REDIRECT_URL = "/"
 
 # ------------ Account (e-posta odaklı)
+# allauth'un kendi kayit sayfasi kapali: siteden linki yok, gercek akis
+# /auth/email-upsert-login/ ve orada Turnstile var. Bkz. account_adapter.py
+ACCOUNT_ADAPTER = "landing.account_adapter.ClosedSignupAdapter"
 ACCOUNT_AUTHENTICATION_METHOD = "email"
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False

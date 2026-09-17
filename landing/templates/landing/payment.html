@@ -216,6 +216,17 @@
         </dl>
         <p class="mt-2 text-[11px]" style="color:var(--vs-text-2)">{% trans "VAT may apply at payment." %}</p>
 
+        {% if turnstile_site_key %}
+        {% comment %}
+          KART DENEME (carding) FRENİ. 2026-09-09'da biri 7 dakikada 16 farklı
+          kartla denedi; Stripe Radar taranan HER ödeme için 0.05 EUR yazdığı
+          için fatura bize çıktı. Bot ödeme oturumu AÇAMAZSA kart deneyemez,
+          o yüzden widget tam burada — Stripe'a gitmeden önce.
+        {% endcomment %}
+        <div class="cf-turnstile mt-4 flex justify-center"
+             data-sitekey="{{ turnstile_site_key }}" data-theme="auto"
+             data-appearance="interaction-only"></div>
+        {% endif %}
         <button id="btn-pay" class="vs-btn vs-btn-primary vs-btn-lg mt-5 w-full">
           {% trans "Pay now" %}
           <svg class="h-5 w-5 rtl:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
@@ -250,6 +261,7 @@
 {% endblock %}
 
 {% block scripts %}
+{% if turnstile_site_key %}<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>{% endif %}
 {{ block.super }}
 <style>
   .gw-card{
@@ -501,15 +513,27 @@
       }
     }
 
+    // Turnstile jetonu; widget basılmamışsa boş döner (sunucu da kapalı).
+    function vsCaptchaToken(){
+      const el = document.querySelector('[name="cf-turnstile-response"]');
+      return el ? (el.value || '') : '';
+    }
+
     // Stripe seçiliyse: Checkout oturumu aç ve yönlendir
     if (selectedGW === 'stripe') {
       fetch('/api/checkout/stripe/', {
         method: 'POST',
         headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken')||''},
-        body: JSON.stringify({ plan: (p&&p.key)||'{{ plan.key }}' }),
+        body: JSON.stringify({ plan: (p&&p.key)||'{{ plan.key }}',
+                               captcha: vsCaptchaToken() }),
         credentials: 'same-origin'
       }).then(r=>r.json()).then(d=>{
         if (d?.redirect_url) { location.href = d.redirect_url; return; }
+        if (d?.error === 'captcha_failed') {
+          try { window.turnstile && turnstile.reset(); } catch(_){}   // jeton tek kullanımlık
+          showBanner(d.detail || 'Verification failed. Please try again.');
+          return;
+        }
         if (d?.error === 'login_required') {
           showBanner(MSG.must_login_with_password || 'Please sign in first (email above or Google).', false);
           return;

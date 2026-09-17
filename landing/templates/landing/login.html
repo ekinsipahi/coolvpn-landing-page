@@ -64,6 +64,20 @@
           <p class="mt-1.5 text-[11px]" style="color:var(--vs-text-2)" id="pass-hint"></p>
         </div>
 
+        {% if turnstile_site_key %}
+        {% comment %}
+          Cloudflare Turnstile. reCAPTCHA yerine bu: "zero-log" satan bir
+          VPN'in kayıt formundan her ziyaretçiyi Google'a tanıtmak sözün
+          kendisiyle çelişirdi. Turnstile çerez kullanmıyor ve çoğu ziyaretçi
+          için görünmez geçiyor.
+          Anahtar yoksa widget hiç basılmaz ve sunucu da doğrulama yapmaz —
+          ikisi aynı ayara bakıyor, yani yarım yapılandırma kimseyi kilitlemez.
+        {% endcomment %}
+        <div class="cf-turnstile mt-1 flex justify-center"
+             data-sitekey="{{ turnstile_site_key }}" data-theme="auto"
+             data-appearance="interaction-only"></div>
+        {% endif %}
+
         <div class="pt-1">
           <button id="btn-email-login" class="vs-btn vs-btn-primary w-full">
             {% trans "Sign in" %}
@@ -107,6 +121,7 @@
 {% endblock %}
 
 {% block scripts %}
+{% if turnstile_site_key %}<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>{% endif %}
 {{ block.super }}
 
 <style>
@@ -161,6 +176,13 @@
     if(v.includes('@')) checkEmail(v);
   });
 
+  // Turnstile jetonu. Widget basılmamışsa (anahtar yoksa) boş döner —
+  // sunucu tarafı da o durumda doğrulama yapmıyor, akış bozulmaz.
+  function vsCaptchaToken(){
+    const el = document.querySelector('[name="cf-turnstile-response"]');
+    return el ? (el.value || '') : '';
+  }
+
   // Email login/upsert
   async function emailLogin(){
     const email = (qs('#email')?.value||'').trim();
@@ -171,10 +193,17 @@
       const r = await fetch('/auth/email-upsert-login/', {
         method:'POST',
         headers:{'Content-Type':'application/x-www-form-urlencoded','X-CSRFToken': getCookie('csrftoken')||''},
-        body: new URLSearchParams({email, password: pass}),
+        body: new URLSearchParams({email, password: pass,
+                                   'cf-turnstile-response': vsCaptchaToken()}),
         credentials:'same-origin'
       });
       const d = await r.json();
+      if(d?.error === 'captcha_failed'){
+        // Jeton tek kullanımlık: reddedilirse yenisini almak için sıfırla.
+        try { window.turnstile && turnstile.reset(); } catch(_){}
+        showFormAlert(d.detail || "{{ _('Verification failed. Please try again.') }}");
+        return;
+      }
       if(d?.ok){
         try { window.vsTrack && vsTrack(window.__lastEmailExists === false ? 'sign_up' : 'login', {method: 'email'}); } catch(_){}
         location.href = nextUrl || '/';

@@ -220,6 +220,11 @@ class WebhookTests(TestCase):
         self.assertFalse(Subscription.objects.exists())
 
 
+# Turnstile bu sınıfın konusu değil; .env'de anahtar varsa checkout'u
+# 403'lerdi ve testler geliştiricinin ortamına göre farklı sonuç verirdi.
+# Açıkça kapatmak testi deterministik yapar (captcha'nın kendi testleri
+# core/tests_bot_shield.py'de).
+@override_settings(TURNSTILE_SITE_KEY="", TURNSTILE_SECRET_KEY="")
 class DoubleBillingGuardTests(TestCase):
     """Aynı kişiden ikinci kez tahsilat açılmamalı.
 

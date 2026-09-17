@@ -102,6 +102,9 @@ def seo(request):
         "og_locale": og_locale,
         "org_schema_json": org_schema_json,
         "company": company,
+        # Turnstile site anahtarı: boşsa şablonlar widget'ı hiç basmaz,
+        # doğrulama da sunucuda kapalı olur (ikisi aynı anahtara bakar).
+        "turnstile_site_key": getattr(settings, "TURNSTILE_SITE_KEY", ""),
         # Uzantı kurulum CTA'ları her sayfada var; view'dan view'a
         # taşımak yerine global veriyoruz (dashboard build_ui_context kullanmıyor).
         "chrome_store_url": getattr(settings, "CHROME_STORE_URL", ""),

@@ -2,14 +2,40 @@
 # Ödeme mutabakatının TEK kaynağı — hem `manage.py reconcile_payments`
 # hem de /api/cron/reconcile/ (cron-job.org) bunu çağırır.
 
+import logging
 from datetime import timedelta
 
 import requests
 from django.conf import settings
 from django.utils import timezone
 
+log = logging.getLogger(__name__)
+
 from landing.helpers.subscription import grant_subscription
 from landing.models import ExtensionLink, Order, Subscription
+
+
+def _bot_shield_state() -> str:
+    """Turnstile ve kayıt yüzeyinin tek kelimelik durumu.
+
+    Ağ çağrısı yapmaz: yalnız yapılandırmaya bakar, o yüzden 5 dakikada bir
+    çalışması bedava. Yarım yapılandırma ikisinden de kötü olabildiği için
+    ayrı ayrı raporlanıyor — yalnız site anahtarı varsa koruma YOK, yalnız
+    gizli anahtar varsa HİÇ KİMSE kaydolamaz.
+    """
+    from django.conf import settings as dj
+
+    site = bool(getattr(dj, "TURNSTILE_SITE_KEY", ""))
+    secret = bool(getattr(dj, "TURNSTILE_SECRET_KEY", ""))
+    if site and not secret:
+        return "half_open_no_secret"     # widget var, doğrulama yok
+    if secret and not site:
+        return "half_locked_no_sitekey"  # doğrulama var, widget yok -> kimse geçemez
+    if not (site or secret):
+        return "disabled"
+    if "ClosedSignupAdapter" not in (getattr(dj, "ACCOUNT_ADAPTER", "") or ""):
+        return "allauth_signup_open"     # captcha'sız yan kapı
+    return "ok"
 
 
 def run_reconcile(np_limit: int = 25, stripe_limit: int = 50) -> dict:
@@ -118,6 +144,17 @@ def run_reconcile(np_limit: int = 25, stripe_limit: int = 50) -> dict:
                         out["errors"].append(
                             f"stripe:{local.stripe_subscription_id}:iptal ama yerel "
                             f"bitiş {local.ends_at:%Y-%m-%d} çok ileride, elle bakılmalı")
+
+    # ---- BOT KALKANI NÖBETİ ----
+    # Sunucuda zamanlayıcı yok; tek düzenli tetikleyici bu cron. Kalkanın
+    # kapanması sessiz bir olaydır: bir deploy env değişkenini düşürse ya da
+    # biri silse, kayıt formu korumasız kalır ve bunu ancak Radar faturası
+    # geldiğinde fark ederdik. WARNING olarak logluyoruz — LoggingIntegration
+    # WARNING'i Sentry olayına çeviriyor, yani haber anında geliyor.
+    out["bot_shield"] = _bot_shield_state()
+    if out["bot_shield"] != "ok":
+        log.warning("BOT KALKANI SORUNLU: %s — kayıt/checkout korumasız olabilir",
+                    out["bot_shield"])
 
     # ---- Bayat bağlama nonce'ları ----
     cutoff = timezone.now() - timedelta(hours=24)
