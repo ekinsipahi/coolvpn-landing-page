@@ -241,3 +241,99 @@ class AssistantMessage(models.Model):
 
     def __str__(self):
         return f"{self.role}: {self.content[:50]}"
+
+
+class ExtensionAd(models.Model):
+    """Eklentinin ucretsiz planinda gosterilen reklam.
+
+    NEDEN URL ALANI, ImageField DEGIL:
+    Render'in dosya sistemi kalici degil; yuklenen gorseller her deploy'da
+    silinirdi. Gorselleri `static/img/ads/` altina koyup buraya tam URL'sini
+    yazin -- kendi alan adinizdan sunuldugu icin reklam sunucusu kullanicinin
+    IP'sini gormez ve beyan etmeniz gereken bir veri aktarimi olusmaz.
+
+    NOT: eklenti yalnizca https kabul eder; http adresler reddedilir.
+    """
+
+    MEDIA_CHOICES = [("image", "Gorsel"), ("video", "Video")]
+
+    title = models.CharField(max_length=120, help_text="Sadece panelde gorunur")
+    media_type = models.CharField(
+        max_length=8, choices=MEDIA_CHOICES, default="image", db_index=True,
+        help_text="Video sessiz baslar: tarayicilar sesli otomatik oynatmayi engeller.",
+    )
+    image_url = models.URLField(
+        max_length=500,
+        help_text="Gorsel icin .png/.jpg, video icin .mp4/.webm. Ornek: https://vpnsterr.com/static/img/ads/x.mp4",
+    )
+    click_url = models.URLField(max_length=500, help_text="Tiklaninca acilacak https adres")
+    alt = models.CharField(max_length=120, blank=True, default="", help_text="Erisilebilirlik metni")
+    sponsor = models.CharField(max_length=40, blank=True, default="", help_text="'Sponsored by ...'")
+
+    is_active = models.BooleanField(default=True, db_index=True)
+    weight = models.PositiveIntegerField(default=1, help_text="Buyuk olan daha sik gosterilir")
+    starts_at = models.DateTimeField(null=True, blank=True)
+    ends_at = models.DateTimeField(null=True, blank=True)
+
+    impressions = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ("-created_at",)
+        indexes = [models.Index(fields=["is_active", "starts_at", "ends_at"])]
+
+    def __str__(self):
+        return self.title
+
+    def is_live(self, now=None):
+        now = now or timezone.now()
+        if not self.is_active:
+            return False
+        if self.starts_at and self.starts_at > now:
+            return False
+        if self.ends_at and self.ends_at < now:
+            return False
+        return True
+
+
+class PlayPurchase(models.Model):
+    """
+    A subscription purchase that came from Google Play.
+
+    WHY ITS OWN TABLE:
+    A Play purchase token is an entitlement document on its own. If two
+    different accounts submitted the same token, both would become premium; the
+    unique constraint prevents that (replay protection). And because Google
+    returns the same token on renewal, updating this record lets us pull the
+    subscription's end date to whatever Google says - running our own counter
+    would mean never noticing a cancelled subscription.
+    """
+    STATE_ACTIVE = "active"
+    STATE_EXPIRED = "expired"
+    STATE_OTHER = "other"
+
+    purchase_token = models.CharField(max_length=512, unique=True, db_index=True)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="play_purchases"
+    )
+    product_id = models.CharField(max_length=64)
+    plan_key = models.CharField(max_length=20)
+    state = models.CharField(max_length=16, default=STATE_OTHER)
+    expires_at = models.DateTimeField(null=True, blank=True)
+    subscription = models.ForeignKey(
+        "Subscription", null=True, blank=True, on_delete=models.SET_NULL,
+        related_name="play_purchases",
+    )
+    device_uuid = models.CharField(max_length=64, blank=True, default="")
+    raw = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ("-updated_at",)
+        indexes = [models.Index(fields=["user", "expires_at"])]
+
+    def __str__(self):
+        return f"{self.product_id} / {self.user_id} / {self.state}"
+
+

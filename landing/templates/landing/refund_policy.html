@@ -16,32 +16,52 @@
     <p class="mt-2 text-sm" style="color:var(--vs-text-2)">{% trans "Last updated:" %} {% now "Y-m-d" %}</p>
 
     <div class="mt-8 space-y-8 text-[15px] leading-7" style="color:var(--vs-text-2)">
-      <div>
-        <h2 class="text-lg font-bold tracking-tight mb-2" style="color:var(--vs-text)">{% trans "1) The free extension" %}</h2>
-        <p>{% trans "The VPNsterr browser extension is 100% free with unlimited use. No payment is ever collected for it, so no refund is ever needed." %}</p>
+      <div class="rounded-2xl p-5"
+           style="background:color-mix(in srgb, var(--vs-500) 7%, transparent); border:1px solid color-mix(in srgb, var(--vs-500) 20%, transparent)">
+        <p>{% blocktrans trimmed %}<strong>Where you bought decides who refunds you.</strong> Subscriptions purchased inside the <strong>Android app</strong> are billed by Google Play, and refunds for them are handled by <strong>Google</strong> (section 3). Subscriptions bought on <strong>this website</strong> are billed and refunded by us (section 2).{% endblocktrans %}</p>
       </div>
 
       <div>
-        <h2 class="text-lg font-bold tracking-tight mb-2" style="color:var(--vs-text)">{% trans "2) Premium subscriptions — refunds for unused service" %}</h2>
+        <h2 class="text-lg font-bold tracking-tight mb-2" style="color:var(--vs-text)">{% trans "1) The free tiers" %}</h2>
+        <p>{% trans "The browser extension and the free tier of the Android app cost nothing and are unlimited. No payment is ever collected for them, so no refund is ever needed." %}</p>
+      </div>
+
+      <div>
+        <h2 class="text-lg font-bold tracking-tight mb-2" style="color:var(--vs-text)">{% trans "2) Bought on vpnsterr.com — refunds for unused service" %}</h2>
         <p>{% trans "We offer a full refund on any Premium subscription that has not been used. \"Unused\" means no VPN connection was established with your Premium account after the purchase." %}</p>
         <ul class="mt-3 space-y-2 list-disc ps-5">
           <li>{% trans "Eligible: you purchased Premium but never connected — contact support any time within 14 days of purchase for a 100% refund." %}</li>
           <li>{% trans "Not eligible: once the service has been used (a Premium connection was made), the purchase is final and the subscription runs to the end of its term." %}</li>
         </ul>
+        <p class="mt-3">{% blocktrans trimmed %}Email <a href="mailto:support@vpnsterr.com" class="underline">support@vpnsterr.com</a> from the address on the account, with your order ID. Eligible refunds are confirmed within 2 business days and returned via the original payment method. Crypto refunds are sent to a wallet address you provide, in the same currency and network as the original payment.{% endblocktrans %}</p>
       </div>
 
       <div>
-        <h2 class="text-lg font-bold tracking-tight mb-2" style="color:var(--vs-text)">{% trans "3) How to request a refund" %}</h2>
-        <p>{% blocktrans trimmed %}Email <a href="mailto:support@vpnsterr.com" class="underline">support@vpnsterr.com</a> from the address on the account, with your order ID. Eligible refunds are confirmed within 2 business days and returned via the original payment method. Crypto refunds are sent to a wallet address you provide, in the same currency and network as the original payment.{% endblocktrans %}</p>
+        <h2 class="text-lg font-bold tracking-tight mb-2" style="color:var(--vs-text)">{% trans "3) Bought in the Android app — Google Play" %}</h2>
+        <p>{% blocktrans trimmed %}If you subscribed inside the Android app, <strong>Google Play is the seller</strong>. We never receive your payment details and we cannot issue, reverse or refuse a refund on that purchase — only Google can.{% endblocktrans %}</p>
+        <ul class="mt-3 space-y-2 list-disc ps-5">
+          <li>{% blocktrans trimmed %}Request it from Google at <a href="https://play.google.com/store/account/orderhistory" class="underline" target="_blank" rel="noopener">play.google.com → Order history</a>, or in the Play Store app. Google's own refund policy and its time limits apply, and <strong>Google makes the final decision</strong>.{% endblocktrans %}</li>
+          <li>{% blocktrans trimmed %}If Google passes the request on to us, we apply the same unused-service rule as section 2.{% endblocktrans %}</li>
+          <li>{% blocktrans trimmed %}Write to <a href="mailto:support@vpnsterr.com" class="underline">support@vpnsterr.com</a> if something goes wrong — we will help you through it even though the refund itself is Google's to make.{% endblocktrans %}</li>
+        </ul>
       </div>
 
       <div>
         <h2 class="text-lg font-bold tracking-tight mb-2" style="color:var(--vs-text)">{% trans "4) Renewals & cancellation" %}</h2>
-        <p>{% trans "You can cancel auto-renewal at any time from your dashboard; access continues until the end of the paid period. A renewal charge that has not been used follows the same unused-service refund rule above." %}</p>
+        <p>{% trans "Cancelling stops the next renewal; your access continues until the end of the period you already paid for. A renewal charge that has not been used follows the same unused-service rule above." %}</p>
+        <ul class="mt-3 space-y-2 list-disc ps-5">
+          <li>{% blocktrans trimmed %}<strong>Android app subscriptions:</strong> cancel in <a href="https://play.google.com/store/account/subscriptions" class="underline" target="_blank" rel="noopener">Google Play → Subscriptions</a>. Cancelling in our dashboard is not possible for these — Play holds the subscription.{% endblocktrans %}</li>
+          <li>{% blocktrans trimmed %}<strong>Website subscriptions:</strong> cancel any time from your dashboard.{% endblocktrans %}</li>
+        </ul>
       </div>
 
       <div>
-        <h2 class="text-lg font-bold tracking-tight mb-2" style="color:var(--vs-text)">{% trans "5) Statutory rights" %}</h2>
+        <h2 class="text-lg font-bold tracking-tight mb-2" style="color:var(--vs-text)">{% trans "5) EU right of withdrawal" %}</h2>
+        <p>{% blocktrans trimmed %}Consumers in the EU normally have 14 days to withdraw from a distance contract. Because Premium is a digital service that starts immediately, that right ends once you begin using it — which is exactly the line drawn above: <strong>unused means refundable, used means started</strong>. By subscribing you ask us to begin the service straight away and acknowledge that the withdrawal right ends when you first connect.{% endblocktrans %}</p>
+      </div>
+
+      <div>
+        <h2 class="text-lg font-bold tracking-tight mb-2" style="color:var(--vs-text)">{% trans "6) Statutory rights" %}</h2>
         <p>{% trans "Nothing in this policy limits any non-waivable rights you hold under the consumer-protection law of your country of residence." %}</p>
       </div>
     </div>

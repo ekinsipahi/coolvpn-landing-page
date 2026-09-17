@@ -49,7 +49,7 @@
       <ul class="space-y-2">
         <li class="vs-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>{% trans "We keep zero activity logs: no browsing history, no DNS queries, no traffic content, no IP after connection." %}</li>
         <li class="vs-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>{% trans "The free extension works with no account — we couldn't tie activity to you even if we wanted to." %}</li>
-        <li class="vs-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>{% trans "We never sell or rent user data to anyone, for any purpose. Ads on the free tier are served without profiling you." %}</li>
+        <li class="vs-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>{% trans "We never sell or rent user data to anyone, for any purpose. We have no browsing data to sell — none is ever created." %}</li>
       </ul>
     </div>
 
@@ -57,7 +57,15 @@
 
       <div>
         <h2 class="text-lg font-bold tracking-tight mb-2" style="color:var(--vs-text)">{% trans "1) Who we are & scope" %}</h2>
-        <p>{% blocktrans trimmed %}VPNsterr ("we", "us") is operated by <strong>Sterr Technologies</strong>, the data controller. This policy covers the vpnsterr.com website, our apps, and the <strong>VPNsterr browser extension</strong> distributed through the Chrome Web Store and other extension stores.{% endblocktrans %}</p>
+        <p>{% blocktrans trimmed %}VPNsterr ("we", "us") is operated by <strong>Sterr Technologies OÜ</strong>, a company registered in Estonia (registry code <strong>17591465</strong>), Tornimäe tn 5, Kesklinna linnaosa, 10145 Tallinn, Estonia. We are the <strong>data controller</strong> for the personal data described here.{% endblocktrans %}</p>
+        <p class="mt-2">{% trans "This policy covers all three products:" %}</p>
+        <ul class="mt-2 space-y-1.5 list-disc ps-5">
+          <li>{% trans "the vpnsterr.com website and your account dashboard" %}</li>
+          <li>{% trans "VPNsterr for Android, distributed through Google Play" %}</li>
+          <li>{% trans "the VPNsterr browser extension, distributed through the Chrome Web Store and other extension stores" %}</li>
+        </ul>
+        <p class="mt-2">{% blocktrans trimmed %}The products do not all handle data the same way — most importantly, <strong>the Android app shows ads through Google AdMob while the extension does not</strong>. Where they differ, the section says which product it is talking about.{% endblocktrans %}</p>
+        <p class="mt-2">{% blocktrans trimmed %}Questions, or to exercise any right below: <a href="mailto:support@vpnsterr.com" class="underline">support@vpnsterr.com</a>.{% endblocktrans %}</p>
       </div>
 
       <div>
@@ -83,7 +91,7 @@
           <li><code>storage</code> — {% trans "saves your preferences (location, auto-connect, ad-block toggle) and a random client identifier, locally in your browser." %}</li>
           <li><code>tabs</code> — {% trans "powers per-tab routing (choosing which tabs use the VPN). Page contents are never read." %}</li>
         </ul>
-        <p class="mt-3">{% blocktrans trimmed %}In line with the Chrome Web Store User Data Policy: we only use extension data to provide the VPN's single purpose, we transmit connection data over encrypted channels, and we <strong>do not sell, rent or transfer user data</strong> to third parties for advertising, credit-worthiness or any unrelated purpose. The free tier is supported by ads shown inside the extension UI; these are served <strong>without behavioral profiling</strong> — we have no browsing data to profile you with.{% endblocktrans %}</p>
+        <p class="mt-3">{% blocktrans trimmed %}In line with the Chrome Web Store User Data Policy: we only use extension data to provide the VPN's single purpose, we transmit connection data over encrypted channels, and we <strong>do not sell, rent or transfer user data</strong> to third parties for advertising, credit-worthiness or any unrelated purpose. The extension's free tier is supported by ads we serve ourselves from our own server; <strong>no advertising SDK runs inside the extension</strong> and these ads involve <strong>no behavioral profiling</strong> — we have no browsing data to profile you with.{% endblocktrans %}</p>
       </div>
 
       <div>
@@ -100,22 +108,67 @@
       </div>
 
       <div>
+        <h2 class="text-lg font-bold tracking-tight mb-2" style="color:var(--vs-text)">{% trans "3.2) VPNsterr for Android" %}</h2>
+        <p>{% blocktrans trimmed %}The Android app routes your device's traffic through an encrypted VPN tunnel using Android's <code>VpnService</code>. The zero-logs rules in section 2 apply to it in full: <strong>we do not record which apps you use, which sites you visit, your DNS queries, or your traffic.</strong>{% endblocktrans %}</p>
+
+        <p class="mt-3">{% trans "Before the app makes its first network request, it shows a disclosure screen explaining what it will do. Nothing below happens until you accept it." %}</p>
+
+        <p class="mt-3">{% trans "What the app handles:" %}</p>
+        <ul class="mt-2 space-y-1.5 list-disc ps-5">
+          <li><strong>{% trans "Device identifier:" %}</strong> {% trans "a random identifier generated on your device the first time you open the app. It is not your advertising ID, not your hardware ID, and cannot be traced back to you. It exists so a subscription can be tied to a device and device limits enforced." %}</li>
+          <li><strong>{% trans "Account e-mail:" %}</strong> {% trans "only if you choose to sign in. Free use requires no account." %}</li>
+          <li><strong>{% trans "Subscription status:" %}</strong> {% trans "your plan, its expiry date, and — for purchases made through Google Play — the purchase token, which we send to Google to confirm the subscription is genuine." %}</li>
+          <li><strong>{% trans "Device model and app version:" %}</strong> {% trans "so you can recognise your own devices in the dashboard and we can support you." %}</li>
+        </ul>
+
+        <p class="mt-3">{% trans "Android permissions and why they exist:" %}</p>
+        <ul class="mt-2 space-y-1.5 list-disc ps-5">
+          <li><code>VpnService</code> / <code>FOREGROUND_SERVICE_SPECIAL_USE</code> — {% trans "creates and maintains the tunnel. Android always asks for your explicit permission first, and the foreground notification exists so you can always tell the VPN is on." %}</li>
+          <li><code>INTERNET</code>, <code>ACCESS_NETWORK_STATE</code> — {% trans "connect, and notice when the network changes." %}</li>
+          <li><code>POST_NOTIFICATIONS</code> — {% trans "the ongoing connection notification Android requires for a foreground service." %}</li>
+          <li><code>AD_ID</code> — {% trans "the advertising identifier, used only for ads on the free tier. See the next section." %}</li>
+        </ul>
+
+        <p class="mt-3">{% blocktrans trimmed %}The app asks for <strong>no location permission, no contacts, no camera, no microphone, no file access</strong>, and does not read the list of apps installed on your device.{% endblocktrans %}</p>
+      </div>
+
+      <div>
+        <h2 class="text-lg font-bold tracking-tight mb-2" style="color:var(--vs-text)">{% trans "3.3) Advertising in the Android app" %}</h2>
+        <p>{% blocktrans trimmed %}The free tier of the Android app is supported by ads served through <strong>Google AdMob</strong>. This is the one place where a third party receives data about you, so we are specific about it.{% endblocktrans %}</p>
+        <ul class="mt-3 space-y-1.5 list-disc ps-5">
+          <li>{% blocktrans trimmed %}AdMob uses your device's <strong>advertising ID</strong> (a resettable identifier Android provides), along with technical data such as device type, operating system, coarse region and language, to select and measure ads. It may serve <strong>personalised ads</strong> on this basis.{% endblocktrans %}</li>
+          <li>{% blocktrans trimmed %}Google acts as an independent controller for this data. How Google uses it is described in <a href="https://policies.google.com/technologies/partner-sites" class="underline" target="_blank" rel="noopener">Google's own policy</a>.{% endblocktrans %}</li>
+          <li>{% blocktrans trimmed %}<strong>We never send your VPN activity to any ad network</strong> — we do not have it. Ads are never targeted using anything you did through the VPN.{% endblocktrans %}</li>
+          <li>{% blocktrans trimmed %}Where your consent is legally required for personalised ads, the app asks on first launch and you can change your answer any time in its settings.{% endblocktrans %}</li>
+          <li>{% blocktrans trimmed %}You can reset or delete your advertising ID at any time in <strong>Android Settings → Privacy → Ads</strong>. Deleting it stops personalisation across every app on the device.{% endblocktrans %}</li>
+          <li>{% blocktrans trimmed %}<strong>Premium removes ads entirely.</strong> No ad is requested and no ad SDK data is sent while your subscription is active.{% endblocktrans %}</li>
+        </ul>
+        <p class="mt-3">{% trans "The browser extension does not use AdMob or any other advertising SDK; its ads come from our own server and involve no profiling." %}</p>
+      </div>
+
+      <div>
         <h2 class="text-lg font-bold tracking-tight mb-2" style="color:var(--vs-text)">{% trans "4) What we do collect (minimal)" %}</h2>
         <ul class="space-y-2 list-disc ps-5">
           <li><strong>{% trans "Premium account data:" %}</strong> {% trans "email (or federated sign-in ID), plan and subscription status, invoices. Needed to deliver what you paid for." %}</li>
-          <li><strong>{% trans "Payments:" %}</strong> {% trans "processed by third-party gateways (e.g. crypto payment processors); we receive only non-sensitive status metadata (paid / failed / refunded, currency, plan). We never see or store card numbers or wallet private keys." %}</li>
+          <li><strong>{% trans "Payments:" %}</strong> {% trans "handled entirely by third-party processors — Google Play for in-app subscriptions, Stripe for card payments on the website, and crypto payment processors. We receive only non-sensitive status metadata (paid / failed / refunded, currency, plan, renewal date). We never see or store card numbers or wallet private keys." %}</li>
           <li><strong>{% trans "Operational telemetry:" %}</strong> {% trans "authentication events, a device identifier for seat limits, and aggregate server load. None of it links to your browsing activity; retention is short." %}</li>
         </ul>
       </div>
 
       <div>
         <h2 class="text-lg font-bold tracking-tight mb-2" style="color:var(--vs-text)">{% trans "5) Cookies & local storage" %}</h2>
-        <p>{% trans "The website uses only functional cookies (session, CSRF, language, theme). The extension stores preferences and its client identifier locally in your browser. We do not run third-party advertising or cross-site tracking cookies on our website." %}</p>
+        <p>{% trans "The website uses only functional cookies (session, CSRF, language, theme); we run no third-party advertising or cross-site tracking cookies on it. The extension stores preferences and its client identifier locally in your browser. The Android app stores your preferences, your device identifier and your sign-in token on the device itself — the token is kept in the Android Keystore, not in plain text." %}</p>
       </div>
 
       <div>
         <h2 class="text-lg font-bold tracking-tight mb-2" style="color:var(--vs-text)">{% trans "6) Sharing" %}</h2>
-        <p>{% trans "We share data only with processors strictly needed to run the service: payment gateways, email delivery, and infrastructure providers — each bound by data-processing agreements. We disclose data if legally compelled, but since we keep no activity logs, there is no browsing history to hand over." %}</p>
+        <p>{% trans "We share data only with the parties strictly needed to run the service:" %}</p>
+        <ul class="mt-2 space-y-1.5 list-disc ps-5">
+          <li>{% trans "payment processors (Google Play, Stripe, crypto gateways) — to take payment and confirm a subscription is genuine" %}</li>
+          <li>{% trans "e-mail delivery and infrastructure providers — bound by data-processing agreements" %}</li>
+          <li>{% trans "Google AdMob — only for ads in the free tier of the Android app, as described in section 3.3" %}</li>
+        </ul>
+        <p class="mt-2">{% trans "We disclose data if legally compelled, but since we keep no activity logs, there is no browsing history to hand over." %}</p>
       </div>
 
       <div>
@@ -135,6 +188,8 @@
       <div>
         <h2 class="text-lg font-bold tracking-tight mb-2" style="color:var(--vs-text)">{% trans "9) Your rights" %}</h2>
         <p>{% blocktrans trimmed %}Depending on your jurisdiction (GDPR, CCPA and similar), you may request access, correction, deletion, portability, or object to/restrict processing. Email <a href="mailto:support@vpnsterr.com" class="underline">support@vpnsterr.com</a> — we respond within 30 days.{% endblocktrans %}</p>
+        <p class="mt-2">{% blocktrans trimmed %}<strong>Deleting your account:</strong> you can delete your account and all data attached to it yourself, at any time — see <a href="/account/delete/" class="underline">Delete your account</a>. No e-mail to us is required.{% endblocktrans %}</p>
+        <p class="mt-2">{% blocktrans trimmed %}As we are established in Estonia, you also have the right to lodge a complaint with the Estonian Data Protection Inspectorate (<em>Andmekaitse Inspektsioon</em>, <a href="https://www.aki.ee/en" class="underline" target="_blank" rel="noopener">aki.ee</a>), or with the supervisory authority of your own EU country of residence.{% endblocktrans %}</p>
       </div>
 
       <div>
@@ -144,17 +199,23 @@
 
       <div>
         <h2 class="text-lg font-bold tracking-tight mb-2" style="color:var(--vs-text)">{% trans "11) Security" %}</h2>
-        <p>{% trans "AES-256 / ChaCha20 encrypted transport (WireGuard & OpenVPN), hardened infrastructure, least-privilege access, and regular patching." %}</p>
+        <p>{% trans "Encrypted transport end to end, hardened infrastructure, least-privilege access and regular patching. Every request between our clients and our servers uses TLS. The Android app builds its tunnel with sing-box; the credentials it uses to reach a gateway are short-lived and rotate automatically while you stay connected, so a captured credential expires on its own." %}</p>
       </div>
 
       <div>
         <h2 class="text-lg font-bold tracking-tight mb-2" style="color:var(--vs-text)">{% trans "12) Children" %}</h2>
-        <p>{% trans "The service is not intended for children under 16, and we do not knowingly collect their data." %}</p>
+        <p>{% trans "The service is intended for adults (18+). It is not directed at children, we do not knowingly collect their data, and the Android app is not distributed under any children's or family programme. If you believe a child has given us personal data, write to us and we will delete it." %}</p>
       </div>
 
       <div>
         <h2 class="text-lg font-bold tracking-tight mb-2" style="color:var(--vs-text)">{% trans "13) Changes & contact" %}</h2>
-        <p>{% blocktrans trimmed %}Material changes are posted here with a new "Last updated" date. Controller: <strong>Sterr Technologies</strong> · <a href="mailto:support@vpnsterr.com" class="underline">support@vpnsterr.com</a>{% endblocktrans %}</p>
+        <p>{% blocktrans trimmed %}Material changes are posted here with a new "Last updated" date.{% endblocktrans %}</p>
+        <p class="mt-2">{% trans "Data controller:" %}<br>
+          <strong>Sterr Technologies OÜ</strong><br>
+          {% trans "Registry code:" %} 17591465<br>
+          Tornimäe tn 5, Kesklinna linnaosa, 10145 Tallinn, {% trans "Estonia" %}<br>
+          <a href="mailto:support@vpnsterr.com" class="underline">support@vpnsterr.com</a>
+        </p>
       </div>
     </div>
 

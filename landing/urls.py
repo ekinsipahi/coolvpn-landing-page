@@ -59,10 +59,17 @@ urlpatterns = [
     path("api/extension/auth-token/", views.extension_auth_token, name="extension_auth_token"),
     path("api/extension/login/", views.extension_login, name="extension_login"),
     path("extension/link", views.extension_link, name="extension_link"),
+    path("api/extension/ad", views.extension_ad, name="extension_ad"),
     path("api/extension/link/claim", views.extension_link_claim, name="extension_link_claim"),
     path("api/extension/link/refresh", views.extension_link_refresh, name="extension_link_refresh"),
     path("api/extension/link/revoke", views.extension_link_revoke, name="extension_link_revoke"),
     path("api/extension/logout/", views.extension_logout, name="extension_logout"),
+
+    # Mobile app: Play Store subscription verification (see helpers/play_billing.py)
+    path("api/mobile/billing/verify", views.mobile_billing_verify, name="mobile_billing_verify"),
+    # Mobile app: in-app Google sign-in (no browser round trip)
+    path("api/mobile/auth/google", views.mobile_auth_google, name="mobile_auth_google"),
+
     path("account/delete/", views.account_delete, name="account_delete"),
     
     # Şifre sıfırlama (login sayfasındaki "Forgot password?" buraya gelir)
@@ -90,6 +97,11 @@ urlpatterns = [
     
     # SEO
     path("robots.txt", TemplateView.as_view(template_name="landing/robots.txt", content_type="text/plain")),
+
+    # AdMob: envanterimizi satmaya yetkili saticilar. Kok dizinde, duz metin
+    # olarak sunulmak zorunda - Google https://vpnsterr.com/app-ads.txt adresine
+    # bakar ve baska bir yolu kabul etmez.
+    path("app-ads.txt", TemplateView.as_view(template_name="landing/app-ads.txt", content_type="text/plain")),
 ]
 
 

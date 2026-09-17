@@ -9,6 +9,7 @@ from .models import (
     AssistantConversation,
     AssistantMessage,
     Device,
+    ExtensionAd,
     Order,
     Subscription,
     SupportTicket,
@@ -423,6 +424,32 @@ class AssistantConversationAdmin(admin.ModelAdmin):
             if any(m.role == AssistantMessage.ROLE_OWNER for m in new_operator_msgs):
                 conv.owner_joined = True
             conv.save(update_fields=["user_unread", "owner_joined", "updated_at"])
+
+
+@admin.register(ExtensionAd)
+class ExtensionAdAdmin(admin.ModelAdmin):
+    list_display = ("title", "media_type", "is_active", "weight", "starts_at", "ends_at", "impressions", "preview")
+    list_filter = ("is_active", "media_type")
+    search_fields = ("title", "sponsor", "click_url")
+    readonly_fields = ("impressions", "created_at", "preview")
+    fieldsets = (
+        (None, {"fields": ("title", "media_type", "image_url", "click_url", "alt", "sponsor", "preview")}),
+        ("Yayin", {"fields": ("is_active", "weight", "starts_at", "ends_at")}),
+        ("Istatistik", {"fields": ("impressions", "created_at")}),
+    )
+
+    def preview(self, obj):
+        if not obj or not obj.image_url:
+            return "-"
+        if obj.media_type == "video":
+            return format_html(
+                '<video src="{}" muted controls style="max-width:240px;border-radius:8px"></video>',
+                obj.image_url,
+            )
+        return format_html(
+            '<img src="{}" style="max-width:240px;border-radius:8px" />', obj.image_url
+        )
+    preview.short_description = "Onizleme"
 
 
 # Kullanici odakli admin (kullanici sayfasi, cihaz/abonelik inline lari,

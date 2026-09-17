@@ -3,6 +3,8 @@ import hashlib
 import hmac
 import json
 import logging
+import random
+import secrets
 import time
 import uuid
 from datetime import timedelta
@@ -20,10 +22,12 @@ from django.contrib.auth import authenticate, get_user_model, login as auth_logi
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
-from django.db.models import Q
+from django.db import transaction
+from django.db.models import F, Q
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect, render
 from django.templatetags.static import static
+from django.urls import reverse
 from django.db.models import DateTimeField
 from django.utils import timezone
 from django.utils.timezone import now
@@ -45,7 +49,7 @@ from landing.templatetags.pricing import (
     detect_country,
     get_pricing_for_request
 )
-from .models import Device, ExtensionLink, Order, Subscription
+from .models import Device, ExtensionAd, ExtensionLink, Order, Subscription
 
 
 # -----------------------------
@@ -1229,14 +1233,14 @@ from landing.helpers.stripe_gw import (stripe_enabled, ensure_price, get_or_crea
 
 
 def _stripe_amount_label(stripe_sub) -> str:
-    """Stripe abonelik nesnesinden "4.99 USD" gibi okunur bir tutar uretir.
+    """Stripe abonelik nesnesinden "4.99 USD" gibi okunur bir tutar üretir.
 
-    Nesne hem dict hem StripeObject olabildigi icin iki erisim de denenir;
-    cikarilamazsa bos doner (bildirim mailinde "-" gorunur).
+    Nesne hem dict hem StripeObject olabildiği için iki erişim de denenir;
+    çıkarılamazsa boş döner (bildirim mailinde "—" görünür).
     """
     try:
         return _stripe_amount_of(stripe_sub)
-    except Exception:  # noqa: BLE001 - tutar sadece bilgi amacli, akisi bozamaz
+    except Exception:  # noqa: BLE001 - tutar sadece bilgi amaçlı, akışı bozamaz
         return ""
 
 
@@ -1302,12 +1306,11 @@ def _grant_stripe_subscription(user, plan_key, stripe_sub):
 
 
 logger = logging.getLogger(__name__)
-
 # --- Kart deneme (card-testing) frenleri -----------------------------------
-# 2026-09-09'da tek kullanici 7 dakikada 16 FARKLI Amex kartiyla denedi
-# (klasik carding). Radar 14'unu blokladi ama her taranan islem 0.05 EUR Radar
-# ucreti yazdi ve bu tur trafik hesabin askiya alinmasina yol acabiliyor.
-# Checkout oturumu acmayi sinirlamak, saldirganin deneme yuzeyini daraltir.
+# 2026-09-09'da tek kullanıcı 7 dakikada 16 FARKLI Amex kartıyla denedi
+# (klasik carding). Radar 14'ünü blokladı ama her taranan işlem €0.05 Radar
+# ücreti yazdı ve bu tür trafik hesabın askıya alınmasına yol açabiliyor.
+# Checkout oturumu açmayı sınırlamak, saldırganın deneme yüzeyini daraltır.
 _CHECKOUT_MAX_PER_USER_H = 6
 _CHECKOUT_MAX_PER_IP_H = 12
 
@@ -1318,7 +1321,7 @@ def _client_ip(request) -> str:
 
 
 def _checkout_throttled(request) -> bool:
-    """Kullanici ve IP basina saatlik checkout oturumu tavani."""
+    """Kullanıcı ve IP başına saatlik checkout oturumu tavanı."""
     from django.core.cache import cache
     slot = now().strftime("%Y%m%d%H")
     for key, cap in ((f"cko:u{request.user.id}:{slot}", _CHECKOUT_MAX_PER_USER_H),
@@ -1327,7 +1330,7 @@ def _checkout_throttled(request) -> bool:
             cache.get_or_set(key, 0, 3700)
             if cache.incr(key) > cap:
                 return True
-        except Exception:  # noqa: BLE001 - cache yoksa odeme akisi durmasin
+        except Exception:  # noqa: BLE001 - cache yoksa ödeme akışı durmasın
             return False
     return False
 
@@ -1356,6 +1359,7 @@ def stripe_checkout_create(request):
     except Exception:
         data = {}
     plan_key = normalize_plan_slug(data.get("plan") or "monthly")
+
     # ---- KART DENEME (carding) FRENİ ----
     # Asıl hedef burası: kart denemek isteyen biri kayıt akışını atlayabilir
     # ama ödeme oturumu açmadan kart deneyemez. Stripe Radar TARANAN HER
@@ -1628,18 +1632,36 @@ def stripe_billing_portal(request):
 
 # ---- Eklenti: nonce ile cihaz bağlama (account.js sözleşmesi) ----
 
+#: Hesap token'inin azami omru (saniye).
+#
+# NEDEN SINIR VAR: havuz (pool.vpnsterr.com) bu token'i STATELESS dogruluyor --
+# imza ve exp disinda hicbir seye bakmiyor, veritabanina gitmiyor. exp'i
+# aboneligin bitisine esitlersek yillik bir abone icin token BIR YIL gecerli
+# olur; abonelik iade/chargeback ile erken iptal edilse ya da kullanici
+# yenileme istegini engellese bile havuz o token'i aylarca kabul eder.
+#
+# Omru kisa tutunca havuz token'i kendiliginden reddediyor ve istemci yeniden
+# yenilemek ZORUNDA kaliyor; yenileme ise veritabanini kontrol ediyor. Boylece
+# iptal, istemci dusmanca davransa bile en fazla bu sure kadar gecikiyor.
+EXTENSION_TOKEN_MAX_AGE = 3600  # 1 saat
+
+
 def _mint_account_token(user, device_id: str, tier: str, exp_ts: int):
     """İmzalı hesap token'ı: base64url(payload).base64url(HMAC_SHA256(secret, payload_b64))"""
     import base64
 
     secret = (getattr(settings, "EXTENSION_SHARED_SECRET", "") or "").encode()
+    issued = int(time.time())
+    # Yetkinin bitisi ile azami omurden HANGISI ONCEyse o. Abonelik 1 saatten
+    # once bitiyorsa token da onunla birlikte biter.
+    expires = min(int(exp_ts), issued + EXTENSION_TOKEN_MAX_AGE)
     payload = {
         "v": 1,
         "user_id": user.id,
         "device_id": device_id or "",
         "tier": tier,
-        "iat": int(time.time()),
-        "exp": int(exp_ts),
+        "iat": issued,
+        "exp": expires,
         "iss": "vpnsterr.com",
     }
     payload_b64 = base64.urlsafe_b64encode(
@@ -1680,6 +1702,28 @@ def _user_tier_and_exp(user):
     if sub:
         return "premium", int(sub.ends_at.timestamp()), sub
     return "free", int(time.time()) + 365 * 86400, None
+
+
+def _subscription_fields(sub):
+    """
+    Abonelik bilgisinin istemciye gonderilen hali.
+
+    NEDEN AYRI ALAN: hesap token'inin `exp` alani premium'da zaten abonelik
+    bitisine esit, ama free'de "simdi + 365 gun". Istemci token'i cozup gun
+    saymaya kalkarsa free kullaniciya "365 gun premium" gosterir. Bu alanlar
+    tek anlamli: premium degilse expires_at = None.
+
+    Alanlar EK'tir; eski istemciler (eklenti) bilmedigi anahtarlari yok sayar.
+    """
+    if not sub:
+        return {"expires_at": None, "plan_key": "", "source": ""}
+    return {
+        "expires_at": sub.ends_at.isoformat(),
+        "plan_key": sub.plan_key or "",
+        # google_play | stripe | crypto | manual - uygulama "aboneligini nereden
+        # yonetmelisin" mesajini buna gore secer.
+        "source": sub.source or "",
+    }
 
 
 @login_required
@@ -1748,7 +1792,7 @@ def extension_link_claim(request):
     if link.claimed:
         return JsonResponse({"ok": False, "error": "already_claimed"}, status=409)
 
-    tier, exp_ts, _sub = _user_tier_and_exp(link.user)
+    tier, exp_ts, sub = _user_tier_and_exp(link.user)
     token = _mint_account_token(link.user, link.device_id, tier, exp_ts)
     link.claimed = True
     link.save(update_fields=["claimed"])
@@ -1757,6 +1801,7 @@ def extension_link_claim(request):
         "token": token,
         "email": link.user.email or "",
         "plan": tier,
+        **_subscription_fields(sub),
     })
 
 
@@ -1776,9 +1821,45 @@ def extension_link_refresh(request):
     user = User.objects.filter(id=payload.get("user_id")).first()
     if not user:
         return JsonResponse({"ok": False, "error": "no_user"}, status=401)
-    tier, exp_ts, _sub = _user_tier_and_exp(user)
-    fresh = _mint_account_token(user, payload.get("device_id") or "", tier, exp_ts)
-    return JsonResponse({"ok": True, "token": fresh, "email": user.email or "", "plan": tier})
+
+    # Cihaz hala bagli mi?
+    #
+    # Bu kontrol olmadan "revoke" hicbir sey yapmiyordu: revoke yalnizca
+    # Device.is_active'i False yapiyor, ama burasi cihaz tablosuna hic
+    # bakmadigi icin revoke edilmis cihaz her yenilemede taze bir premium
+    # token aliyordu. Yenileme kullanicinin bir eylemi degil, arka planda
+    # otomatik calisan bir istek -- dolayisiyla iptali burada uygulamak
+    # zorundayiz.
+    #
+    # device_id bos olan token'lar da reddediliyor: bir cihaza baglanmamis
+    # token zaten iptal EDILEMEZ, kapatmaya calistigimiz acigin ta kendisi.
+    # Kullanici icin cikis yolu basit: yeniden giris yapip cihazi baglamak.
+    device_id = (payload.get("device_id") or "").strip()
+    if not device_id:
+        return JsonResponse({"ok": False, "error": "device_unbound"}, status=401)
+    # KAYDI OLMAYAN cihaz iptal edilmis sayilmaz. Baglama akislari, plan cihaz
+    # limiti doluyken Device satirini bilerek atliyor ama token'i yine veriyor
+    # (extension_link ve _mobile_link_response). "satir yoksa 401" demek, limiti
+    # dolu olan herkesi kapanmayan bir donguye sokardi: baglan -> token gelir ->
+    # ilk yenilemede 401 -> uygulama hesabi siler -> tekrar baglan -> satir yine
+    # olusmaz. Sadece VAR OLAN ve pasiflestirilmis satir bir iptaldir.
+    device = (
+        Device.objects.filter(user=user, client_uuid=device_id)
+        .only("is_active")
+        .first()
+    )
+    if device is not None and not device.is_active:
+        return JsonResponse({"ok": False, "error": "device_revoked"}, status=401)
+
+    tier, exp_ts, sub = _user_tier_and_exp(user)
+    fresh = _mint_account_token(user, device_id, tier, exp_ts)
+    return JsonResponse({
+        "ok": True,
+        "token": fresh,
+        "email": user.email or "",
+        "plan": tier,
+        **_subscription_fields(sub),
+    })
 
 
 @csrf_exempt
@@ -1978,8 +2059,6 @@ def extension_auth_token(request):
     })
 
 
-@login_required
-@require_POST
 def _cancel_stripe_subscriptions(user) -> int:
     """Hesap silinmeden ÖNCE Stripe aboneliklerini iptal et.
 
@@ -2172,3 +2251,350 @@ def privacy_policy(request):
 def terms_of_service(request):
     today_iso = timezone.localdate().isoformat()
     return render(request, "landing/terms.html", {"today_iso": today_iso})
+
+# ---- Eklenti: ucretsiz plan reklami ----
+
+@csrf_exempt
+def extension_ad(request):
+    """
+    GET /api/extension/ad  ->  {media_type, image_url, click_url, alt, sponsor}
+
+    Kimlik dogrulamasi YOK ve kullanici verisi ALINMIYOR. Reklam secimi
+    tarama gecmisine, konuma veya hesaba bakmadan yapilir: Chrome Web Store
+    Limited Use, kullanici verisiyle kisisellestirilmis/yeniden hedeflenmis
+    reklami acikca yasakliyor ve bir VPN'de zaten yapilmamali.
+
+    Gosterilecek reklam yoksa 204 doner; eklenti slotu sessizce gizler.
+    """
+    now = timezone.now()
+    qs = ExtensionAd.objects.filter(is_active=True).filter(
+        Q(starts_at__isnull=True) | Q(starts_at__lte=now)
+    ).filter(
+        Q(ends_at__isnull=True) | Q(ends_at__gte=now)
+    )
+    ads = list(qs)
+    if not ads:
+        return HttpResponse(status=204)
+
+    # Agirlikli rastgele secim: weight buyuk olan daha sik cikar.
+    total = sum(max(1, a.weight) for a in ads)
+    pick = random.randint(1, total)
+    chosen = ads[-1]
+    running = 0
+    for a in ads:
+        running += max(1, a.weight)
+        if pick <= running:
+            chosen = a
+            break
+
+    # Gosterim sayaci: tek alan, yarisa dayanikli olsun diye F() ile.
+    ExtensionAd.objects.filter(pk=chosen.pk).update(impressions=F("impressions") + 1)
+
+    resp = JsonResponse({
+        "id": chosen.pk,
+        "media_type": chosen.media_type,
+        "image_url": chosen.image_url,
+        "click_url": chosen.click_url,
+        "alt": chosen.alt or chosen.title,
+        "sponsor": chosen.sponsor,
+    })
+    # Eklenti kendi tarafinda da onbellekliyor; burada kisa tutuyoruz ki
+    # kampanya kapatildiginda hizla dussun.
+    resp["Cache-Control"] = "public, max-age=60"
+    return resp
+
+
+# ---- Mobile: Google Play subscription verification ----
+
+@csrf_exempt
+@require_POST
+def mobile_billing_verify(request):
+    """
+    POST /api/mobile/billing/verify
+      Authorization: Bearer <account token>   (the app links the device first)
+      Body: {platform, purchase_token, product_id, device_id}
+
+    On success it returns a FRESH account token: {ok, token, email, plan}. The
+    app adopts it and sends it to the pool, so the tier flips to premium
+    immediately.
+
+    WHY AN ACCOUNT TOKEN IS REQUIRED:
+    The subscription has to be written against a user; otherwise someone who
+    changes phones cannot restore it and it never shows up on the website.
+    No account is needed for free use - only for paying.
+    """
+    from landing.helpers.play_billing import (
+        PlayConfigError,
+        PlayVerifyError,
+        verify_subscription,
+    )
+    from landing.models import PlayPurchase
+
+    auth = request.headers.get("Authorization", "")
+    token = auth[7:].strip() if auth.startswith("Bearer ") else ""
+    payload = _verify_account_token(token)
+    if not payload:
+        return JsonResponse({"ok": False, "error": "invalid_token"}, status=401)
+
+    user = User.objects.filter(id=payload.get("user_id")).first()
+    if not user:
+        return JsonResponse({"ok": False, "error": "invalid_token"}, status=401)
+
+    try:
+        body = json.loads(request.body.decode("utf-8") or "{}")
+    except Exception:  # noqa: BLE001
+        body = {}
+
+    platform = (body.get("platform") or "").strip()
+    if platform != "google_play":
+        # App Store verification does not exist yet; rejecting openly beats
+        # silently handing out premium.
+        return JsonResponse({"ok": False, "error": "unsupported_platform"}, status=400)
+
+    purchase_token = (body.get("purchase_token") or "").strip()
+    product_id = (body.get("product_id") or "").strip()
+    device_uuid = (body.get("device_id") or "").strip()[:64]
+
+    try:
+        result = verify_subscription(purchase_token, expected_product_id=product_id)
+    except PlayConfigError:
+        # A setup gap is not the user's fault. We do NOT grant premium, but we
+        # also do not tell them their purchase is invalid.
+        return JsonResponse({"ok": False, "error": "not_configured"}, status=503)
+    except PlayVerifyError as exc:
+        return JsonResponse({"ok": False, "error": exc.code}, status=400)
+
+    # Replay protection: no other account may submit the same token.
+    existing = PlayPurchase.objects.filter(purchase_token=purchase_token).first()
+    if existing and existing.user_id != user.id:
+        return JsonResponse({"ok": False, "error": "purchase_already_linked"}, status=409)
+
+    if not result["active"]:
+        # The record is still kept: if the state changes later (a payment
+        # problem gets resolved) we want the history when the same token
+        # comes back.
+        PlayPurchase.objects.update_or_create(
+            purchase_token=purchase_token,
+            defaults={
+                "user": user,
+                "product_id": result["product_id"],
+                "plan_key": result["plan_key"],
+                "state": result["state"],
+                "expires_at": result["expires_at"],
+                "device_uuid": device_uuid,
+                "raw": result["raw"],
+            },
+        )
+        return JsonResponse({"ok": False, "error": "purchase_not_active"}, status=400)
+
+    # The subscription end date is the one GOOGLE reports. Running our own
+    # 30/365-day counter would mean never noticing a cancelled or non-renewed
+    # subscription; on renewal Google returns the same token with a new
+    # expiryTime and the record is updated.
+    expires_at = result["expires_at"]
+
+    with transaction.atomic():
+        purchase, _created = PlayPurchase.objects.select_for_update().update_or_create(
+            purchase_token=purchase_token,
+            defaults={
+                "user": user,
+                "product_id": result["product_id"],
+                "plan_key": result["plan_key"],
+                "state": result["state"],
+                "expires_at": expires_at,
+                "device_uuid": device_uuid,
+                "raw": result["raw"],
+            },
+        )
+
+        sub = purchase.subscription
+        if sub is None:
+            sub = Subscription.objects.create(
+                user=user,
+                plan_key=result["plan_key"],
+                starts_at=now(),
+                ends_at=expires_at,
+                source="google_play",
+            )
+            purchase.subscription = sub
+            purchase.save(update_fields=["subscription"])
+        else:
+            sub.plan_key = result["plan_key"]
+            sub.ends_at = expires_at
+            sub.source = "google_play"
+            sub.save(update_fields=["plan_key", "ends_at", "source"])
+
+        # Show the device the purchase came from on the account.
+        if device_uuid:
+            Device.objects.update_or_create(
+                user=user,
+                client_uuid=device_uuid,
+                defaults={
+                    "platform": "android",
+                    "name": "Android app",
+                    "is_active": True,
+                    "last_subscription": sub,
+                },
+            )
+
+    tier, exp_ts, fresh_sub = _user_tier_and_exp(user)
+    fresh = _mint_account_token(user, device_uuid or payload.get("device_id") or "", tier, exp_ts)
+    return JsonResponse({
+        "ok": True,
+        "token": fresh,
+        "email": user.email or "",
+        "plan": tier,
+        # _subscription_fields kullaniliyor ki bu yanit da digerleriyle ayni
+        # sekle sahip olsun. Kaynak DB'deki abonelik: kullanicinin daha uzun
+        # suren baska bir aboneligi varsa (ornegin siteden alinmis yillik)
+        # dogru olan odur, az once yazilan Play kaydi degil.
+        **_subscription_fields(fresh_sub),
+    })
+
+
+# ---- Mobile: in-app Google sign-in ----
+
+def _google_audiences():
+    """
+    Accepted `aud` values for a mobile ID token.
+
+    Android's Google Sign-In is given a `serverClientId`, so the token it
+    returns carries the WEB client id as its audience - the same
+    GOOGLE_CLIENT_ID the website already uses. GOOGLE_MOBILE_CLIENT_IDS exists
+    only as an escape hatch if a platform-specific client id ever has to be
+    accepted as well.
+    """
+    ids = []
+    web = (getattr(settings, "GOOGLE_CLIENT_ID", "") or "").strip()
+    if web:
+        ids.append(web)
+    extra = getattr(settings, "GOOGLE_MOBILE_CLIENT_IDS", "") or ""
+    if isinstance(extra, str):
+        extra = [x.strip() for x in extra.split(",")]
+    ids.extend([x for x in extra if x])
+    return ids
+
+
+def _unique_username_for(email: str) -> str:
+    """A free username derived from the address; the local part when it is free."""
+    base = email.split("@")[0][:150]
+    username = base
+    i = 1
+    while User.objects.filter(username=username).exclude(email__iexact=email).exists():
+        suffix = f"-{i}"
+        username = f"{base[:150 - len(suffix)]}{suffix}"
+        i += 1
+    return username
+
+
+def _mobile_link_response(user, device_uuid: str) -> JsonResponse:
+    """Register the device on the account and mint the signed account token.
+
+    Every mobile sign-in path ends here - Google and the emailed code alike - so
+    the app sees one response shape and one place decides what "linked" means.
+    The shape matches /api/extension/link/claim on purpose.
+    """
+    tier, exp_ts, sub = _user_tier_and_exp(user)
+
+    # Show the device on the account, exactly as the nonce flow does.
+    if device_uuid:
+        device = Device.objects.filter(user=user, client_uuid=device_uuid).first()
+        if device is None:
+            cap = plan_device_limit(sub.plan_key if sub else None)
+            used = Device.objects.filter(user=user, is_active=True).count()
+            if used < cap:
+                Device.objects.create(
+                    user=user, client_uuid=device_uuid, platform="android",
+                    name="Android app", is_active=True, last_subscription=sub,
+                )
+        else:
+            device.is_active = True
+            device.last_seen = now()
+            device.last_subscription = sub or device.last_subscription
+            device.save(update_fields=["is_active", "last_seen", "last_subscription"])
+
+    return JsonResponse({
+        "ok": True,
+        "token": _mint_account_token(user, device_uuid, tier, exp_ts),
+        "email": user.email or "",
+        "plan": tier,
+        **_subscription_fields(sub),
+    })
+
+
+@csrf_exempt
+@require_POST
+def mobile_auth_google(request):
+    """
+    POST /api/mobile/auth/google   Body: {id_token, device_id}
+
+    In-app Google sign-in for the mobile app. Returns the same signed account
+    token as /api/extension/link/claim, so the app treats both flows
+    identically.
+
+    WHY THIS EXISTS ALONGSIDE THE NONCE FLOW:
+    Opening a browser to sign in is Google's own recommended pattern and is not
+    a Play violation. But our link page lives on a domain whose /pricing page
+    sells subscriptions through Stripe, and a reviewer who follows a link out of
+    the app can read that as steering to an external payment method. Signing in
+    without leaving the app removes that reading entirely.
+    Note this endpoint creates NO Django session - the app is stateless and
+    carries the account token instead.
+    """
+    if not getattr(settings, "EXTENSION_SHARED_SECRET", ""):
+        return JsonResponse({"ok": False, "error": "server_not_configured"}, status=500)
+
+    audiences = _google_audiences()
+    if not audiences:
+        return JsonResponse({"ok": False, "error": "server_not_configured"}, status=503)
+
+    try:
+        data = json.loads(request.body.decode("utf-8") or "{}")
+    except Exception:  # noqa: BLE001
+        data = {}
+
+    token = (data.get("id_token") or "").strip()
+    device_uuid = (data.get("device_id") or "").strip()[:64]
+    if not token:
+        return JsonResponse({"ok": False, "error": "missing_token"}, status=400)
+
+    # verify_oauth2_token checks one audience at a time, so try each.
+    info = None
+    for aud in audiences:
+        try:
+            info = id_token.verify_oauth2_token(token, g_requests.Request(), aud)
+            break
+        except Exception:  # noqa: BLE001
+            continue
+    if not info:
+        return JsonResponse({"ok": False, "error": "invalid_token"}, status=401)
+
+    # Google verifies the address itself; an unverified one must not be allowed
+    # to take over an existing account with the same email.
+    if not info.get("email_verified", False):
+        return JsonResponse({"ok": False, "error": "email_not_verified"}, status=401)
+
+    email = (info.get("email") or "").strip().lower()
+    if not email:
+        return JsonResponse({"ok": False, "error": "no_email"}, status=400)
+
+    user, created = User.objects.get_or_create(
+        email=email,
+        defaults={
+            "username": _unique_username_for(email),
+            "first_name": (info.get("given_name") or "")[:150],
+            "last_name": (info.get("family_name") or "")[:150],
+        },
+    )
+    if created:
+        # No password is ever set: this account can only be reached through
+        # Google, and an unusable password cannot be guessed.
+        user.set_unusable_password()
+        user.save(update_fields=["password"])
+        try:
+            from landing.helpers.mailer import send_welcome_email
+            send_welcome_email(user)
+        except Exception:  # noqa: BLE001
+            pass
+
+    return _mobile_link_response(user, device_uuid)

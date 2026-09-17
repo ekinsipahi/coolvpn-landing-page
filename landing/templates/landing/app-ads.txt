@@ -1,0 +1,13 @@
+# app-ads.txt - IAB Tech Lab authorized sellers for apps
+#
+# Bu dosya, AdMob envanterimizi kimin satmaya yetkili oldugunu ilan eder.
+# Yayinda olmazsa reklam alicilari envanteri "yetkisiz" sayip teklif vermeyi
+# azaltir - yani dogrudan gelir kaybi.
+#
+# Calismasi icin Google Play magaza kaydindaki "Website" alaninin vpnsterr.com
+# olmasi ve AdMob'da uygulamanin magaza kaydina bagli olmasi gerekir; Google
+# dosyayi o baglantiyi izleyerek bulur ve ~24 saatte tarar.
+#
+# Yayinci kimligi: AdMob uygulama kimliginden gelir
+#   ca-app-pub-7595979990993512~6413272160  ->  pub-7595979990993512
+google.com, pub-7595979990993512, DIRECT, f08c47fec0942fa0

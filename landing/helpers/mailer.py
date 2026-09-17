@@ -167,6 +167,7 @@ def send_welcome_email(user) -> None:
                   _shell("Zero logs. Free unlimited VPN extension. Welcome aboard.", body), text)
 
 
+
 # ------------------------------------------------------------------ #
 # 2) Premium aktif — Stripe VEYA kripto ödemesi düşünce
 # ------------------------------------------------------------------ #
