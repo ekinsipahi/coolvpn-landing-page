@@ -1,6 +1,7 @@
 # core/settings.py
 from pathlib import Path
 import os
+import sys
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -280,6 +281,21 @@ DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "VPNsterr <support@vpn
 # Boşsa landing.helpers.mailer Django EMAIL_BACKEND'e düşer (dev'de console).
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "").strip()
 NOREPLY_EMAIL = os.environ.get("NOREPLY_EMAIL", "VPNsterr <noreply@vpnsterr.com>").strip()
+
+# ---- TESTLER ASLA GERÇEK E-POSTA GÖNDERMEZ ----------------------------------
+# Django'nun test koşucusu EMAIL_BACKEND'i locmem'e çevirir ama bizim mailer'ı
+# bu KURTARMAZ: RESEND_API_KEY doluysa doğrudan Resend'e HTTP atıyor ve
+# Django backend'ini hiç görmüyor. Sonuç: test suite'i her koştuğunda
+# eski@t.test / insan@t.test gibi UYDURMA adreslere gerçek mail gitti.
+# ".test" var olmayan bir TLD; her biri bounce oldu ve bounce'lar gönderim
+# itibarını aşağı çeker — yani gerçek müşterinin maili spam'e düşer.
+# Anahtarı test modunda boşaltmak tek güvenilir çözüm: mailer o zaman
+# Django'nun locmem backend'ine düşer ve hiçbir şey dışarı çıkmaz.
+_RUNNING_TESTS = ((len(sys.argv) > 1 and sys.argv[1] == "test")
+                  or "PYTEST_CURRENT_TEST" in os.environ)
+if _RUNNING_TESTS:
+    RESEND_API_KEY = ""
+    EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
 # Ticket/escalation bildirimlerinin yönlendiği operatör adresi.
 SUPPORT_FORWARD_EMAIL = os.environ.get("SUPPORT_FORWARD_EMAIL", "").strip()
 
