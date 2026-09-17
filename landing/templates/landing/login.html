@@ -73,9 +73,28 @@
           Anahtar yoksa widget hiç basılmaz ve sunucu da doğrulama yapmaz —
           ikisi aynı ayara bakıyor, yani yarım yapılandırma kimseyi kilitlemez.
         {% endcomment %}
-        <div class="cf-turnstile mt-1 flex justify-center"
+        {% comment %}
+          appearance="always": widget HER ZAMAN görünür. "interaction-only"
+          ile Cloudflare gerek görmedikçe hiç çizilmiyordu; kullanıcı da
+          operatör de korumanın çalışıp çalışmadığını göremiyordu. Kayıt
+          ve giriş, hesabın çat diye açıldığı yer — burada görünür olması
+          hem caydırıcı hem de doğrulanabilir.
+        {% endcomment %}
+        <div class="cf-turnstile mt-3 flex justify-center"
              data-sitekey="{{ turnstile_site_key }}" data-theme="auto"
-             data-appearance="interaction-only"></div>
+             data-appearance="always" data-size="flexible"
+             data-error-callback="vsTurnstileError"></div>
+        {% comment %}
+          Doğrulama yüklenemezse kullanıcı SEBEBİNİ görmeli. Sunucu jetonsuz
+          isteği reddediyor; hata sessiz kalsaydı kişi "giriş çalışmıyor"
+          deyip gidecekti. Reklam engelleyiciler, kurumsal DNS ve bazı
+          ISS'ler Cloudflare'in challenge alan adlarını kesebiliyor.
+        {% endcomment %}
+        <p id="captcha-error" class="mt-2 hidden text-center text-[11px]"
+           style="color:#f87171">
+          {% trans "Verification couldn't load. Disable ad blockers for this page, or write to" %}
+          <a href="mailto:support@vpnsterr.com" class="underline">support@vpnsterr.com</a>.
+        </p>
         {% endif %}
 
         <div class="pt-1">
@@ -175,6 +194,13 @@
     const v=(e.target.value||'').trim();
     if(v.includes('@')) checkEmail(v);
   });
+
+  // Turnstile yüklenemedi: sebebi göster, sessizce başarısız olma.
+  window.vsTurnstileError = function(){
+    const el = document.getElementById('captcha-error');
+    if (el) el.classList.remove('hidden');
+    return true;   // Turnstile'a "ben hallettim" de, kendi hatasını basmasın
+  };
 
   // Turnstile jetonu. Widget basılmamışsa (anahtar yoksa) boş döner —
   // sunucu tarafı da o durumda doğrulama yapmıyor, akış bozulmaz.

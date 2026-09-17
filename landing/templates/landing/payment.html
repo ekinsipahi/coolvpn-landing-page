@@ -225,7 +225,13 @@
         {% endcomment %}
         <div class="cf-turnstile mt-4 flex justify-center"
              data-sitekey="{{ turnstile_site_key }}" data-theme="auto"
-             data-appearance="interaction-only"></div>
+             data-appearance="always" data-size="flexible"
+             data-error-callback="vsTurnstileError"></div>
+        <p id="captcha-error" class="mt-2 hidden text-center text-[11px]"
+           style="color:#f87171">
+          {% trans "Verification couldn't load. Disable ad blockers for this page, or write to" %}
+          <a href="mailto:support@vpnsterr.com" class="underline">support@vpnsterr.com</a>.
+        </p>
         {% endif %}
         <button id="btn-pay" class="vs-btn vs-btn-primary vs-btn-lg mt-5 w-full">
           {% trans "Pay now" %}
@@ -512,6 +518,12 @@
         return;
       }
     }
+
+    window.vsTurnstileError = function(){
+      const el = document.getElementById('captcha-error');
+      if (el) el.classList.remove('hidden');
+      return true;
+    };
 
     // Turnstile jetonu; widget basılmamışsa boş döner (sunucu da kapalı).
     function vsCaptchaToken(){
