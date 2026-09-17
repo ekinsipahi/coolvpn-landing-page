@@ -52,12 +52,19 @@ class FooterCompanyDetailsTests(TestCase):
 
 class OrganizationSchemaTests(TestCase):
     def _schema(self):
+        """Organization düğümü.
+
+        Site geneli JSON-LD artık tek bir @graph olarak basılıyor (Organization
+        + WebSite birbirine @id ile bağlı), o yüzden düğümleri düzleştirip
+        arıyoruz; eskiden her biri ayrı bir script'ti.
+        """
         body = self.client.get("/").content.decode()
         for blob in re.findall(r'<script type="application/ld\+json">(.*?)</script>',
                                body, re.S):
             data = json.loads(blob)
-            if data.get("@type") == "Organization":
-                return data
+            for node in (data["@graph"] if "@graph" in data else [data]):
+                if node.get("@type") == "Organization":
+                    return node
         self.fail("Organization JSON-LD bulunamadi")
 
     def test_it_carries_verifiable_identifiers(self):

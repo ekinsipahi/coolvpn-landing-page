@@ -34,6 +34,13 @@
     "applicationCategory": "SecurityApplication",
     "operatingSystem": "iOS, Android, Windows, macOS, Linux, Chrome",
     "brand": { "@type": "Brand", "name": "VPNsterr" },
+    {% comment %}
+      Ürünü KAYITLI ŞİRKETE bağlar. Bunsuz arama motoru için ürün sahipsiz:
+      footer'da sicil kodu ve adres var ama yapısal veride hiçbir şey onları
+      ürüne iliştirmiyordu.
+    {% endcomment %}
+    "provider": { "@id": "{{ org_id }}" },
+    "publisher": { "@id": "{{ org_id }}" },
     "description": "{{ product_desc|escapejs }}",
     "slogan": "{{ product_slogan|escapejs }}",
     "isAccessibleForFree": true,

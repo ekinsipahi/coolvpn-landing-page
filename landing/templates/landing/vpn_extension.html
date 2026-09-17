@@ -17,7 +17,9 @@
   "operatingSystem": "Chrome, Edge, Brave, Opera",
   "applicationCategory": "SecurityApplication",
   "applicationSubCategory": "VPN Browser Extension",
-  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD",
+              "seller": { "@id": "{{ org_id }}" } },
+  "provider": { "@id": "{{ org_id }}" },
   "isAccessibleForFree": true,
   "featureList": "Unlimited bandwidth, no sign-up, zero logs, one-click connect, per-tab routing",
   "url": "{{ canonical_url|default:request.build_absolute_uri }}"

@@ -8,7 +8,7 @@
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"Blog","name":"VPNsterr Blog",
  "url":"{{ canonical_url }}","description":"{{ seo_description }}",
- "publisher":{"@type":"Organization","name":"Sterr Technologies"}}
+ "publisher":{"@id":"{{ org_id }}","@type":"Organization","name":"{{ company.legal_name }}"}}
 </script>
 {% endblock %}
 

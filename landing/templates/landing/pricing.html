@@ -12,30 +12,13 @@
 
 {# ---- JSON-LD ---- #}
 {% block schema_jsonld %}
-  {# Sitewide: Organization + WebSite (tekil @id’lerle) #}
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    "@id": "{{ request.build_absolute_uri|slice:':-1' }}/#org",
-    "name": "{{ site_name }}",
-    "url": "{{ request.build_absolute_uri|default:canonical_url }}",
-    "logo": {"@type":"ImageObject","url":"{{ request.build_absolute_uri|cut:request.get_full_path }}{% static 'img/apple-touch-icon-180.png' %}"}
-  }
-  </script>
-
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    "@id": "{{ request.build_absolute_uri|slice:':-1' }}/#website",
-    "url": "{{ request.build_absolute_uri|default:canonical_url }}",
-    "name": "{{ site_name }}",
-    "publisher": {"@id": "{{ request.build_absolute_uri|slice:':-1' }}/#org"},
-    "inLanguage": "{{ LANGUAGE_CODE|default:'en' }}"
-  }
-  </script>
-
+  {% comment %}
+    Organization ve WebSite buradan KALDIRILDI: base.html zaten site geneli
+    @graph'ı basıyor. Buradaki kopyalar @id'yi request.build_absolute_uri'den
+    türetiyordu, yani /pricing/ sayfasında ".../pricing/#org" oluyordu —
+    arama motoru için ikinci, ayrı bir kuruluş. Aşağıdaki düğümler tek
+    gerçek kuruluşa {{ org_id }} ile bağlanıyor.
+  {% endcomment %}
   {# Breadcrumbs (Home → Pricing) #}
   <script type="application/ld+json">
   {

@@ -49,14 +49,26 @@ def seo(request):
         "support_email": getattr(settings, "SUPPORT_EMAIL", "support@vpnsterr.com"),
     }
 
-    # Organization JSON-LD (global)
+    # ---- Site geneli JSON-LD ----
+    # TEK @id, TEK kaynak: sayfa şablonları publisher/provider alanında bu
+    # düğüme {"@id": ...} ile bağlanıyor. Önceden her sayfa kendi
+    # Organization'ını gömüyordu ve içlerinde tüzel ad "Sterr Technologies"
+    # olarak kalmıştı — sicildeki ad "Sterr Technologies OÜ". Arama motoru
+    # için bunlar AYRI iki kuruluş demek; footer'daki kimlikle de çelişiyordu.
+    #
+    # Taban adres canonical host'tan: SITE_URL dev'de 127.0.0.1 olduğu için
+    # @id'ler ortama göre kayardı, o da düğümleri birbirinden koparırdı.
+    site_base = f"https://{getattr(settings, 'CANONICAL_HOST', 'vpnsterr.com')}"
+    org_id = f"{site_base}/#org"
+
     org_schema = {
-        "@context": "https://schema.org",
         "@type": "Organization",
-        "@id": "https://vpnsterr.com/#org",
+        "@id": org_id,
         "name": getattr(settings, "SITE_NAME", "VPNsterr"),
         "legalName": company["legal_name"] or "Sterr Technologies OÜ",
-        "url": getattr(settings, "SITE_URL", "https://vpnsterr.com"),
+        "url": site_base,
+        "email": company["support_email"],
+        "foundingDate": "2026-09-04",
         # Dogrulanabilir kimlik: arama motorlari ve "bu gercek bir sirket mi"
         # diye bakan kullanici icin en agirlikli sinyal bunlar.
         "address": {
@@ -74,7 +86,7 @@ def seo(request):
         ],
         "logo": {
             "@type": "ImageObject",
-            "url": "https://vpnsterr.com/static/img/VPNSTERR-LOGO.png",
+            "url": f"{site_base}/static/img/VPNSTERR-LOGO.png",
         },
         "contactPoint": {
             "@type": "ContactPoint",
@@ -88,7 +100,20 @@ def seo(request):
             "https://www.tiktok.com/@vpnsterr",
         ]) + ([company["registry_url"]] if company["registry_url"] else []),
     }
-    org_schema_json = json.dumps(org_schema, ensure_ascii=False)
+    # WebSite düğümü: siteyi kuruluşa bağlar. Bu olmadan arama motoru
+    # "vpnsterr.com" ile "Sterr Technologies OÜ"yü aynı varlık saymak
+    # zorunda değil.
+    website_schema = {
+        "@type": "WebSite",
+        "@id": f"{site_base}/#website",
+        "url": site_base,
+        "name": getattr(settings, "SITE_NAME", "VPNsterr"),
+        "publisher": {"@id": org_id},
+        "inLanguage": "en",
+    }
+    org_schema_json = json.dumps(
+        {"@context": "https://schema.org", "@graph": [org_schema, website_schema]},
+        ensure_ascii=False)
 
     return {
         "GA_MEASUREMENT_ID": getattr(settings, "GA_MEASUREMENT_ID", ""),
@@ -102,6 +127,8 @@ def seo(request):
         "og_locale": og_locale,
         "org_schema_json": org_schema_json,
         "company": company,
+        # Sayfa şablonları publisher/provider'ı buna bağlasın diye.
+        "org_id": org_id,
         # Turnstile site anahtarı: boşsa şablonlar widget'ı hiç basmaz,
         # doğrulama da sunucuda kapalı olur (ikisi aynı anahtara bakar).
         "turnstile_site_key": getattr(settings, "TURNSTILE_SITE_KEY", ""),

@@ -17,7 +17,7 @@
  "dateModified":"{{ post.updated_at|date:'c' }}",
  "mainEntityOfPage":"{{ post.effective_canonical }}"{% if post.effective_og_image_url %},
  "image":"{{ post.effective_og_image_url }}"{% endif %},
- "publisher":{"@type":"Organization","name":"Sterr Technologies",
+ "publisher":{"@id":"{{ org_id }}","@type":"Organization","name":"{{ company.legal_name }}",
    "logo":{"@type":"ImageObject","url":"https://vpnsterr.com/static/img/VPNSTERR-LOGO.png"}}}
 </script>
 {% endif %}
