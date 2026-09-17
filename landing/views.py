@@ -1186,7 +1186,7 @@ def _best_active_sub_among_users(user_ids):
         qs = qs.filter(Q(ends_at__isnull=True) | Q(ends_at__gte=today))
 
     row = qs.order_by('-ends_at').values('user_id', 'id', 'ends_at').first()
-    print(f"[_best_active_sub_among_users] candidates={user_ids} result={row}")
+    logger.debug("best sub: %d candidate(s) -> %s", len(user_ids), bool(row))
     return row
 
 
@@ -1206,14 +1206,18 @@ def _resolve_premium_by_client_uuid(client_uuid: str):
         .order_by('-last_seen')
     )
     user_ids = list(dev_qs.values_list('user_id', flat=True).distinct())
-    print(f"[_resolve_premium_by_client_uuid] client_uuid={client_uuid} active_devices={dev_qs.count()} users={user_ids}")
+    # logger.debug, NOT print: the pool calls this on every premium request, so
+    # a print() writes the device UUID into the production log forever, at
+    # volume, on a product whose privacy policy says we keep no activity logs.
+    # debug is off in production and the UUID is truncated even then.
+    logger.debug("entitlement: dev=%s… users=%d", client_uuid[:8], len(user_ids))
 
     if not user_ids:
         return (False, None, None)
 
     best = _best_active_sub_among_users(user_ids)
     if not best:
-        print("[_resolve_premium_by_client_uuid] no active subs among users")
+        logger.debug("entitlement: dev=%s… no active subscription", client_uuid[:8])
         return (False, None, None)
 
     resolved_user_id = best['user_id']
@@ -1228,7 +1232,9 @@ def _resolve_premium_by_client_uuid(client_uuid: str):
     )
     device_uuid = str(device_uuid) if device_uuid else None
 
-    print(f"[_resolve_premium_by_client_uuid] RESOLVED user_id={resolved_user_id} device_uuid={device_uuid} sub_id={best['id']} ends_at={best['ends_at']}")
+    logger.debug(
+        "entitlement: dev=%s… granted until %s", client_uuid[:8], best["ends_at"]
+    )
     return (True, resolved_user_id, device_uuid)
 
 
@@ -1795,6 +1801,12 @@ def extension_link(request):
     """
     nonce = (request.GET.get("nonce") or request.POST.get("nonce") or "").strip()
     device_id = (request.GET.get("device_id") or request.POST.get("device_id") or "").strip()[:64]
+    # Bu sayfayi HEM eklenti HEM mobil uygulama kullaniyor; ikisi de ayni nonce
+    # akisindan geciyor. Platformu buradan tahmin etmek mumkun degil -- sayfayi
+    # acan sey her iki durumda da bir TARAYICI, User-Agent mobil olsa bile.
+    # O yuzden istemci kendini soyluyor; bilinmeyen degeri kabul etmiyoruz ki
+    # cihaz listesine serbest metin yazilamasin.
+    platform_hint = (request.GET.get("platform") or request.POST.get("platform") or "").strip().lower()
 
     if not (16 <= len(nonce) <= 64):
         return render(request, "landing/extension_link.html", {"error": "bad_nonce"})
@@ -1817,9 +1829,10 @@ def extension_link(request):
                 cap = plan_device_limit(sub.plan_key if sub else None)
                 used = Device.objects.filter(user=request.user, is_active=True).count()
                 if used < cap:
+                    plat, plat_name = _platform_from_hint(platform_hint)
                     Device.objects.create(
-                        user=request.user, client_uuid=dev_id, platform="browser",
-                        name="Browser extension", is_active=True, last_subscription=sub,
+                        user=request.user, client_uuid=dev_id, platform=plat,
+                        name=plat_name, is_active=True, last_subscription=sub,
                     )
             else:
                 device.is_active = True
@@ -1829,7 +1842,27 @@ def extension_link(request):
 
         return render(request, "landing/extension_link.html", {"linked": True})
 
-    return render(request, "landing/extension_link.html", {"nonce": nonce, "device_id": device_id})
+    return render(request, "landing/extension_link.html", {
+        "nonce": nonce, "device_id": device_id, "platform": platform_hint,
+    })
+
+
+PLATFORM_LABELS = {
+    "android": ("android", "Android app"),
+    "ios": ("ios", "iPhone / iPad"),
+    "browser": ("browser", "Browser extension"),
+}
+
+
+def _platform_from_hint(hint: str):
+    """(platform, gorunen ad). Bilinmeyen ipucu tarayiciya duser.
+
+    Eskiden bu akis her cihazi "Browser extension" diye kaydediyordu, cunku
+    yalnizca eklenti kullanir sanilmisti. Android uygulamasinin tarayici ile
+    baglanan kullanicilari dashboard'da eklenti gibi gorunuyordu -- kendi
+    telefonunu listede bulamayan biri yanlis satiri iptal eder.
+    """
+    return PLATFORM_LABELS.get(hint, PLATFORM_LABELS["browser"])
 
 
 @csrf_exempt
@@ -2225,7 +2258,7 @@ def extension_handshake(request):
         data = {}
 
     client_uuid = (data.get("client_uuid") or "").strip()
-    print(f"[handshake] client_uuid={client_uuid!r}")
+    logger.debug("handshake: dev=%s…", str(client_uuid)[:8])
 
     if not client_uuid:
         return JsonResponse({"premium": False, "device_uuid": None, "existing": False}, status=200)
@@ -2240,7 +2273,7 @@ def extension_handshake(request):
         "device_uuid": device_uuid,
         "existing": bool(existing),
     }
-    print(f"[handshake] RESP {resp}")
+    logger.debug("handshake: replying premium=%s", resp["premium"])
     return JsonResponse(resp)
 
     """
@@ -2268,7 +2301,7 @@ def extension_handshake(request):
         data = {}
 
     client_uuid = (data.get("client_uuid") or "").strip()
-    print(f"[handshake] client_uuid={client_uuid!r}")
+    logger.debug("handshake: dev=%s…", str(client_uuid)[:8])
 
     premium = False
     device_uuid = None
@@ -2300,7 +2333,7 @@ def extension_handshake(request):
         # ops/debug için faydalı; UI’da göstermek zorunda değilsin.
         "linked_client_uuids": linked_client_uuids,
     }
-    print(f"[handshake] RESP {resp}")
+    logger.debug("handshake: replying premium=%s", resp["premium"])
     return JsonResponse(resp)
 
 
