@@ -366,3 +366,55 @@ def send_owner_new_subscription(user, sub, *, amount: str = "", extra: str = "")
                   _shell(f"New {plan} subscription from {email}", body,
                          footer_note="Operator notification — sent for every new subscription."),
                   text)
+
+
+# ------------------------------------------------------------------ #
+# 8) Operatör bildirimi — kart dispute / chargeback açıldığında
+#    Bir dispute'un SERT bir kanıt-son-tarihi var; cevaplanmazsa
+#    OTOMATİK KAYBEDİLİR. O yüzden bu alarm anında gitmeli.
+# ------------------------------------------------------------------ #
+def send_owner_dispute_alert(user, *, amount: str = "", currency: str = "",
+                             reason: str = "", status: str = "",
+                             respond_by: str = "", dispute_url: str = "") -> None:
+    """Bir VPNsterr kartlı ödemesine dispute/chargeback açıldığında sahibi anında
+    uyar. Dispute sessiz kalırsa varsayılan olarak kaybedilir."""
+    to = getattr(settings, "SUPPORT_FORWARD_EMAIL", "")
+    if not to:
+        return
+    site = getattr(settings, "SITE_URL", "https://vpnsterr.com").rstrip("/")
+    email = getattr(user, "email", "") or getattr(user, "username", "?")
+    amt = f"{amount} {currency}".strip()
+    rows = [
+        ("Customer", email),
+        ("Amount", amt or "—"),
+        ("Reason", reason or "—"),
+        ("Status", status or "—"),
+        ("Respond by", respond_by or "—"),
+    ]
+    table = "".join(
+        f'<tr><td style="padding:4px 14px 4px 0;font-size:13px;color:#7b8ba0">{k}</td>'
+        f'<td style="padding:4px 0;font-size:14px;font-weight:600;color:#0c2233">{v}</td></tr>'
+        for k, v in rows
+    )
+    btn_url = dispute_url or (site + "/admin/landing/subscription/")
+    body = f"""
+      <p style="margin:0 0 4px;font-size:13px;font-weight:700;letter-spacing:1.5px;color:#e11d48;text-transform:uppercase">
+        Card dispute</p>
+      <h1 style="margin:0 0 12px;font-size:22px;line-height:1.3">🚨 Dispute açıldı — {email}</h1>
+      <p style="margin:0 0 16px;font-size:13px;line-height:1.6;color:#b42318">
+        Sert kanıt son tarihi var — cevap verilmezse dispute <b>otomatik kaybedilir</b>. Stripe'ta kanıt yükle.</p>
+      <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 20px">{table}</table>
+      <p style="margin:0 0 22px">{_btn(btn_url, "Open dispute in Stripe")}</p>
+    """
+    text = ("CARD DISPUTE / CHARGEBACK OPENED (VPNsterr)\n"
+            f"Customer  : {email}\n"
+            f"Amount    : {amt or '-'}\n"
+            f"Reason    : {reason or '-'}\n"
+            f"Status    : {status or '-'}\n"
+            f"Respond by: {respond_by or '-'}\n\n"
+            "Submit evidence in Stripe before the deadline or the dispute is lost by default.\n"
+            f"{dispute_url}")
+    send_email_bg(to, f"🚨 VPNsterr DISPUTE — {email} ({amt})".strip(),
+                  _shell(f"Card dispute opened — {email}", body,
+                         footer_note="Operator notification — a chargeback needs your response before the deadline."),
+                  text)

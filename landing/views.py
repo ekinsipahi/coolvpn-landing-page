@@ -1532,6 +1532,52 @@ def stripe_success(request):
 
 
 @csrf_exempt
+def _notify_stripe_dispute(dispute):
+    """Kart dispute / chargeback açıldı. Stripe hesabı ürünler arası PAYLAŞILDIĞI
+    için (VPNsterr + proxysterr/ipsterr + esimsterr) her event HER endpoint'e
+    düşer. Dispute'un charge'ını VPNsterr müşterisine (Stripe customer id) bağlayıp
+    SADECE bizimse alarm veriyoruz; başka ürünün dispute'unu atlıyoruz (onu kendi
+    webhook'u uyarır). Asla patlamaz — bir alarm hatası webhook'u 500'lememeli."""
+    from datetime import datetime, timezone as dt_tz
+    from landing.helpers.mailer import send_owner_dispute_alert
+
+    charge_id = _sf(dispute, "charge")
+    cust = None
+    if charge_id:
+        try:
+            charge = _stripe().Charge.retrieve(charge_id)
+            cust = _sf(charge, "customer")
+        except Exception:  # noqa: BLE001
+            cust = None
+    if not cust:
+        return
+    local = (Subscription.objects.filter(stripe_customer_id=str(cust))
+             .select_related("user").order_by("-created_at").first())
+    if not local:
+        return  # VPNsterr charge'ı değil (paylaşılan Stripe hesabı)
+
+    try:
+        amount_txt = f"{Decimal(str(_sf(dispute, 'amount', default=0) or 0)) / 100:.2f}"
+    except Exception:  # noqa: BLE001
+        amount_txt = ""
+    cur = str(_sf(dispute, "currency", default="") or "").upper()
+    reason = str(_sf(dispute, "reason", default="") or "")
+    status = str(_sf(dispute, "status", default="") or "")
+    due_unix = _sf(dispute, "evidence_details", "due_by")
+    due = ""
+    if due_unix:
+        try:
+            due = datetime.fromtimestamp(int(due_unix), tz=dt_tz.utc).strftime("%Y-%m-%d %H:%M UTC")
+        except (ValueError, TypeError, OSError):
+            due = ""
+    did = str(_sf(dispute, "id", default=""))
+    send_owner_dispute_alert(
+        local.user, amount=amount_txt, currency=cur, reason=reason,
+        status=status, respond_by=due,
+        dispute_url=f"https://dashboard.stripe.com/disputes/{did}",
+    )
+
+
 def stripe_webhook(request):
     """
     POST /api/payment/stripe/webhook/
@@ -1577,6 +1623,12 @@ def stripe_webhook(request):
     elif etype == "customer.subscription.deleted":
         # İptal: dönem sonuna kadar erişim kalır; ends_at zaten period_end.
         pass
+
+    elif etype == "charge.dispute.created":
+        try:
+            _notify_stripe_dispute(obj)
+        except Exception:  # noqa: BLE001
+            logger.exception("stripe dispute alert failed")
 
     return HttpResponse(status=200)
 

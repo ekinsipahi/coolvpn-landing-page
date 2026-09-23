@@ -6,6 +6,7 @@ from django.urls import reverse
 from django.conf import settings
 
 from .models import (
+    ArchivedAssistantMessage,
     AssistantConversation,
     AssistantMessage,
     Device,
@@ -424,6 +425,36 @@ class AssistantConversationAdmin(admin.ModelAdmin):
             if any(m.role == AssistantMessage.ROLE_OWNER for m in new_operator_msgs):
                 conv.owner_joined = True
             conv.save(update_fields=["user_unread", "owner_joined", "updated_at"])
+
+
+@admin.register(ArchivedAssistantMessage)
+class ArchivedAssistantMessageAdmin(admin.ModelAdmin):
+    """Read-only black-box log: every chat message is copied here before it is
+    deleted, so a deleted conversation is still reviewable. Cannot be added,
+    edited or deleted from the admin — a tamper-resistant record."""
+    list_display = ("archived_at", "short_conv", "user_email", "role",
+                    "content_preview", "message_created_at")
+    list_filter = ("role", "archived_at")
+    search_fields = ("user_email", "conversation_id", "message_id", "content")
+    date_hierarchy = "archived_at"
+    ordering = ("-archived_at",)
+
+    @admin.display(description="Conv")
+    def short_conv(self, obj):
+        return str(obj.conversation_id)[:8] if obj.conversation_id else "—"
+
+    @admin.display(description="Message")
+    def content_preview(self, obj):
+        return (obj.content or "")[:80]
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 
 @admin.register(ExtensionAd)
