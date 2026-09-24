@@ -3,6 +3,8 @@ from pathlib import Path
 import os
 import sys
 
+from core.site_url import resolve_email_base_url, resolve_site_url
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
@@ -119,11 +121,29 @@ STRIPE_3DS_MODE = os.environ.get("STRIPE_3DS_MODE", "challenge").strip() or "cha
 TURNSTILE_SITE_KEY = os.environ.get("TURNSTILE_SITE_KEY", "").strip()
 TURNSTILE_SECRET_KEY = os.environ.get("TURNSTILE_SECRET_KEY", "").strip()
 
-# ---- Site URL (dev/prod’a göre ayarla)
-SITE_URL = os.environ.get("SITE_URL", "http://127.0.0.1:8000")
+# ---- Site URL — dışarı verilen HER mutlak adresin tek kaynağı
+# Buradan beslenenler: e-posta linkleri (landing/helpers/mailer.py), Stripe
+# checkout success_url/cancel_url ve billing portal return_url, NOWPayments
+# IPN/success/cancel adresleri, blog canonical'ı. Yani bu değer yanlışsa
+# müşteri ödemeden sonra ölü sayfaya düşer, kripto IPN'i hiç gelmez ve
+# giden mailler tıklanamaz link taşır.
+#
+# Eskiden env yoksa doğrudan "http://127.0.0.1:8000"e düşüyordu. Render'da
+# SITE_URL tanımlı olmadığı için canlı sistem tam da bu değeri kullandı:
+# 07.09.2026–23.09.2026 arasında 45 e-posta 127.0.0.1 linkleriyle gitti.
+# Artık üretimde loopback'e düşmek mümkün değil — env boş olsa da, dev
+# .env'i yanlışlıkla kopyalanmış olsa da canonical host'a sabitlenir.
 
 # Domain taşıma: eski hostlar 301 ile buraya yönlenir
-CANONICAL_HOST = os.environ.get("CANONICAL_HOST", "vpnsterr.com")
+CANONICAL_HOST = os.environ.get("CANONICAL_HOST", "vpnsterr.com").strip()
+
+SITE_URL = resolve_site_url(os.environ.get("SITE_URL", ""), CANONICAL_HOST, debug=DEBUG)
+
+# E-posta linkleri ASLA localhost olamaz: alıcı hiçbir zaman bu makinede
+# değil. Üstelik mailer.py Resend'e doğrudan POST attığı için EMAIL_BACKEND'i
+# atlar — yani dev sunucusundan da gerçek mail çıkar. Bu yüzden mail tabanı
+# DEBUG'tan bağımsız olarak her zaman publik adrestir.
+EMAIL_BASE_URL = resolve_email_base_url(os.environ.get("EMAIL_BASE_URL", ""), CANONICAL_HOST)
 OLD_HOSTS = [h for h in os.environ.get("OLD_HOSTS", "coolvpn.app,www.coolvpn.app,www.vpnsterr.com").split(",") if h.strip()]
 
 # Eklenti/havuz köprüsü: siteyi token-imzalayan otorite yapan paylaşılan sır.
@@ -184,8 +204,12 @@ ACCOUNT_PASSWORD_MIN_LENGTH = 5
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "")
 GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", "")
 
-# Dev’de http çalışıyorsun:
-ACCOUNT_DEFAULT_HTTP_PROTOCOL = "http"
+# Parola sıfırlama / e-posta doğrulama linklerini allauth bu protokol +
+# Sites tablosundaki domain (vpnsterr.com) ile kurar. Dev'de bile https:
+# bu linkler e-postaya gömülüyor, alıcı hiçbir zaman bu makinede değil ve
+# http kalsaydı sıfırlama token'ı ilk adımda düz metin üzerinden giderdi.
+# Site tek protokol konuşur: https. www yok, http yok.
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
 
 # ------------ Middleware
 MIDDLEWARE = [

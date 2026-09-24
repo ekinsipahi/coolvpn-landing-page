@@ -86,7 +86,7 @@ def send_email_bg(to: str, subject: str, html: str, text: str = "",
 # Markalı iskelet
 # ------------------------------------------------------------------ #
 def _shell(preheader: str, body_html: str, footer_note: str = "") -> str:
-    site = getattr(settings, "SITE_URL", "https://vpnsterr.com").rstrip("/")
+    site = getattr(settings, "EMAIL_BASE_URL", "https://vpnsterr.com").rstrip("/")
     year_note = footer_note or (
         "You're receiving this because you have a VPNsterr account. "
         "This mailbox isn't monitored — need help? Visit "
@@ -137,7 +137,7 @@ def _first_name(user) -> str:
 # 1) Hoş geldin — hesap açılınca
 # ------------------------------------------------------------------ #
 def send_welcome_email(user) -> None:
-    site = getattr(settings, "SITE_URL", "https://vpnsterr.com").rstrip("/")
+    site = getattr(settings, "EMAIL_BASE_URL", "https://vpnsterr.com").rstrip("/")
     name = _first_name(user)
     body = f"""
       <h1 style="margin:0 0 6px;font-size:22px;line-height:1.3">Welcome to VPNsterr, {name} 👋</h1>
@@ -176,7 +176,7 @@ _PLAN_LABELS = {"monthly": "Monthly", "semiannual": "6-Month", "semi": "6-Month"
 
 
 def send_premium_activated_email(user, sub) -> None:
-    site = getattr(settings, "SITE_URL", "https://vpnsterr.com").rstrip("/")
+    site = getattr(settings, "EMAIL_BASE_URL", "https://vpnsterr.com").rstrip("/")
     name = _first_name(user)
     plan = _PLAN_LABELS.get((getattr(sub, "plan_key", "") or "").lower(),
                             (getattr(sub, "plan_key", "") or "Premium").title())
@@ -217,7 +217,7 @@ def send_premium_activated_email(user, sub) -> None:
 def send_ticket_opened_emails(ticket, first_message: str) -> None:
     """Kullanıcıya alındı onayı + operatöre (SUPPORT_FORWARD_EMAIL) kopya.
     Operatör mailinin Reply-To'su kullanıcı: gelen kutusundan direkt cevap."""
-    site = getattr(settings, "SITE_URL", "https://vpnsterr.com").rstrip("/")
+    site = getattr(settings, "EMAIL_BASE_URL", "https://vpnsterr.com").rstrip("/")
     user = ticket.user
     name = _first_name(user)
     snippet = (first_message or "").strip()[:600]
@@ -254,7 +254,7 @@ def send_ticket_opened_emails(ticket, first_message: str) -> None:
 
 def send_ticket_replied_email(ticket, reply_body: str) -> None:
     """Ekip cevap yazınca kullanıcıya bildirim."""
-    site = getattr(settings, "SITE_URL", "https://vpnsterr.com").rstrip("/")
+    site = getattr(settings, "EMAIL_BASE_URL", "https://vpnsterr.com").rstrip("/")
     name = _first_name(ticket.user)
     snippet = (reply_body or "").strip()[:800]
     body = f"""
@@ -271,7 +271,7 @@ def send_ticket_replied_email(ticket, reply_body: str) -> None:
 
 def send_ticket_user_reply_forward(ticket, body_text: str) -> None:
     """Kullanıcı ticket'a yeni mesaj yazınca operatöre haber."""
-    site = getattr(settings, "SITE_URL", "https://vpnsterr.com").rstrip("/")
+    site = getattr(settings, "EMAIL_BASE_URL", "https://vpnsterr.com").rstrip("/")
     admin_to = getattr(settings, "SUPPORT_FORWARD_EMAIL", "")
     if not admin_to:
         return
@@ -291,7 +291,7 @@ def send_ticket_user_reply_forward(ticket, body_text: str) -> None:
 # 4) Asistan yükseltmesi — operatöre anlık haber
 # ------------------------------------------------------------------ #
 def send_assistant_escalation(conv_id: str, who: str, last_text: str, flags) -> None:
-    site = getattr(settings, "SITE_URL", "https://vpnsterr.com").rstrip("/")
+    site = getattr(settings, "EMAIL_BASE_URL", "https://vpnsterr.com").rstrip("/")
     admin_to = getattr(settings, "SUPPORT_FORWARD_EMAIL", "")
     if not admin_to:
         return
@@ -329,7 +329,7 @@ def send_owner_new_subscription(user, sub, *, amount: str = "", extra: str = "")
     to = getattr(settings, "SUPPORT_FORWARD_EMAIL", "")
     if not to:
         return
-    site = getattr(settings, "SITE_URL", "https://vpnsterr.com").rstrip("/")
+    site = getattr(settings, "EMAIL_BASE_URL", "https://vpnsterr.com").rstrip("/")
     plan_key = (getattr(sub, "plan_key", "") or "").lower()
     plan = _PLAN_LABELS.get(plan_key, plan_key.title() or "Premium")
     source = _SOURCE_LABELS.get((getattr(sub, "source", "") or "").lower(),
@@ -381,7 +381,7 @@ def send_owner_dispute_alert(user, *, amount: str = "", currency: str = "",
     to = getattr(settings, "SUPPORT_FORWARD_EMAIL", "")
     if not to:
         return
-    site = getattr(settings, "SITE_URL", "https://vpnsterr.com").rstrip("/")
+    site = getattr(settings, "EMAIL_BASE_URL", "https://vpnsterr.com").rstrip("/")
     email = getattr(user, "email", "") or getattr(user, "username", "?")
     amt = f"{amount} {currency}".strip()
     rows = [
