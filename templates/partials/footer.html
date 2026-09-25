@@ -76,8 +76,8 @@
           {% comment %}
             Google Play'in Data safety formu, silme talebi icin herkese acik ve
             kolay bulunur bir baglanti bekliyor.
-            NOT: {# ... #} tek satirliktir; cok satirli kullanilinca Django onu
-            yorum saymaz ve metin footer'da HAM olarak gorunur.
+            Silme baglantisi bu yuzden footer'da: her sayfadan tek tikla
+            ulasilabilir olmasi gerekiyor.
           {% endcomment %}
           <li><a href="{% url 'account_delete' %}">{% trans "Delete your account" %}</a></li>
         </ul>

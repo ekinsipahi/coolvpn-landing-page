@@ -42,21 +42,21 @@
     content="{% block meta_description %}{{ seo_description|default:default_description }}{% endblock %}" />
   <meta name="robots" content="{% block meta_robots %}index,follow{% endblock %}" />
 
-  {# Canonical #}
+  {% comment %}Canonical{% endcomment %}
   {% if canonical_url %}
   <link rel="canonical" href="{{ canonical_url }}" />
   {% endif %}
 
-  {# hreflang alternates #}
+  {% comment %}hreflang alternates{% endcomment %}
   {% if hreflang_urls %}
   {% for lang_code, href in hreflang_urls %}
   <link rel="alternate" hreflang="{{ lang_code }}" href="{{ href }}" />
   {% endfor %}
-  {# x-default #}
+  {% comment %}x-default{% endcomment %}
   <link rel="alternate" hreflang="x-default" href="{{ canonical_url|default:request.build_absolute_uri }}" />
   {% endif %}
 
-  {# Open Graph #}
+  {% comment %}Open Graph{% endcomment %}
   <meta property="og:type" content="{% block og_type %}website{% endblock %}">
   <meta property="og:site_name" content="{{ site_name }}">
   <meta property="og:locale" content="{{ og_locale|default:'en_US' }}">
@@ -68,7 +68,7 @@
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">{% endblock %}
 
-  {# Twitter #}
+  {% comment %}Twitter{% endcomment %}
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="{% block tw_title %}{{ seo_title|default:site_name }}{% endblock %}">
   <meta name="twitter:description"
@@ -76,12 +76,12 @@
   {% block tw_image %}<meta name="twitter:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'img/og-image.jpg' %}">{% endblock %}
 
 
-  {# Site geneli Organization JSON-LD #}
+  {% comment %}Site geneli Organization JSON-LD{% endcomment %}
   {% if org_schema_json %}
   <script type="application/ld+json">{{ org_schema_json|safe }}</script>
   {% endif %}
 
-  {# Sayfa-bazlı JSON-LD (FAQ, Product, Breadcrumb, Article vs.) #}
+  {% comment %}Sayfa-bazlı JSON-LD (FAQ, Product, Breadcrumb, Article vs.){% endcomment %}
   {% block schema_jsonld %}{% endblock %}
 
   {% block head_extra %}{% endblock %}
@@ -122,7 +122,7 @@
 <body class="{% block body_class %}{% endblock %}">
   <header>
     {% block header %}
-    {# navbar burada; dil değiştirici vs. #}
+    {% comment %}navbar burada; dil değiştirici vs.{% endcomment %}
     {% endblock %}
   </header>
 

@@ -1,16 +1,15 @@
 {% extends "base.html" %}
 {% load i18n static %}
-{# templates/landing/pricing.html #}
 
 {% block header %}
   {% include "partials/navbar.html" %}
 {% endblock %}
 
-{# ---- SEO meta ---- #}
+{% comment %}---- SEO meta ----{% endcomment %}
 {% block title %}{{ seo_title }}{% endblock %}
 {% block meta_description %}{{ seo_description }}{% endblock %}
 
-{# ---- JSON-LD ---- #}
+{% comment %}---- JSON-LD ----{% endcomment %}
 {% block schema_jsonld %}
   {% comment %}
     Organization ve WebSite buradan KALDIRILDI: base.html zaten site geneli
@@ -19,7 +18,7 @@
     arama motoru için ikinci, ayrı bir kuruluş. Aşağıdaki düğümler tek
     gerçek kuruluşa {{ org_id }} ile bağlanıyor.
   {% endcomment %}
-  {# Breadcrumbs (Home → Pricing) #}
+  {% comment %}Breadcrumbs (Home → Pricing){% endcomment %}
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -35,7 +34,7 @@
   }
   </script>
 
-  {# Product + OfferCatalog (home’daki @id ile aynı Product @id kullanılır — kanonik tekil varlık!) #}
+  {% comment %}Product + OfferCatalog (home’daki @id ile aynı Product @id kullanılır — kanonik tekil varlık!){% endcomment %}
   {% blocktrans asvar product_desc %}Strict no-logs VPN with unlimited bandwidth on every device.{% endblocktrans %}
   <script type="application/ld+json">
   {
@@ -55,7 +54,7 @@
   }
   </script>
 
-  {# Görünür planları ayrıca OfferCatalog olarak belirtelim (Google “Pricing” sinyali güçlenir). #}
+  {% comment %}Görünür planları ayrıca OfferCatalog olarak belirtelim (Google “Pricing” sinyali güçlenir).{% endcomment %}
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",

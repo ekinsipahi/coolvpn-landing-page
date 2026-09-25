@@ -44,8 +44,10 @@
           {% csrf_token %}
           <input type="hidden" name="nonce" value="{{ nonce }}">
           <input type="hidden" name="device_id" value="{{ device_id }}">
-          {# Hangi urun bagliyor: GET ile geldi, POST'a da tasinmali yoksa
-             cihaz listesinde her sey "Browser extension" gorunur. #}
+          {% comment %}
+            Hangi urun bagliyor: GET ile geldi, POST'a da tasinmali yoksa
+            cihaz listesinde her sey "Browser extension" gorunur.
+          {% endcomment %}
           <input type="hidden" name="platform" value="{{ platform }}">
           <button type="submit" class="vs-btn vs-btn-primary w-full">{% trans "Yes, link this device" %}</button>
         </form>

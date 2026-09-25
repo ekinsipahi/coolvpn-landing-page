@@ -23,7 +23,7 @@
     <h1 class="vs-h2">{% trans "Delete your account" %}</h1>
     <p class="mt-2 text-sm" style="color:var(--vs-text-2)">{% trans "Last updated:" %} {% now "Y-m-d" %}</p>
 
-    {# ===================== EYLEM KUTUSU — en ustte ===================== #}
+    {% comment %}===================== EYLEM KUTUSU — en ustte ====================={% endcomment %}
     {% if user.is_authenticated %}
 
       <div class="vs-card mt-8 !p-6 md:!p-7"
@@ -40,7 +40,7 @@
               {% blocktrans trimmed with email=user.email %}Signed in as <b>{{ email }}</b>.{% endblocktrans %}
             </p>
 
-            {# Ne silinecek, somut sayilarla #}
+            {% comment %}Ne silinecek, somut sayilarla{% endcomment %}
             <ul class="mt-4 space-y-1.5 text-sm" style="color:var(--vs-text-2)">
               <li class="flex items-center gap-2">
                 <span class="h-1.5 w-1.5 rounded-full" style="background:#dc2626"></span>
@@ -84,7 +84,6 @@
             {% comment %}
               Iki adimli onay: once kutucuk isaretlenir, sonra buton acilir —
               dashboard'daki akisin aynisi, tek tikla silinmesin.
-              ({# ... #} TEK SATIRLIKTIR; cok satirli yazilirsa sayfada ham gorunur.)
             {% endcomment %}
             <form method="post" action="{% url 'account_delete' %}" class="mt-5" id="del-form">
               {% csrf_token %}
@@ -105,7 +104,7 @@
 
     {% else %}
 
-      {# ---- GIRIS YOK: silme mumkun degil, en ustte net soyle ---- #}
+      {% comment %}---- GIRIS YOK: silme mumkun degil, en ustte net soyle ----{% endcomment %}
       <div class="vs-card mt-8 !p-6 md:!p-7">
         <div class="flex items-start gap-3">
           <span class="mt-0.5 grid h-9 w-9 shrink-0 place-content-center rounded-full"
@@ -136,7 +135,7 @@
 
     {% endif %}
 
-    {# ===================== BILGILENDIRME ===================== #}
+    {% comment %}===================== BILGILENDIRME ====================={% endcomment %}
     <div class="mt-10 space-y-8 text-[15px] leading-7" style="color:var(--vs-text-2)">
 
       <p>{% blocktrans trimmed %}This page explains how to delete your <strong>VPNsterr</strong> account — the account used by the VPNsterr Android app, the browser extension and vpnsterr.com. VPNsterr is operated by <strong>Sterr Technologies OÜ</strong>.{% endblocktrans %}</p>
