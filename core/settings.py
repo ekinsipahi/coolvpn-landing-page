@@ -172,6 +172,7 @@ INSTALLED_APPS = [
 
     "landing",
     "blog",
+    "retention",
 ]
 
 SITE_ID = 1  # <-- Sites framework
@@ -290,6 +291,51 @@ DATABASES = {
         "PORT": os.environ.get("DB_PORT", "5432"),
     }
 }
+
+
+# ------------ Cache
+# NOT a page cache: the only thing that touches the cache in this project is
+# rate limiting (checkout, assistant, support). That is precisely why the
+# backend has to be SHARED.
+#
+# Leaving CACHES undefined meant Django's default LocMemCache, which is
+# per-process. With more than one gunicorn worker every worker counted
+# separately, so the "6 checkout sessions per user per hour" brake was really
+# 6 x workers, and it reset on every deploy. It is not a theory: the brake
+# shipped 2026-09-10 and on 2026-09-17 one single account still pushed 9 cards
+# through in 9 minutes.
+#
+# The database is the shared store we already have. Cache traffic here is a
+# handful of rows per payment attempt, so Postgres is nowhere near stressed,
+# and unlike Redis it costs nothing extra. The cache table is created by
+# retention/migrations/0002, so a fresh deploy needs no manual step.
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
+        "LOCATION": "vpnsterr_cache",
+        "TIMEOUT": 300,
+        "OPTIONS": {"MAX_ENTRIES": 10000, "CULL_FREQUENCY": 3},
+    }
+}
+
+# ------------ Cookie security
+# The site is https-only, so the session and CSRF cookies must never be allowed
+# onto a plain-http request. Without these two flags a single http:// hit on the
+# apex -- a typed address, an old link, a captive portal -- puts the session
+# cookie on the wire in clear text before the redirect happens.
+#
+# NOT enabled here, on purpose:
+#   SECURE_SSL_REDIRECT   - Cloudflare already forces https at the edge, and
+#                           turning it on in Django as well risks a redirect
+#                           loop if the proxy headers are ever not trusted.
+#   SECURE_HSTS_SECONDS   - HSTS is hard to undo. Set it at Cloudflare, where it
+#                           can be switched off again the same day.
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
+
+# Salt for the e-mail fingerprints in the retention app. Deliberately separate
+# from SECRET_KEY, which gets rotated -- see retention/models.py.
+RETENTION_EMAIL_SALT = os.environ.get("RETENTION_EMAIL_SALT", "vpnsterr-retention-v1")
 
 
 # ------------ E-posta (şifre sıfırlama vb.) — dev: console, prod: SMTP (.env)

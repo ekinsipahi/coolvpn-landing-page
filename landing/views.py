@@ -1267,6 +1267,17 @@ def extension_entitlement(request):
         # One shape for every rejection -- an attacker learns nothing.
         return JsonResponse({"premium": False, "error": "unauthorized"}, status=403)
     is_premium, _uid, _dev = _resolve_premium_by_client_uuid(device_id)
+    if is_premium and _uid:
+        # A BILLING fact, not an activity log: retention.usage keeps one
+        # aggregate row per account and overwrites it in place, at most once
+        # every 15 minutes. It is the only evidence we have that a paid
+        # subscription was actually consumed, and the refund policy turns on
+        # exactly that ("no VPN connection was established ... after the
+        # purchase"). It outlives account deletion via retention.signals,
+        # because a refund request or a chargeback usually arrives after the
+        # customer is already gone.
+        from retention.usage import mark_premium_used
+        mark_premium_used(_uid)
     return JsonResponse({"premium": bool(is_premium)})
 
 
@@ -2267,11 +2278,13 @@ def account_delete(request):
 
         if cancelled:
             messages.success(request, _(
-                "Your account and all data attached to it have been deleted, and your "
-                "card subscription has been cancelled — you will not be charged again."))
+                "Your account has been deleted along with your devices, support tickets "
+                "and sign-in details, and your card subscription has been cancelled — you "
+                "will not be charged again."))
         else:
             messages.success(request, _(
-                "Your account and all data attached to it have been deleted."))
+                "Your account has been deleted along with your devices, support "
+                "tickets and sign-in details."))
         return redirect("home")
 
     # --- GET: sayfa. Girişliyse ne silineceğini somut olarak göster. ---

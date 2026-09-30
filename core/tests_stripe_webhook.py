@@ -10,6 +10,7 @@ yazilsalardi hatanin hicbiri tekrar etmezdi: sorun tam olarak StripeObject'in
 artik dict GIBI davranmamasiydi.
 """
 import json
+import time
 from datetime import datetime, timezone as dt_tz
 from unittest import mock
 
@@ -24,8 +25,18 @@ from landing.models import Subscription
 
 User = get_user_model()
 
-P_START = 1789579715   # 16.09.2026
-P_END = 1792171715     # 16.10.2026
+# Anchored to "now", NOT to a calendar date.
+#
+# These used to be 1789579715 / 1792171715 (16.09.2026 -> 16.10.2026). The
+# reconcile cron only looks at subscriptions whose ends_at falls within the last
+# 10 days (landing/helpers/reconcile.py), so the fixture quietly aged out of
+# scope and test_reconcile_extends_with_the_new_subscription_shape started
+# failing on 2026-09-26 17:28:35 -- exactly ten days after P_START, on a date
+# nobody picked. Every assertion here is about the RELATIONSHIP between the
+# dates, never about a particular day, so pinning them to real time is the fix.
+_NOW = int(time.time())
+P_START = _NOW - 2 * 86400        # the period began 2 days ago: inside the window
+P_END = P_START + 30 * 86400      # ...and still has ~4 weeks to run
 
 
 def new_subscription(sub_id="sub_TEST", customer="cus_TEST",
