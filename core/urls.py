@@ -46,14 +46,10 @@ products_patterns = (
             ),
             name="desktop",
         ),
-        path(
-            "mobile/",
-            Stub(
-                template_name="stubs/simple.html",
-                extra_context={"title": "Mobile App", "subtitle": "iOS & Android"},
-            ),
-            name="mobile",
-        ),
+        # Eskiden "coming soon" stub'ıydı; uygulama çıktı ve stub ince içerik
+        # sinyali veriyordu. Navbar/footer artık doğrudan yeni sayfaya gidiyor,
+        # bu kayıt sadece dışaridan indekslenmiş eski linkler için duruyor.
+        path("mobile/", RedirectView.as_view(url="/free-vpn-android/", permanent=True), name="mobile"),
     ],
     "products",
 )
@@ -62,6 +58,7 @@ from django.contrib.sitemaps.views import sitemap as sitemap_view
 from core.sitemaps import SITEMAPS
 from landing.views_faq import faq as faq_view
 from landing.views_changelog import changelog as changelog_view
+from landing.views_mobile import free_vpn_android, free_vpn_iphone
 
 urlpatterns = [
     path("i18n/", include("django.conf.urls.i18n")),  # dil değişimi
@@ -108,6 +105,9 @@ urlpatterns += i18n_patterns(
     # marketing
     path("faq/", faq_view, name="faq"),
     path("changelog/", changelog_view, name="changelog"),
+    # Mobil uygulama SEO sayfalari (landing/views_mobile.py)
+    path("free-vpn-android/", free_vpn_android, name="free_vpn_android"),
+    path("free-vpn-iphone/", free_vpn_iphone, name="free_vpn_iphone"),
     # namespaced groups
     path("features/", include(features_patterns, namespace="features")),
     path("advantages/", include(advantages_patterns, namespace="advantages")),

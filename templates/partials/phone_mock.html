@@ -1,0 +1,133 @@
+{% load i18n static %}
+{% comment %}
+Telefon maketi + ekran görüntüsü dönüşü. `screens` listesini bekler
+(landing/views_mobile.py SCREENS).
+
+Görseller store-assets/screenshots içindeki Play rozetlerinden kırpıldı —
+oradakiler zaten çerçeveli olduğu için ham ekran alındı, yoksa çerçeve
+içinde çerçeve çıkardı.
+{% endcomment %}
+
+<div data-phone-mock data-dwell="4600">
+
+  <div class="pm-stage">
+    <div class="pm vs-float-slow">
+      <div class="pm-body">
+        <span class="pm-key vol-up" aria-hidden="true"></span>
+        <span class="pm-key vol-dn" aria-hidden="true"></span>
+        <span class="pm-key power" aria-hidden="true"></span>
+
+        <div class="pm-screen">
+          {% for s in screens %}
+          <img src="{% static s.img %}" width="560" height="1236"
+               alt="{{ s.title }} — VPNsterr free VPN app for Android"
+               class="{% if forloop.first %}on{% endif %}"
+               {% if forloop.first %}fetchpriority="high"{% else %}loading="lazy" decoding="async"{% endif %}>
+          {% endfor %}
+        </div>
+
+        <span class="pm-island" aria-hidden="true"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="pm-tabs mt-7" role="tablist" style="--pm-dwell:4.6s"
+       aria-label="{% trans 'App screenshots' %}">
+    {% for s in screens %}
+    <button type="button" role="tab" class="pm-tab"
+            id="pm-tab-{{ forloop.counter0 }}" aria-controls="pm-pane-{{ forloop.counter0 }}"
+            aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+            tabindex="{% if forloop.first %}0{% else %}-1{% endif %}">
+      {{ s.tab }}<span class="pm-bar" aria-hidden="true"></span>
+    </button>
+    {% endfor %}
+  </div>
+
+  <div class="pm-caption mt-5 text-center max-w-md mx-auto">
+    {% for s in screens %}
+    <div role="tabpanel" class="pm-pane" id="pm-pane-{{ forloop.counter0 }}"
+         aria-labelledby="pm-tab-{{ forloop.counter0 }}"
+         {% if not forloop.first %}hidden{% endif %}>
+      <div class="font-bold tracking-tight" style="color:var(--vs-text)">{{ s.title }}</div>
+      <p class="mt-1.5 text-sm leading-6" style="color:var(--vs-text-2)">{{ s.body }}</p>
+    </div>
+    {% endfor %}
+  </div>
+
+</div>
+
+<script>
+  (function () {
+    var root = document.querySelector('[data-phone-mock]');
+    if (!root) return;
+    var imgs = root.querySelectorAll('.pm-screen img');
+    var tabs = root.querySelectorAll('.pm-tab');
+    var panes = root.querySelectorAll('.pm-pane');
+    if (imgs.length < 2) return;
+
+    var reduce = false;
+    try { reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { }
+    var dwell = parseInt(root.dataset.dwell, 10) || 4600;
+    var i = 0, timer = null, held = false, onScreen = true, surrendered = false;
+
+    function show(n, animate) {
+      i = (n + imgs.length) % imgs.length;
+      for (var k = 0; k < imgs.length; k++) imgs[k].classList.toggle('on', k === i);
+      for (var p = 0; p < panes.length; p++) panes[p].hidden = (p !== i);
+      for (var t = 0; t < tabs.length; t++) {
+        var on = (t === i);
+        tabs[t].setAttribute('aria-selected', on ? 'true' : 'false');
+        tabs[t].tabIndex = on ? 0 : -1;
+        tabs[t].classList.remove('running');
+        if (on && animate) {
+          void tabs[t].offsetWidth;   // reflow: süre çubuğunu baştan başlat
+          tabs[t].classList.add('running');
+        }
+      }
+    }
+
+    function stop() {
+      if (timer) { clearInterval(timer); timer = null; }
+      for (var t = 0; t < tabs.length; t++) tabs[t].classList.remove('running');
+    }
+
+    function play() {
+      if (timer || reduce || held || surrendered || !onScreen || document.hidden) return;
+      show(i, true);
+      timer = setInterval(function () { show(i + 1, true); }, dwell);
+    }
+
+    // Fareyle üzerindeyken ya da klavye odağı içindeyken durur.
+    root.addEventListener('mouseenter', function () { held = true; stop(); });
+    root.addEventListener('mouseleave', function () { held = false; play(); });
+    root.addEventListener('focusin', function () { held = true; stop(); });
+    root.addEventListener('focusout', function () { held = false; play(); });
+
+    // Sekmeye tıklayan kullanıcı kontrolü devraldı; altından kaydırmayalım.
+    for (var t = 0; t < tabs.length; t++) {
+      (function (n) {
+        tabs[n].addEventListener('click', function () { surrendered = true; stop(); show(n, false); });
+        tabs[n].addEventListener('keydown', function (e) {
+          var d = e.key === 'ArrowRight' ? 1 : (e.key === 'ArrowLeft' ? -1 : 0);
+          if (!d) return;
+          e.preventDefault();
+          surrendered = true; stop(); show(n + d, false);
+          tabs[i].focus();
+        });
+      })(t);
+    }
+
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) { stop(); } else { play(); }
+    });
+
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (entries) {
+        onScreen = entries[0].isIntersecting;
+        if (onScreen) { play(); } else { stop(); }
+      }, { threshold: .25 }).observe(root);
+    }
+
+    play();
+  })();
+</script>

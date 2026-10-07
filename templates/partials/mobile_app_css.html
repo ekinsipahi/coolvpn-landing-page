@@ -1,0 +1,186 @@
+{% comment %}
+Mobil uygulama sayfalarının (/free-vpn-android/, /free-vpn-iphone/) kendi CSS'i.
+
+Neden Tailwind değil de düz CSS: telefon maketi ve store rozetleri bu iki sayfa
+dışında hiçbir yerde kullanılmıyor. Tailwind'e yazsaydık her deploy'un
+`npm run build` çalıştırmış olmasına bağımlı olurdu; buradaki her şey
+şablonun içinde geldiği için derleme adımı atlansa bile sayfa doğru görünür.
+Renkler tw.css'teki --vs-* token'larından geliyor, ayrı bir palet YOK.
+{% endcomment %}
+<style>
+  /* ---------- Telefon maketi ---------- */
+  .pm-stage { position: relative; display: flex; justify-content: center; }
+
+  /* Arkadaki aurora — maketi sayfadan ayırıyor.
+     inset yatayda POZİTİF kalmalı: dışa taşarsa sayfaya yatay kaydırma
+     çubuğu ekliyor (telefon 286px, sütun ~600px — içeride kalsa da
+     maketten kat kat geniş, görsel olarak hiçbir şey kaybolmuyor). */
+  .pm-stage::before {
+    content: ""; position: absolute; inset: -6% 6% 2%;
+    background: radial-gradient(60% 50% at 50% 38%, rgba(16, 144, 192, .34), transparent 70%),
+                radial-gradient(46% 42% at 72% 72%, rgba(217, 70, 239, .20), transparent 70%);
+    filter: blur(28px); z-index: 0; pointer-events: none;
+  }
+
+  .pm { position: relative; z-index: 1; width: min(286px, 72vw); }
+
+  .pm-body {
+    position: relative; aspect-ratio: 560 / 1236; border-radius: 42px; padding: 9px;
+    background: linear-gradient(155deg, #394a58 0%, #0d1a24 26%, #0a141d 70%, #2b3a47 100%);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, .10) inset,
+                0 34px 70px -28px rgba(4, 26, 43, .62),
+                0 10px 26px -12px rgba(4, 26, 43, .45);
+  }
+  html.dark .pm-body {
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, .13) inset,
+                0 34px 80px -26px rgba(0, 0, 0, .9);
+  }
+
+  .pm-screen {
+    position: absolute; inset: 9px; border-radius: 34px; overflow: hidden;
+    background: #061320; isolation: isolate;
+  }
+  .pm-screen img {
+    position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+    opacity: 0; transform: scale(1.035);
+    transition: opacity .62s ease, transform .9s ease;
+  }
+  .pm-screen img.on { opacity: 1; transform: none; }
+
+  /* Ekranın üstündeki cam parlaması */
+  .pm-screen::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(118deg, rgba(255, 255, 255, .13) 0%, rgba(255, 255, 255, 0) 38%);
+  }
+
+  /* Dynamic island */
+  .pm-island {
+    position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
+    width: 74px; height: 20px; border-radius: 999px; background: #05101a; z-index: 3;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, .06);
+  }
+  .pm-island::after {
+    content: ""; position: absolute; right: 11px; top: 50%; transform: translateY(-50%);
+    width: 6px; height: 6px; border-radius: 50%;
+    background: radial-gradient(circle at 32% 32%, #2b4a5e, #0a1822);
+  }
+
+  /* Yan tuşlar */
+  .pm-key { position: absolute; width: 2.5px; border-radius: 3px; background: linear-gradient(180deg, #46596a, #1b2833); }
+  .pm-key.vol-up { left: -2.5px; top: 21%; height: 7%; }
+  .pm-key.vol-dn { left: -2.5px; top: 30%; height: 7%; }
+  .pm-key.power { right: -2.5px; top: 24%; height: 10.5%; }
+
+  /* ---------- Ekran sekmeleri ---------- */
+  .pm-tabs { display: flex; flex-wrap: wrap; justify-content: center; gap: 7px; }
+  .pm-tab {
+    position: relative; overflow: hidden; border-radius: 999px;
+    padding: 7px 14px; font-size: 12.5px; font-weight: 600; letter-spacing: -.01em;
+    color: var(--vs-text-2); background: var(--vs-card);
+    border: 1px solid var(--vs-line-2); cursor: pointer;
+    transition: color .2s ease, border-color .2s ease, transform .2s ease;
+  }
+  .pm-tab:hover { color: var(--vs-600); transform: translateY(-1px); }
+  html.dark .pm-tab:hover { color: var(--vs-300); }
+  .pm-tab[aria-selected="true"] { color: #fff; border-color: transparent; background: var(--vs-grad-cta); }
+  .pm-tab[aria-selected="true"]:hover { color: #fff; }
+
+  /* Aktif sekmenin altında ilerleyen süre çubuğu */
+  .pm-tab .pm-bar {
+    position: absolute; left: 0; bottom: 0; height: 2px; width: 100%;
+    background: rgba(255, 255, 255, .75); transform-origin: left; transform: scaleX(0);
+  }
+  .pm-tab[aria-selected="true"].running .pm-bar { animation: pm-fill var(--pm-dwell, 4.6s) linear forwards; }
+  @keyframes pm-fill { from { transform: scaleX(0) } to { transform: scaleX(1) } }
+
+  .pm-caption { min-height: 4.4rem; }
+
+  /* ---------- Store rozetleri ---------- */
+  .ms-row { display: flex; flex-wrap: wrap; gap: 12px; }
+  /* Dar ekranda alt alta geçiyorlar; "Soon" rozeti iOS butonunu genişlettiği
+     için eşit genişlik vermezsek kırık bir merdiven gibi duruyorlar. */
+  @media (max-width: 479px) { .ms-badge { flex: 1 1 100%; } }
+
+  .ms-badge {
+    position: relative; overflow: hidden; isolation: isolate;
+    display: inline-flex; align-items: center; gap: 11px;
+    min-width: 196px; padding: 10px 20px 10px 16px; border-radius: 15px;
+    text-decoration: none; line-height: 1.15;
+    transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+  }
+  .ms-badge:hover { transform: translateY(-2px); }
+  .ms-badge:focus-visible { outline: 2px solid var(--vs-400); outline-offset: 3px; }
+  .ms-badge svg { flex: none; }
+  .ms-badge small {
+    display: block; font-size: 10px; font-weight: 600;
+    letter-spacing: .085em; text-transform: uppercase; opacity: .72;
+  }
+  .ms-badge strong { display: block; font-size: 17.5px; font-weight: 700; letter-spacing: -.015em; }
+
+  /* Üzerinden geçen ışık — iki rozette de aynı */
+  .ms-badge::after {
+    content: ""; position: absolute; inset: 0; z-index: 2; pointer-events: none;
+    background: linear-gradient(105deg, transparent 38%, rgba(255, 255, 255, .22) 50%, transparent 62%);
+    transform: translateX(-120%);
+  }
+  .ms-badge:hover::after { transition: transform .75s ease; transform: translateX(120%); }
+
+  /* Play — gerçek, çalışan link */
+  .ms-play { background: #0a1016; color: #fff; border: 1px solid rgba(255, 255, 255, .14); }
+  .ms-play:hover { box-shadow: 0 16px 34px -16px rgba(0, 0, 0, .7); border-color: rgba(255, 255, 255, .26); }
+  html.dark .ms-play { background: #060c12; }
+
+  /* iOS — henüz uygulama yok; rozet bunu saklamıyor, hover'da açıkça söylüyor */
+  .ms-ios {
+    color: var(--vs-text); background: var(--vs-card-2);
+    border: 1px dashed var(--vs-line-2);
+  }
+  .ms-ios:hover { border-style: solid; border-color: color-mix(in srgb, var(--vs-500) 55%, transparent); box-shadow: var(--vs-glow); }
+
+  /* APP_STORE_URL dolunca rozet Play'inkiyle aynı görünür */
+  .ms-ios.ms-live { background: #0a1016; color: #fff; border: 1px solid rgba(255, 255, 255, .14); }
+  .ms-ios.ms-live:hover { box-shadow: 0 16px 34px -16px rgba(0, 0, 0, .7); border-color: rgba(255, 255, 255, .26); }
+
+  .ms-flip { position: relative; display: block; height: 2.45em; overflow: hidden; }
+  .ms-flip > span {
+    display: block; height: 2.45em;
+    transition: transform .38s cubic-bezier(.3, .8, .35, 1);
+  }
+  .ms-ios:hover .ms-flip > span,
+  .ms-ios:focus-visible .ms-flip > span { transform: translateY(-2.45em); }
+
+  .ms-soon {
+    margin-inline-start: auto; align-self: center;
+    font-size: 10px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 999px;
+    color: var(--vs-amber); background: color-mix(in srgb, var(--vs-amber) 14%, transparent);
+  }
+
+  /* ---------- iPhone sayfasındaki "henüz yok" ekranı ---------- */
+  .pm-building {
+    position: absolute; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 14px; padding: 28px;
+    background: radial-gradient(74% 54% at 50% 34%, #0d2a3c 0%, #061320 68%);
+  }
+  .pm-building img { position: static; width: 58px; height: 58px; opacity: 1; transform: none; border-radius: 15px; }
+  .pm-building b { font-size: 14.5px; font-weight: 700; color: #e8f1f7; letter-spacing: -.01em; }
+  .pm-building span { font-size: 11.5px; color: #7f9cb0; text-align: center; line-height: 1.5; }
+
+  .pm-skel { width: 100%; display: grid; gap: 8px; margin-top: 6px; }
+  .pm-skel i {
+    display: block; height: 9px; border-radius: 999px;
+    background: linear-gradient(90deg, #11293a 0%, #1d4258 50%, #11293a 100%);
+    background-size: 220% 100%; animation: pm-shimmer 1.9s ease-in-out infinite;
+  }
+  .pm-skel i:nth-child(2) { width: 78%; animation-delay: .18s; }
+  .pm-skel i:nth-child(3) { width: 56%; animation-delay: .36s; }
+  @keyframes pm-shimmer { 0%, 100% { background-position: 120% 0 } 50% { background-position: -20% 0 } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pm-skel i { animation: none; }
+    .pm-screen img { transition: none; }
+    .pm-tab[aria-selected="true"].running .pm-bar { animation: none; transform: scaleX(1); }
+    .ms-badge, .ms-badge:hover, .ms-flip > span { transition: none; transform: none; }
+    .ms-badge:hover::after { display: none; }
+  }
+</style>

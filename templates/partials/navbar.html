@@ -101,12 +101,19 @@
               <span><span class="t">{% trans "Desktop App" %}</span>
               <span class="d block">Windows · macOS · Linux</span></span>
             </a>
-            <a href="{% url 'products:mobile' %}" class="vs-menu-item">
+            <a href="{% url 'free_vpn_android' %}" class="vs-menu-item">
               <span class="vs-icon !h-9 !w-9 shrink-0 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2"/><path d="M12 18h.01"/></svg>
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.6 9.48l1.84-3.18c.16-.31.04-.7-.26-.85a.637.637 0 0 0-.83.22l-1.88 3.24a11.46 11.46 0 0 0-8.94 0L5.65 5.67a.643.643 0 0 0-.87-.2c-.28.18-.37.54-.22.83L6.4 9.48A10.78 10.78 0 0 0 1 18h22a10.78 10.78 0 0 0-5.4-8.52zM7 15.25a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5zm10 0a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5z"/></svg>
               </span>
-              <span><span class="t">{% trans "Mobile App" %}</span>
-              <span class="d block">iOS · Android</span></span>
+              <span><span class="t">{% trans "Android App" %}</span>
+              <span class="d block">{% trans "Free on Google Play" %}</span></span>
+            </a>
+            <a href="{% url 'free_vpn_iphone' %}" class="vs-menu-item">
+              <span class="vs-icon !h-9 !w-9 shrink-0 bg-slate-500/10" style="color:var(--vs-text-2)">
+                <svg viewBox="0 0 24 28" fill="currentColor"><path d="M16.4 2.1a4.3 4.3 0 0 1-1.1 3.1 3.6 3.6 0 0 1-2.8 1.4A4 4 0 0 1 13.6 3.5 4.1 4.1 0 0 1 16.4 2.1zM20.3 18.6c-.5 1-1 1.9-1.6 2.7-.9 1.1-1.8 1.6-2.9 1.6-.7 0-1.6-.2-2.6-.6-1-.5-2-.7-2.9-.7-.9 0-1.9.2-2.9.7-1 .4-1.9.6-2.5.7-1.1 0-2.1-.6-2.9-1.7C-.7 12.4 1.6 7.3 5.5 7.2c.8 0 1.9.3 3.1.7 1.2.5 2 .7 2.4.7.3 0 1.1-.3 2.5-.8 1.3-.5 2.4-.7 3.4-.6 1.9.2 3.3.9 4.3 2.2-1.7 1-2.5 2.5-2.5 4.3 0 1.4.5 2.6 1.6 3.6z"/></svg>
+              </span>
+              <span><span class="t">{% trans "iPhone App" %}</span>
+              <span class="d block">{% trans "In development" %}</span></span>
             </a>
             <a href="{% url 'vpn_extension' %}" class="vs-menu-item">
               <span class="vs-icon !h-9 !w-9 shrink-0 bg-fuchsia-500/10 text-fuchsia-600 dark:text-fuchsia-400 border-fuchsia-500/20">
@@ -265,7 +272,8 @@
           </summary>
           <div class="pb-2 pl-3 space-y-0.5">
             <a href="{% url 'products:desktop' %}" class="block py-2 text-sm" style="color:var(--vs-text-2)">{% trans "Desktop App" %}</a>
-            <a href="{% url 'products:mobile' %}" class="block py-2 text-sm" style="color:var(--vs-text-2)">{% trans "Mobile App" %}</a>
+            <a href="{% url 'free_vpn_android' %}" class="block py-2 text-sm" style="color:var(--vs-text-2)">{% trans "Android App" %}</a>
+            <a href="{% url 'free_vpn_iphone' %}" class="block py-2 text-sm" style="color:var(--vs-text-2)">{% trans "iPhone App" %}</a>
             <a href="{% url 'vpn_extension' %}" class="block py-2 text-sm" style="color:var(--vs-text-2)">{% trans "Browser Extension" %}</a>
           </div>
         </details>

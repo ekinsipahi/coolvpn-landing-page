@@ -67,6 +67,20 @@ CHROME_STORE_URL = os.environ.get(
     "https://chromewebstore.google.com/detail/free-vpn-for-chrome-vpn-p/llmhkchghidfojlbdelkebgohjfjijmg",
 )
 
+# Google Play — "VPNsterr - Fast Secure VPN", yayında (listelemede: 29 Eyl 2026).
+# Paket adı play_billing.py'deki GOOGLE_PLAY_PACKAGE_NAME ile AYNI olmalı;
+# ayrı tutuluyor çünkü biri abonelik doğrulamasında, bu ise sadece linkte kullanılıyor.
+GOOGLE_PLAY_PACKAGE_NAME = os.environ.get("GOOGLE_PLAY_PACKAGE_NAME", "com.vpnsterr.app")
+PLAY_STORE_URL = os.environ.get(
+    "PLAY_STORE_URL",
+    f"https://play.google.com/store/apps/details?id={GOOGLE_PLAY_PACKAGE_NAME}",
+)
+
+# iOS uygulaması henüz App Store'a gönderilmedi. Çıktığında burayı doldur:
+# /free-vpn-iphone/ sayfası bu değer dolduğunda "coming soon" rozetini
+# gerçek bir indirme linkine çevirmek için tek değişiklik noktası.
+APP_STORE_URL = os.environ.get("APP_STORE_URL", "")
+
 # ---- Sentry (hata + performans izleme)
 # DSN'i .env'e koy: SENTRY_DSN=https://...@...ingest.de.sentry.io/...
 # DSN boşsa Sentry hiç başlatılmaz — dev'de gürültü yapmaz, deploy'u bozmaz.

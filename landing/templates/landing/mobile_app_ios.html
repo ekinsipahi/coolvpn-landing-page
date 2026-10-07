@@ -1,0 +1,271 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{% block title %}{{ seo_title }}{% endblock %}
+{% block meta_description %}{{ seo_description }}{% endblock %}
+
+{% block header %}{% include "partials/navbar.html" %}{% endblock %}
+
+{% block head_extra %}{% include "partials/mobile_app_css.html" %}{% endblock %}
+
+{% block schema_jsonld %}
+<script type="application/ld+json">{{ schema_json|safe }}</script>
+{% endblock %}
+
+{% block content %}
+
+<!-- ============ HERO ============ -->
+<section class="vs-section !pt-10 md:!pt-14">
+  <div class="vs-shell">
+    <div class="grid gap-14 lg:grid-cols-2 lg:gap-10 items-center">
+
+      <div>
+        <span class="vs-badge" style="color:var(--vs-amber); background:color-mix(in srgb, var(--vs-amber) 13%, transparent)">
+          {% trans "iOS · In development" %}
+        </span>
+
+        <h1 class="vs-h2 !text-4xl md:!text-5xl !mt-5">
+          A free VPN for iPhone: where ours actually stands
+        </h1>
+
+        <p class="vs-sub">
+          There is no VPNsterr app on the App Store yet. We could have put a
+          "Download on the App Store" button here and sent you to a 404 — plenty of sites
+          do. Instead: here's the honest status, what iOS makes hard, and how to judge any
+          free iPhone VPN you're considering in the meantime.
+        </p>
+
+        <div class="mt-8">
+          {% include "partials/store_badges.html" with ga_label="ios_hero" hide_ios=1 %}
+        </div>
+        <p class="mt-3 text-xs" style="color:var(--vs-text-2)">
+          The Android app is live today, and one account covers every platform we ship on.
+        </p>
+      </div>
+
+      <div class="lg:ps-6">
+        <div class="pm-stage">
+          <div class="pm vs-float-slow">
+            <div class="pm-body">
+              <span class="pm-key vol-up" aria-hidden="true"></span>
+              <span class="pm-key vol-dn" aria-hidden="true"></span>
+              <span class="pm-key power" aria-hidden="true"></span>
+              <div class="pm-screen">
+                <div class="pm-building">
+                  <img src="{% static 'img/logo-mark.png' %}" alt="" width="58" height="58">
+                  <b>VPNsterr for iOS</b>
+                  <span>Not submitted to the App&nbsp;Store yet.<br>No waitlist, no email to hand over.</span>
+                  <div class="pm-skel" aria-hidden="true"><i></i><i></i><i></i></div>
+                </div>
+              </div>
+              <span class="pm-island" aria-hidden="true"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============ NEDEN HENÜZ YOK ============ -->
+<section class="vs-section-alt">
+  <div class="vs-shell">
+    <div class="grid gap-12 lg:grid-cols-2 items-start">
+
+      <div>
+        <span class="vs-eyebrow">{% trans "Status" %}</span>
+        <h2 class="vs-h2">Why the iPhone app isn't out yet</h2>
+        <div class="mt-4 space-y-4 text-[15px] leading-7" style="color:var(--vs-text-2)">
+          <p>
+            A mobile VPN for iOS can't be a lighter port of the Android build. Apple
+            routes all tunnelling through its Network Extension framework, which needs a specific
+            entitlement granted per developer account, and the app has to be rebuilt
+            against it rather than reusing the Android VPN service.
+          </p>
+          <p>
+            VPN apps also get a stricter App Store review than almost any other category.
+            Apple requires the publisher to be a registered organisation rather than an
+            individual, wants a clear statement of what the app collects, and rejects
+            apps that resell someone else's network without saying so. That's a good
+            thing for you and a slow thing for us.
+          </p>
+          <p>
+            So the honest position: the iOS client is being built, it has not been
+            submitted, and we're not going to put a date on this page that we might miss.
+            When it ships, this page becomes the download page.
+          </p>
+        </div>
+      </div>
+
+      <div>
+        <span class="vs-eyebrow">{% trans "Meanwhile" %}</span>
+        <h2 class="vs-h2">What works today</h2>
+        <div class="mt-5 space-y-3">
+          <a href="{% url 'free_vpn_android' %}" class="vs-card vs-card-hover block">
+            <h3 class="font-bold tracking-tight" style="color:var(--vs-text)">The Android app — live on Google Play</h3>
+            <p class="mt-1.5 text-sm leading-6" style="color:var(--vs-text-2)">
+              Unlimited free tier, no sign-up, one tap to connect. If there's an Android
+              phone or tablet in the house, this works right now.
+            </p>
+          </a>
+          <a href="{% url 'vpn_extension' %}" class="vs-card vs-card-hover block">
+            <h3 class="font-bold tracking-tight" style="color:var(--vs-text)">The browser extension — Chrome, Edge, Brave</h3>
+            <p class="mt-1.5 text-sm leading-6" style="color:var(--vs-text-2)">
+              Free and unlimited on desktop, with per-tab routing. Note that this is a
+              desktop extension — iOS Safari can't run it.
+            </p>
+          </a>
+          <div class="vs-card" style="border-style:dashed">
+            <h3 class="font-bold tracking-tight" style="color:var(--vs-text)">One subscription, every platform</h3>
+            <p class="mt-1.5 text-sm leading-6" style="color:var(--vs-text-2)">
+              If you go Premium now, the iPhone app is included the day it lands. Premium
+              is attached to your account, not to a device or a store.
+            </p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============ DEĞERLİ İÇERİK: iOS VPN SEÇME REHBERİ ============ -->
+<section class="vs-section">
+  <div class="vs-shell">
+    <div class="max-w-2xl">
+      <span class="vs-eyebrow">{% trans "Useful regardless" %}</span>
+      <h2 class="vs-h2">How to judge a free VPN for iPhone</h2>
+      <p class="vs-sub">
+        We're not going to pretend you'll wait for us. If you're hunting for the best
+        free VPN for iPhone this week and installing something today, these are the five
+        things actually worth checking — and most of them take under a minute on the App
+        Store listing itself.
+      </p>
+    </div>
+
+    <div class="mt-12 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+
+      <div class="vs-card vs-reveal">
+        <span class="vs-badge">01</span>
+        <h3 class="mt-3 font-bold tracking-tight" style="color:var(--vs-text)">Read the privacy label, not the screenshots</h3>
+        <p class="mt-2 text-sm leading-6" style="color:var(--vs-text-2)">
+          Every App Store listing has an <em>App Privacy</em> section. If a "no-logs" VPN
+          declares that it collects Browsing History or Identifiers linked to you, the
+          marketing copy and the legal disclosure disagree — believe the disclosure.
+        </p>
+      </div>
+
+      <div class="vs-card vs-reveal" style="transition-delay:.05s">
+        <span class="vs-badge">02</span>
+        <h3 class="mt-3 font-bold tracking-tight" style="color:var(--vs-text)">Find out how it's paid for</h3>
+        <p class="mt-2 text-sm leading-6" style="color:var(--vs-text-2)">
+          Servers and bandwidth cost money every single month. If there are no ads, no
+          subscription and no parent company with another product, you are the revenue.
+          A free VPN that won't explain its funding has a reason.
+        </p>
+      </div>
+
+      <div class="vs-card vs-reveal" style="transition-delay:.1s">
+        <span class="vs-badge">03</span>
+        <h3 class="mt-3 font-bold tracking-tight" style="color:var(--vs-text)">Refuse configuration profiles</h3>
+        <p class="mt-2 text-sm leading-6" style="color:var(--vs-text-2)">
+          A legitimate iOS VPN asks for one permission, through the system dialog. If an
+          app tells you to install a <em>configuration profile</em> from a website, stop —
+          that mechanism is built for corporate device management and can hand over far
+          more than a VPN needs.
+        </p>
+      </div>
+
+      <div class="vs-card vs-reveal" style="transition-delay:.15s">
+        <span class="vs-badge">04</span>
+        <h3 class="mt-3 font-bold tracking-tight" style="color:var(--vs-text)">Check what a data cap really means</h3>
+        <p class="mt-2 text-sm leading-6" style="color:var(--vs-text-2)">
+          Most free iPhone VPNs give you between 500 MB and 10 GB a month. On a phone that
+          is a few evenings of video. A cap isn't dishonest — but an app advertising
+          itself as free when it's a monthly trial is.
+        </p>
+      </div>
+
+      <div class="vs-card vs-reveal" style="transition-delay:.2s">
+        <span class="vs-badge">05</span>
+        <h3 class="mt-3 font-bold tracking-tight" style="color:var(--vs-text)">Look for a company, not a brand</h3>
+        <p class="mt-2 text-sm leading-6" style="color:var(--vs-text-2)">
+          Scroll to the developer name and look it up. The best mobile VPN for iPhone is
+          rarely the one with the most stars — a VPN is the one app that sees all your
+          traffic, so knowing which legal entity is on the other end, and which country it
+          answers to, matters a great deal more.
+        </p>
+      </div>
+
+      <div class="vs-card vs-reveal" style="transition-delay:.25s; background:var(--vs-card-2)">
+        <span class="vs-badge-hot">{% trans "Our answers" %}</span>
+        <h3 class="mt-3 font-bold tracking-tight" style="color:var(--vs-text)">For the record</h3>
+        <p class="mt-2 text-sm leading-6" style="color:var(--vs-text-2)">
+          Funded by in-app ads and Premium subscriptions. No activity logs, because the
+          system never writes any. Published by Sterr Technologies OÜ. No data cap on the
+          free tier.
+        </p>
+        <a href="{% url 'privacy_policy' %}" class="mt-3 inline-block text-sm underline" style="color:var(--vs-600)">
+          Read the privacy policy
+        </a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============ SSS ============ -->
+<section class="vs-section-alt">
+  <div class="vs-shell">
+    <div class="max-w-2xl">
+      <span class="vs-eyebrow">FAQ</span>
+      <h2 class="vs-h2">Free VPN for iPhone — common questions</h2>
+    </div>
+
+    <div class="mt-10 max-w-3xl space-y-3">
+      {% for q, a in faq %}
+      <details class="vs-card vs-reveal !p-0 group" {% if forloop.first %}open{% endif %}>
+        <summary class="cursor-pointer list-none px-6 py-5 flex items-start justify-between gap-4">
+          <h3 class="font-semibold text-[15px] tracking-tight" style="color:var(--vs-text)">{{ q }}</h3>
+          <svg class="h-5 w-5 shrink-0 mt-0.5 transition-transform duration-200 group-open:rotate-45"
+               style="color:var(--vs-text-2)" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        </summary>
+        <p class="px-6 pb-5 -mt-1 text-sm leading-6" style="color:var(--vs-text-2)">{{ a }}</p>
+      </details>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ============ SON CTA ============ -->
+<section class="vs-section">
+  <div class="vs-shell">
+    <div class="vs-card vs-reveal text-center !p-10 md:!p-14"
+         style="background:var(--vs-grad-cta); border:none; box-shadow:var(--vs-shadow-lg)">
+      <h2 class="text-2xl md:text-4xl font-extrabold tracking-tight text-white">
+        Android is ready while iOS is baking
+      </h2>
+      <p class="mt-3 text-white/85 max-w-xl mx-auto text-[15px] leading-7">
+        Same free tier, same zero-activity-logs architecture, and a Premium plan that will
+        cover your iPhone the day the app ships.
+      </p>
+      <div class="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
+        <a href="{% url 'free_vpn_android' %}" class="vs-btn vs-btn-lg"
+           style="background:#fff; color:var(--vs-700)">
+          See the Android app
+          <svg class="h-5 w-5 rtl:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </a>
+        <a href="{% url 'pricing' %}" class="vs-btn vs-btn-lg"
+           style="color:#fff; border:1px solid rgba(255,255,255,.45)">
+          See plans
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block footer %}{% include "partials/footer.html" %}{% endblock %}

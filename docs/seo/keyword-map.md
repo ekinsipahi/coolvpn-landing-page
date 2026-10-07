@@ -205,8 +205,74 @@
 ## Faz 2 fırsatları (mobil app çıkınca)
 
 - GEO kümesi için ülke landing'leri: /vpn-for-japan/, /vpn-usa/ vb. (224 geo keyword hazır bekliyor)
-- `good vpn app for android` (1.6K vol) → app çıkınca /vpn-app-android/ landing
+- ~~`good vpn app for android` (1.6K vol) → app çıkınca /vpn-app-android/ landing~~ → **YAPILDI 2026-10-07**, aşağıya bak
 - Blog: informational küme (`what is a vpn extension` vb.) için içerik takvimi
+
+## Mobil uygulama kümesi (2026-10-07 eklendi)
+
+Android uygulaması Play'de yayında: **VPNsterr - Fast Secure VPN**
+(`com.vpnsterr.app`, Sterr Technologies, "Contains ads" + IAP $4.99–$39.99).
+iOS uygulaması henüz App Store'a gönderilmedi.
+
+İki sayfa açıldı; **/products/mobile/ stub'ı silinip 301 ile Android sayfasına
+yönlendirildi** (ince içerikli "coming soon" stub'ı indekste tutmanın anlamı yoktu).
+
+| Sayfa | Rol |
+|---|---|
+| `/free-vpn-android/` | Para sayfası — tek işi Play Store'a kurulum taşımak |
+| `/free-vpn-iphone/` | iOS kümesi; uygulama yokken bile gerçek içerik (dürüst statü + "free iPhone VPN nasıl seçilir" rehberi) |
+
+İkisi de ayrı sayfa çünkü aynı sayfada "indir" ile "yakında"yı yan yana koymak
+hem kullanıcıyı hem Google'ı yanıltır. iOS sayfası doorway değil: ~700 kelime
+benzersiz içerik + FAQPage şeması taşıyor.
+
+### `/free-vpn-android/` hedef keyword'leri (50)
+
+**Çekirdek / para** — `free vpn android`, `free vpn for android`, `android vpn free`,
+`android free vpn`, `free android vpn`, `free android vpn service`, `android vpn for free`,
+`best android vpn free`, `best android vpn free app`, `best free vpn android`,
+`best free vpn for android`, `best free mobile vpn android`
+
+**Mobile VPN kümesi** — `free mobile vpn`, `free mobile vpn app`, `mobile vpn free`,
+`mobile vpn app free`, `best free mobile vpn`, `best free mobile vpn app`,
+`best free mobile vpn app for android`, `best mobile vpn android`, `mobile vpn android`,
+`mobile vpn android free`, `mobile vpn app android`, `mobile vpn for android`,
+`vpn app for mobile`, `mobile phone vpn app`, `phone vpn app free`, `free phone vpn`,
+`phone vpn android`, `phone vpn android free`
+
+**App / download / apk** — `vpn app android`, `vpn app for android`, `vpn app for android mobile`,
+`android vpn app`, `android vpn app free`, `free vpn app android`, `android vpn download`,
+`android vpn free download`, `free vpn download android`, `free vpn download for android`,
+`free mobile vpn download`, `mobile vpn free download`, `mobile vpn download`,
+`mobile vpn download free`, `free vpn mobile app`, `free vpn mobile app download`,
+`android vpn apk`, `mobile vpn apk`, `free android vpn apk`, `vpn apk free download`
+
+APK kümesi SSS'te **dürüst cevapla** karşılanıyor ("sadece Play'den dağıtıyoruz,
+sahte VPN APK'sı Android malware'inin bir numaralı yolu") — sahte bir indirme
+linkiyle değil.
+
+Bilinçli hedeflenmeyen: `free vpn application android` — İngilizcesi bozuk,
+doğal cümleye sokulamadı.
+
+### `/free-vpn-iphone/` hedef keyword'leri (20)
+
+`free vpn iphone`, `free vpn for iphone`, `free iphone vpn`, `mobile vpn iphone`,
+`mobile vpn iphone free`, `mobile vpn for ios`, `free mobile vpn iphone`,
+`best mobile vpn iphone`, `best free vpn iphone`, `best free vpn for iphone`,
+`vpn app iphone`, `vpn app for iphone`, `vpn apps ios`, `free vpn app iphone`,
+`free vpn app ios`, `vpn iphone free`, `iphone vpn app free`, `phone vpn apple`,
+`vpn apple phone`, `vpn for iphone apps`
+
+`mobile vpn for ios` ticari niyet açısından en değerlisi (~$6.48 CPC / 76 difficulty)
+ve sayfada birebir geçiyor.
+
+### Yapısal veri — YAPMA listesi
+
+Uygulama yeni, Play'de henüz puan yok. **aggregateRating / ratingValue /
+reviewCount uydurulmayacak**: Google'ın yapısal veri politikasının doğrudan
+ihlali ve cezası zengin sonuçlardan tamamen elenmek.
+`landing/tests_mobile.py::test_no_invented_ratings_anywhere` bunu bekçiliyor.
+Sayfadaki şemalar: MobileApplication + FAQPage + HowTo + BreadcrumbList.
 
 ## Feature & Free sayfaları (2026-09-06 eklendi — kalite odaklı, doorway değil)
 
